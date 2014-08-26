@@ -1,7 +1,7 @@
 function krCal()
 
 distvar = 10;
-
+% juwan trial
 % fig = figure(1); clf
 % axis([-200 200 -200 200])
 % axis off
