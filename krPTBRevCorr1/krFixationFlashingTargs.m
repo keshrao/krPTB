@@ -62,8 +62,9 @@ try
     storeYlocs = [];
     storeSuccess = nan(1,ntrls);
     % show n stimuli combinations
-    for trls = 1:ntrls
+    for trl = 1:ntrls
         
+        disp(['Trl Number: ' num2str(trl)])
         
         % present fixation square
         Screen(window, 'FillRect', colorBlue, fixSq);
@@ -97,7 +98,7 @@ try
             Screen(window, 'FillRect', black);
             Screen(window, 'Flip');
             if isDaq, krEndTrial(dio); end
-            storeSuccess(trls) = 0;
+            storeSuccess(trl) = 0;
             WaitSecs(2);
         else
             
@@ -186,7 +187,7 @@ try
                 end %nflahses
                 
                 if ~isInWindow
-                    storeSuccess(trls) = 0;
+                    storeSuccess(trl) = 0;
                     Screen(window, 'FillRect', black);
                     Screen(window, 'Flip');
                     if isDaq, krEndTrial(dio); end
@@ -206,7 +207,7 @@ try
                     % collect flashes
                     storeXlocs = [storeXlocs; xFlashesIter]; %#ok
                     storeYlocs = [storeYlocs; yFlashesIter]; %#ok
-                    storeSuccess(trls) = 1;
+                    storeSuccess(trl) = 1;
                     
                     WaitSecs(2);
                     break
@@ -219,7 +220,7 @@ try
         
         if isDaq, krEndTrial(dio); end
         
-        if mod(trls,20) == 0
+        if mod(trl,20) == 0
             save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
         end
         
