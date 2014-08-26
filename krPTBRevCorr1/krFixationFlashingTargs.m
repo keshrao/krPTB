@@ -4,18 +4,15 @@ clc, clear
 
 try
     [ai, dio] = krConnectDAQ();
+    isDaq = true;
 catch
     disp('no daq')
-end
-if exist('ai') && exist('dio') %#ok
-    isDaq = true;
-else
     isDaq = false;
 end
 
 
 % remember to clear this out for real experiments
-Screen('Preference', 'SkipSyncTests', 0 );
+Screen('Preference', 'SkipSyncTests', 2 );
 
 whichScreen = 2;
 res = Screen('Resolution',whichScreen);
@@ -24,8 +21,8 @@ Priority(2);
 
 try
     HideCursor;
-
     window = Screen(whichScreen, 'OpenWindow');
+    ShowCursor;
     
     white = WhiteIndex(window); % pixel value for white
     black = BlackIndex(window); % pixel value for black
@@ -37,72 +34,81 @@ try
     ntrls = 100;
     framedel = nan(1,ntrls);
     
-    isPhotoOn = false;
+    
+    % --- variables and declarations common to all trials
+    
+    % center fixation square
+    fixSq = [res.width/2-5 res.height/2-5 res.width/2 res.height/2]';
+    colorBlue = [0 0 255]';
+    
+    % this is be a good photodiode cell box
+    photoSq = [0 0 30 30]';
+    colorWhite = [255 255 255]'; % white color
+    
+    
+    stimoffsetW = res.width/10;
+    stimoffsetH = res.height/10;
+    % ---- starting trial loop
     
     % show n stimuli combinations
     for trls = 1:ntrls
         
         
-        krStartTrial(dio)
+        if isDaq, krStartTrial(dio); end
         
+        stims = [fixSq photoSq];
+        stimcolors = [colorBlue colorWhite];
         
-        % to use this function, the last two arguements are the location of the
-        % bottom right point in the square. Then take the first two arguements
-        % and subtract out the size you want the square to be.
+        % how many stimuli do I want to create - for now , always 2
+        % numstimthistrl = randi([1 5], 1);
+        numstimthistrl = 2;
         
-        % center fixation square
-        sq1 = [res.width/2-5 res.height/2-5 res.width/2 res.height/2]';
-        color1 = [0 0 255]';
-
-        stims = [sq1];
-        stimcolors = [color1];
+        % generate nstim stimulus squares and not on the edges of the screen
         
-        % this is be a good photodiode cell box
-        sq2 = [0 0 30 30]';
-        color2 = [255 255 255]'; % white color
-        if ~isPhotoOn
-            stims = [stims sq2];
-            stimcolors = [stimcolors color2];
-            isPhotoOn = true;
-        else
-            isPhotoOn = false;
-        end
-        
-        % how many stimuli do I want to create
-        numstimthistrl = randi([1 5], 1);
-        
-        % generate 5 stimulus squares and not on the edges of the screen
-        randXpos = randi(res.width - 400, numstimthistrl, 1) + 200;
-        randYpos = randi(res.height - 400, numstimthistrl, 1) + 200;
+        randXpos = randi(res.width - stimoffsetW, numstimthistrl, 1) + stimoffsetW/2;
+        randYpos = randi(res.height - stimoffsetH, numstimthistrl, 1) + stimoffsetH/2;
         
         
         for i = 1:numstimthistrl
-            thisSq = [randXpos(i)-20 randYpos(i)-20 randXpos(i) randYpos(i)]';
+            thisSq = [randXpos(i)-10 randYpos(i)-10 randXpos(i) randYpos(i)]';
             stims = [stims thisSq];
-            stimcolors = [stimcolors color2];
+            stimcolors = [stimcolors colorWhite];
         end
-        
         
         
         % draw fixation dot
         Screen(window, 'FillRect', stimcolors , stims);
-        framedel(trls) = Screen(window, 'Flip');
+        Screen(window, 'Flip');
+        
+        % leave stimulus on for short priod of time
+        stimwaitdur = rand/10; %<- uniformly distributed between 0 & 100ms
+        
+        % note that if stimwaitdur < 0.016, then it's just waiting one
+        % frame
+        thisdur = tic;
+        while toc(thisdur) < stimwaitdur
+            % some code
+        end
         
         
-        %KbWait;
-        %WaitSecs(rand/10);
-        krEndTrial(dio)
+        % after stim duration, then blank screen (leave fixation) for 100ms
+        Screen(window, 'FillRect', colorBlue, fixSq);
+        Screen(window, 'Flip');
+        
+        if isDaq, krEndTrial(dio); end
         
         if mod(trls, 25) == 0
             % wipe screen & fill bac
             Screen(window, 'FillRect', black);
-            Screen(window, 'Flip')
+            Screen(window, 'Flip');
             
-            krDeliverReward(dio)
+            if isDaq, krDeliverReward(dio); end;
+            
+            WaitSecs(2);
         end
+        
     end
     
-    ShowCursor;
     Screen('CloseAll');
     
     %
@@ -115,5 +121,3 @@ end
 
 Priority(0);
 
-% plot frame delays
-%plot(diff(framedel)); ylim([nanmedian(diff(framedel))-2*nanstd(diff(framedel)) nanmedian(diff(framedel))+2*nanstd(diff(framedel))])
