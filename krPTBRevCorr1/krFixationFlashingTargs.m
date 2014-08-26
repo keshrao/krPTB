@@ -12,12 +12,17 @@ end
 
 
 % remember to clear this out for real experiments
-Screen('Preference', 'SkipSyncTests', 2 );
+Screen('Preference', 'SkipSyncTests', 0);
 
 whichScreen = 2;
 res = Screen('Resolution',whichScreen);
 centX = res.width/2;
 centY = res.height/2;
+
+
+% data to be stored into this filename
+c = clock;
+fName = [date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
 Priority(2);
 
@@ -50,8 +55,8 @@ try
     colorWhite = [255 255 255]'; % white color
     
     
-    stimoffsetW = res.width/10;
-    stimoffsetH = res.height/10;
+    stimoffsetW = round(res.width/10);
+    stimoffsetH = round(res.height/10);
     % ---- starting trial loop
     
     % this will be used to store all flash locations
@@ -202,6 +207,11 @@ try
             
         end %if successful fixation
         
+        if mod(trls,20) == 0
+            save(fName, 'storeXlocs', 'storeYlocs')
+        end
+        
+        
     end % ntrials
     
     Screen('CloseAll');
@@ -212,8 +222,10 @@ catch %#ok
     Screen('CloseAll');
     disp('Error')
     if isDaq, krEndTrial(dio); end
+    save(fName, 'storeXlocs', 'storeYlocs')
 end
 
 if isDaq, krEndTrial(dio); end
+save(fName, 'storeXlocs', 'storeYlocs')
 Priority(0);
 
