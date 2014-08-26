@@ -16,6 +16,8 @@ Screen('Preference', 'SkipSyncTests', 2 );
 
 whichScreen = 2;
 res = Screen('Resolution',whichScreen);
+centX = res.width/2;
+centY = res.height/2;
 
 Priority(2);
 
@@ -31,11 +33,13 @@ try
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip')
     
-    ntrls = 100;
+    ntrls = 10;
     framedel = nan(1,ntrls);
     
     
     % --- variables and declarations common to all trials
+    
+    winTol = 30;
     
     % center fixation square
     fixSq = [res.width/2-5 res.height/2-5 res.width/2 res.height/2]';
@@ -50,74 +54,166 @@ try
     stimoffsetH = res.height/10;
     % ---- starting trial loop
     
+    % this will be used to store all flash locations
+    storeXlocs = [];
+    storeYlocs = [];
+    
     % show n stimuli combinations
     for trls = 1:ntrls
         
         
-        if isDaq, krStartTrial(dio); end
-        
-        stims = [fixSq photoSq];
-        stimcolors = [colorBlue colorWhite];
-        
-        % how many stimuli do I want to create - for now , always 2
-        % numstimthistrl = randi([1 5], 1);
-        numstimthistrl = 2;
-        
-        % generate nstim stimulus squares and not on the edges of the screen
-        
-        randXpos = randi(res.width - stimoffsetW, numstimthistrl, 1) + stimoffsetW/2;
-        randYpos = randi(res.height - stimoffsetH, numstimthistrl, 1) + stimoffsetH/2;
-        
-        
-        for i = 1:numstimthistrl
-            thisSq = [randXpos(i)-10 randYpos(i)-10 randXpos(i) randYpos(i)]';
-            stims = [stims thisSq];
-            stimcolors = [stimcolors colorWhite];
-        end
-        
-        
-        % draw fixation dot
-        Screen(window, 'FillRect', stimcolors , stims);
-        Screen(window, 'Flip');
-        
-        % leave stimulus on for short priod of time
-        stimwaitdur = rand/10; %<- uniformly distributed between 0 & 100ms
-        
-        % note that if stimwaitdur < 0.016, then it's just waiting one
-        % frame
-        thisdur = tic;
-        while toc(thisdur) < stimwaitdur
-            % some code
-        end
-        
-        
-        % after stim duration, then blank screen (leave fixation) for 100ms
+        % present fixation square
         Screen(window, 'FillRect', colorBlue, fixSq);
         Screen(window, 'Flip');
         
-        if isDaq, krEndTrial(dio); end
+        % wait of eye to enter fixation square to begin trial
+        isInWindow = false;
+        temptic = tic;
         
-        if mod(trls, 25) == 0
-            % wipe screen & fill bac
-            Screen(window, 'FillRect', black);
-            Screen(window, 'Flip');
+        while toc(temptic) < 3 % wait three seconds to enter fixation
             
-            if isDaq, krDeliverReward(dio); end;
+            if isDaq
+                [eyePosX eyePosY] = krGetEyePos(ai);
+            else
+                [eyePosX,eyePosY] = GetMouse(window);
+                eyePosX = eyePosX - centX;
+                eyePosY = eyePosY - centY;
+            end
             
-            WaitSecs(2);
+            % check if within window
+            if abs(eyePosX) < winTol && abs(eyePosY) < winTol
+                isInWindow = true; % cue to begin wait period
+                break % as soon as eye in window, break wait loop
+            end
+            
         end
         
-    end
+        
+        % check if fixation failed
+        if ~isInWindow
+            Screen(window, 'FillRect', black);
+            Screen(window, 'Flip');
+            WaitSecs(2);
+        else
+            
+            % successful fixation trial logic goes here
+            if isDaq, krStartTrial(dio); end
+            
+            % begin series of stimuli flashes
+            numflashes = 10;
+            
+            while isInWindow
+                
+                numstimthistrl = 2;
+                xFlashesIter = nan(numflashes,numstimthistrl);
+                yFlashesIter = nan(numflashes,numstimthistrl);
+                    
+                
+                for nf = 1:numflashes
+                    
+                    % how many stimuli do I want to create - for now , always 2
+                    % numstimthistrl = randi([1 5], 1);
+                    
+                    
+                    % make sure still in window
+                    if isDaq
+                        [eyePosX eyePosY] = krGetEyePos(ai);
+                    else
+                        [eyePosX,eyePosY] = GetMouse(window);
+                        eyePosX = eyePosX - centX;
+                        eyePosY = eyePosY - centY;
+                    end
+                    
+                    % check if within window
+                    if abs(eyePosX) < winTol && abs(eyePosY) < winTol
+                        isInWindow = true; % cue to begin wait period
+                    else
+                        isInWindow = false;
+                        break
+                    end
+                    % --------------------------
+                    
+                    
+                    stims = [fixSq photoSq];
+                    stimcolors = [colorBlue colorWhite];
+                    
+                    
+                    % generate nstim stimulus squares and not on the edges of the screen
+                    randXpos = randi(res.width - stimoffsetW, 1, numstimthistrl) + stimoffsetW/2;
+                    randYpos = randi(res.height - stimoffsetH, 1, numstimthistrl) + stimoffsetH/2;
+                    
+                    xFlashesIter(nf,:) = randXpos;
+                    yFlashesIter(nf,:) = randYpos;
+                    
+                    for i = 1:numstimthistrl
+                        thisSq = [randXpos(i)-10 randYpos(i)-10 randXpos(i) randYpos(i)]';
+                        stims = [stims thisSq];
+                        stimcolors = [stimcolors colorWhite];
+                    end
+                    
+                    
+                    
+                    % draw fixation dot
+                    Screen(window, 'FillRect', stimcolors , stims);
+                    Screen(window, 'Flip');
+                    
+                    % leave stimulus on for short priod of time
+                    stimwaitdur = rand/10; %<- uniformly distributed between 0 & 100ms
+                    
+                    % note that if stimwaitdur < 0.016, then it's just waiting one
+                    % frame
+                    thisdur = tic;
+                    while toc(thisdur) < stimwaitdur
+                        % some code
+                    end
+                    
+                    
+                    blankDur = 0.1;
+                    % after stim duration, then blank screen (leave fixation) for 100ms
+                    Screen(window, 'FillRect', colorBlue, fixSq);
+                    Screen(window, 'Flip');
+                    
+                    thisBlank = tic;
+                    while toc(thisBlank) < blankDur
+                        % some code
+                    end
+                    
+                end %nflahses
+                
+                % successful completion of trial
+                if isInWindow
+                    
+                    if isDaq, krEndTrial(dio); end
+                    % wipe screen & fill bac
+                    Screen(window, 'FillRect', black);
+                    Screen(window, 'Flip');
+                    if isDaq, krDeliverReward(dio); end;
+                    disp('reward')
+                    
+                    % collect flashes
+                    storeXlocs = [storeXlocs; xFlashesIter]; %#ok
+                    storeYlocs = [storeYlocs; yFlashesIter]; %#ok
+                    
+                    WaitSecs(2);
+                    break
+                end
+                
+            end % while continuously fixting
+            
+        end %if successful fixation
+        
+    end % ntrials
     
     Screen('CloseAll');
     
-    %
 catch %#ok
     
     ShowCursor
     Screen('CloseAll');
     disp('Error')
+    if isDaq, krEndTrial(dio); end
 end
 
+if isDaq, krEndTrial(dio); end
 Priority(0);
 

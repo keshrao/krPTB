@@ -122,7 +122,7 @@ try
     black = BlackIndex(window); % pixel value for black
     
     
-    ntrls = 1000;
+    ntrls = 3;
     
     prevLoc = 0;
     indLoc = 0;
@@ -173,6 +173,8 @@ try
                 [eyePosX eyePosY] = krGetEyePos(ai);
             else
                 [eyePosX,eyePosY] = GetMouse(window);
+                eyePosX = eyePosX - centX;
+                eyePosY = eyePosY - centY;
             end
             
             try 
@@ -207,6 +209,8 @@ try
                     [eyePosX eyePosY] = krGetEyePos(ai);
                 else
                     [eyePosX,eyePosY] = GetMouse(window);
+                    eyePosX = eyePosX - centX;
+                    eyePosY = eyePosY - centY;
                 end
                 
                 try
