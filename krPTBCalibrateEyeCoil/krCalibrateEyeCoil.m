@@ -32,12 +32,9 @@ distvar = 15;
 
 try
     [ai, dio] = krConnectDAQ();
+    isDaq = true;
 catch
     disp('no daq')
-end
-if exist('ai') && exist('dio') %#ok
-    isDaq = true;
-else
     isDaq = false;
 end
 
