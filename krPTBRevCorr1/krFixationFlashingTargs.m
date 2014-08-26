@@ -207,7 +207,7 @@ try
                     % collect flashes
                     storeXlocs = [storeXlocs; xFlashesIter]; %#ok
                     storeYlocs = [storeYlocs; yFlashesIter]; %#ok
-                    storeSuccess(trl) = 1;
+                    storeSuccess(trl) = trl;
                     
                     WaitSecs(2);
                     break
