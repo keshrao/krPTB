@@ -38,9 +38,7 @@ try
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip')
     
-    ntrls = 10;
-    framedel = nan(1,ntrls);
-    
+    ntrls = 500;
     
     % --- variables and declarations common to all trials
     
@@ -55,14 +53,14 @@ try
     colorWhite = [255 255 255]'; % white color
     
     
-    stimoffsetW = round(res.width/10);
-    stimoffsetH = round(res.height/10);
+    stimoffsetW = round(res.width/7);
+    stimoffsetH = round(res.height/7);
     % ---- starting trial loop
     
     % this will be used to store all flash locations
     storeXlocs = [];
     storeYlocs = [];
-    
+    storeSuccess = nan(1,ntrls);
     % show n stimuli combinations
     for trls = 1:ntrls
         
@@ -98,6 +96,8 @@ try
         if ~isInWindow
             Screen(window, 'FillRect', black);
             Screen(window, 'Flip');
+            if isDaq, krEndTrial(dio); end
+            storeSuccess(trls) = 0;
             WaitSecs(2);
         else
             
@@ -185,6 +185,15 @@ try
                     
                 end %nflahses
                 
+                if ~isInWindow
+                    storeSuccess(trls) = 0;
+                    Screen(window, 'FillRect', black);
+                    Screen(window, 'Flip');
+                    if isDaq, krEndTrial(dio); end
+                    WaitSecs(2);
+                    break
+                end
+                
                 % successful completion of trial
                 if isInWindow
                     
@@ -193,11 +202,11 @@ try
                     Screen(window, 'FillRect', black);
                     Screen(window, 'Flip');
                     if isDaq, krDeliverReward(dio); end;
-                    disp('reward')
                     
                     % collect flashes
                     storeXlocs = [storeXlocs; xFlashesIter]; %#ok
                     storeYlocs = [storeYlocs; yFlashesIter]; %#ok
+                    storeSuccess(trls) = 1;
                     
                     WaitSecs(2);
                     break
@@ -207,10 +216,12 @@ try
             
         end %if successful fixation
         
-        if mod(trls,20) == 0
-            save(fName, 'storeXlocs', 'storeYlocs')
-        end
         
+        if isDaq, krEndTrial(dio); end
+        
+        if mod(trls,20) == 0
+            save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+        end
         
     end % ntrials
     
@@ -222,10 +233,10 @@ catch %#ok
     Screen('CloseAll');
     disp('Error')
     if isDaq, krEndTrial(dio); end
-    save(fName, 'storeXlocs', 'storeYlocs')
+    save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
 end
 
 if isDaq, krEndTrial(dio); end
-save(fName, 'storeXlocs', 'storeYlocs')
+save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
 Priority(0);
 
