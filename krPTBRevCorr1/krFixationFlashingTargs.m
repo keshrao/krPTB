@@ -38,7 +38,7 @@ try
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip')
     
-    ntrls = 500;
+    ntrls = 100;
     
     % --- variables and declarations common to all trials
     
@@ -53,8 +53,8 @@ try
     colorWhite = [255 255 255]'; % white color
     
     
-    stimoffsetW = round(res.width/7);
-    stimoffsetH = round(res.height/7);
+    stimoffsetW = round(res.width/5);
+    stimoffsetH = round(res.height/5);
     % ---- starting trial loop
     
     % this will be used to store all flash locations
@@ -232,9 +232,9 @@ catch %#ok
     
     ShowCursor
     Screen('CloseAll');
-    disp('Error')
     if isDaq, krEndTrial(dio); end
     save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+    disp(fName)
 end
 
 if isDaq, krEndTrial(dio); end

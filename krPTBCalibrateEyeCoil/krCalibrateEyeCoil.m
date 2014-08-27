@@ -72,6 +72,8 @@ generateTableSquares()
 colorblue = [0; 0; 255];
 colorred  = [255; 0; 0];
 
+photoSq = [0 0 30 30];
+colorwhite = [255; 255; 255];
 
 % now open up a second matlab figure to be used to view eye position
 figure(2), clf 
@@ -119,7 +121,7 @@ try
         storeLocIDs(trls) = indLoc; % these two to be saved later
         
         
-        Screen(window, 'FillRect', colorblue, sq(:,indLoc));
+        Screen(window, 'FillRect', colorblue , sq(:,indLoc) );
         Screen(window, 'Flip');
         
         ticTrl = tic;
