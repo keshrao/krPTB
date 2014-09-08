@@ -1,33 +1,32 @@
 function krCal()
 
-distvar = 10;
-% juwan trial
-% fig = figure(1); clf
-% axis([-200 200 -200 200])
-% axis off
-% uicontrol('Parent',fig,'Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[200 200 60 20]);
-% uicontrol('Parent',fig,'Style','pushbutton','String','Decrement','Callback',@cb_Decrement,'Position',[200 150 60 20]);
-% edit = uicontrol('Parent',fig,'Style','edit','String', '10','Position',[200 250 60 20]);
-% drawnow, pause(0.1)
-% 
-%     function cb_Increment(~,~)
-%         distvar = distvar + 1;
-%         TextBox()
-%         generateTableSquares()
-%         drawnow
-%     end
-%     function cb_Decrement(~,~)
-%         distvar = distvar - 1;
-%         if distvar < 1
-%             distvar = 1;
-%         end
-%         TextBox()
-%         generateTableSquares()
-%         drawnow
-%     end
-%     function TextBox(~,~)
-%         set(edit,'String',num2str(distvar));
-%     end
+distvar = 5;
+fig = figure(1); clf
+axis([-200 200 -200 200])
+axis off
+uicontrol('Parent',fig,'Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[200 200 60 20]);
+uicontrol('Parent',fig,'Style','pushbutton','String','Decrement','Callback',@cb_Decrement,'Position',[200 150 60 20]);
+edit = uicontrol('Parent',fig,'Style','edit','String', num2str(distvar),'Position',[200 250 60 20]);
+drawnow, pause(0.1)
+
+    function cb_Increment(~,~)
+        distvar = distvar + 1;
+        TextBox()
+        generateTableSquares()
+        drawnow
+    end
+    function cb_Decrement(~,~)
+        distvar = distvar - 1;
+        if distvar < 1
+            distvar = 1;
+        end
+        TextBox()
+        generateTableSquares()
+        drawnow
+    end
+    function TextBox(~,~)
+        set(edit,'String',num2str(distvar));
+    end
 
 
 
@@ -122,7 +121,7 @@ try
     black = BlackIndex(window); % pixel value for black
     
     
-    ntrls = 3;
+    ntrls = 100;
     
     prevLoc = 0;
     indLoc = 0;

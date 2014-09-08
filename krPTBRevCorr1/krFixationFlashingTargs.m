@@ -60,7 +60,7 @@ try
     % this will be used to store all flash locations
     storeXlocs = [];
     storeYlocs = [];
-    storeSuccess = nan(1,ntrls);
+    storeSuccess = 0;
     % show n stimuli combinations
     for trl = 1:ntrls
         
@@ -77,7 +77,11 @@ try
         while toc(temptic) < 3 % wait three seconds to enter fixation
             
             if isDaq
-                [eyePosX eyePosY] = krGetEyePos(ai);
+                try
+                    [eyePosX eyePosY] = krGetEyePos(ai);
+                catch
+                    disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
+                end
             else
                 [eyePosX,eyePosY] = GetMouse(window);
                 eyePosX = eyePosX - centX;
@@ -123,7 +127,11 @@ try
                     
                     % make sure still in window
                     if isDaq
-                        [eyePosX eyePosY] = krGetEyePos(ai);
+                        try
+                            [eyePosX eyePosY] = krGetEyePos(ai);
+                        catch
+                            disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
+                        end
                     else
                         [eyePosX,eyePosY] = GetMouse(window);
                         eyePosX = eyePosX - centX;
@@ -164,7 +172,8 @@ try
                     Screen(window, 'Flip');
                     
                     % leave stimulus on for short priod of time
-                    stimwaitdur = rand/10; %<- uniformly distributed between 0 & 100ms
+                    stimwaitdur = 0.05; % always 50ms
+                    %rand/10; %<- uniformly distributed between 0 & 100ms
                     
                     % note that if stimwaitdur < 0.016, then it's just waiting one
                     % frame
@@ -202,6 +211,8 @@ try
                     % wipe screen & fill bac
                     Screen(window, 'FillRect', black);
                     Screen(window, 'Flip');
+                    
+                    WaitSecs(1)
                     if isDaq, krDeliverReward(dio); end;
                     
                     % collect flashes

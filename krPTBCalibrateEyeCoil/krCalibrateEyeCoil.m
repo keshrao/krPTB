@@ -8,7 +8,7 @@ uicontrol('Parent',fig,'Style','pushbutton','String','Decrement','Callback',@cb_
 edit = uicontrol('Parent',fig,'Style','edit','String', '15','Position',[200 250 60 20]);
 drawnow, pause(0.1)
 
-distvar = 15;
+distvar = 10;
 
     function cb_Increment(~,~)
         distvar = distvar + 1;
@@ -70,9 +70,8 @@ generateTableSquares()
     end
 
 colorblue = [0; 0; 255];
-colorred  = [255; 0; 0];
 
-photoSq = [0 0 30 30];
+photoSq = [0 0 30 30]';
 colorwhite = [255; 255; 255];
 
 % now open up a second matlab figure to be used to view eye position
@@ -109,6 +108,10 @@ try
         Screen(window, 'FillRect', black);
         Screen(window, 'Flip');
         
+        % this is mostly just to test if dio working 
+        krStartTrial(dio)
+        krEndTrial(dio)
+        
         
         % select random location
         % select random location
@@ -121,7 +124,7 @@ try
         storeLocIDs(trls) = indLoc; % these two to be saved later
         
         
-        Screen(window, 'FillRect', colorblue , sq(:,indLoc) );
+        Screen(window, 'FillRect', [colorblue colorwhite], [sq(:,indLoc) photoSq]);
         Screen(window, 'Flip');
         
         ticTrl = tic;
@@ -144,6 +147,16 @@ try
         
         % give reward 
         if isDaq, krDeliverReward(dio); end;
+        
+        % wipe screen & fill bac
+        Screen(window, 'FillRect', black);
+        Screen(window, 'Flip');
+        
+        % this is mostly just to test if dio working 
+        krStartTrial(dio)
+        krEndTrial(dio)
+        
+        WaitSecs(2);
         
     end % end trl
     
