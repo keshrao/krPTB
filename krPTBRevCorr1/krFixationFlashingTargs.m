@@ -22,7 +22,9 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-viewingFigure = false;
+numstimthistrl = 10;
+
+viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
     figure(2), clf
@@ -30,12 +32,18 @@ if viewingFigure
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
     hEye = rectangle('Position', [0, 0 25 25],'FaceColor','red'); %<- note, x,y,w,h as opposed to PTB's convention
-    axis off    
+    for numtargsi = 1:numstimthistrl
+        hTargs(numtargsi) = rectangle('Position', [0, 0 10 10],'FaceColor','white'); %#ok
+    end
+    set(gca, 'color', 'none')
 end
 
     function updateViewingFigure()
         try
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
+            for drawi = 1:numstimthistrl 
+               set(hTargs(drawi), 'Position', [randXpos(drawi)-centX -(randYpos(drawi)-centY) 10 10]) 
+            end
             drawnow
             % don't want the program to crash if something happens to a figure
         end
@@ -60,7 +68,7 @@ try
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip');
     
-    ntrls = 100;
+    ntrls = 300;
     
     % --- variables and declarations common to all trials
     
@@ -75,8 +83,8 @@ try
     colorWhite = [255 255 255]'; % white color
     
     
-    stimoffsetW = round(res.width/5);
-    stimoffsetH = round(res.height/5);
+    stimoffsetW = round(res.width/2);
+    stimoffsetH = round(res.height/2);
     % ---- starting trial loop
     
     % this will be used to store all flash locations
@@ -138,7 +146,6 @@ try
             
             while isInWindow
                 
-                numstimthistrl = 2;
                 xFlashesIter = nan(numflashes,numstimthistrl);
                 yFlashesIter = nan(numflashes,numstimthistrl);
                     
@@ -180,11 +187,8 @@ try
                     
                     
                     % generate nstim stimulus squares and not on the edges of the screen
-                    randXpos = randi(res.width - stimoffsetW, 1, numstimthistrl) + stimoffsetW/2;
-                    %randYpos = randi(res.height - stimoffsetH, 1, numstimthistrl) + stimoffsetH/2;
-                    
-                    % testing to see if it only plots on the top half of the screen
-                    randYpos = randi([stimoffsetH/2 res.height/2], 1, numstimthistrl);
+                    randXpos = randi([round(stimoffsetW/2) round(res.width - stimoffsetW/2)], 1, numstimthistrl);
+                    randYpos = randi([stimoffsetH/2 round(res.height - stimoffsetH/2)], 1, numstimthistrl);
                     
                     
                     xFlashesIter(nf,:) = randXpos;
@@ -204,13 +208,9 @@ try
                     
                     % leave stimulus on for short priod of time
                     stimwaitdur = 0.05; % always 50ms
-                    %rand/10; %<- uniformly distributed between 0 & 100ms
-                    
-                    % note that if stimwaitdur < 0.016, then it's just waiting one
-                    % frame
-                    thisdur = tic;
-                    while toc(thisdur) < stimwaitdur
-                        % some code
+                    thisstimdur = tic;
+                    while toc(thisstimdur) < stimwaitdur
+                        if viewingFigure, updateViewingFigure(); end
                     end
                     
                     
@@ -221,7 +221,7 @@ try
                     
                     thisBlank = tic;
                     while toc(thisBlank) < blankDur
-                        % some code
+                       if viewingFigure, updateViewingFigure(); end
                     end
                     
                 end %nflahses
@@ -270,7 +270,7 @@ try
     
     Screen('CloseAll');
     
-catch %#ok
+catch lasterr
     
     ShowCursor
     Screen('CloseAll');
