@@ -1,3 +1,4 @@
+function krNoFixationFlashingTargs()
 % testing psychtoolbox screen command
 
 clc, clear
@@ -19,6 +20,24 @@ res = Screen('Resolution',whichScreen);
 centX = res.width/2;
 centY = res.height/2;
 
+viewingFigure = true;
+if viewingFigure
+    % now open up a second matlab figure to be used to view eye position
+    figure(2), clf
+    axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
+    hold on
+    rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
+    hEye = rectangle('Position', [0, 0 25 25],'FaceColor','red'); %<- note, x,y,w,h as opposed to PTB's convention
+    axis off
+end
+
+    function updateViewingFigure()
+        try
+            set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
+            drawnow
+            % don't want the program to crash if something happens to a figure
+        end
+    end
 
 % data to be stored into this filename
 c = clock;
@@ -39,7 +58,7 @@ try
     Screen(window, 'Flip');
     
     
-    ntrls = 100;
+    ntrls = 50;
     
     % --- variables and declarations common to all trials
     
@@ -93,7 +112,8 @@ try
                 eyePosY = eyePosY - centY;
             end
             
-           
+            if viewingFigure, updateViewingFigure(); end
+            
             % --------------------------
             
             
@@ -147,7 +167,7 @@ try
         
         % collect flashes
         storeXlocs = [storeXlocs; xFlashesIter]; %#ok
-        storeYlocs = [storeYlocs; yFlashesIter]; %#ok        
+        storeYlocs = [storeYlocs; yFlashesIter]; %#ok
         
         % wipe screen & fill bac
         Screen(window, 'FillRect', black);
@@ -156,10 +176,10 @@ try
         if isDaq, krEndTrial(dio); end
         
         WaitSecs(2);
-        if isDaq, krDeliverReward(dio); end
+        if isDaq, krDeliverReward(dio, 4); end
         WaitSecs(2);
         
-        if mod(trl,20) == 0
+        if mod(trl,5) == 0
             save(fName, 'storeXlocs', 'storeYlocs')
         end
         
@@ -173,6 +193,7 @@ catch %#ok
     if isDaq, krEndTrial(dio); end
     save(fName, 'storeXlocs', 'storeYlocs')
     disp(fName)
+    keyboard
 end
 
 if isDaq, krEndTrial(dio); end
@@ -180,3 +201,6 @@ Screen('CloseAll');
 save(fName, 'storeXlocs', 'storeYlocs')
 Priority(0);
 
+keyboard
+
+end %function

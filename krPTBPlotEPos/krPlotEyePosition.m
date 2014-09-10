@@ -18,5 +18,5 @@ toplot = 1;
 
 while toplot
     [eyePosX eyePosY] = krGetEyePos(ai);
-    set(hEye, 'Position', [eyePosX -eyePosY 25 25]); 
+    set(hEye, 'Position', [eyePosX eyePosY 25 25]); 
 end

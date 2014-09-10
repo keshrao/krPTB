@@ -1,14 +1,15 @@
 function krCalibrateEyeCoil()
 
+distvar = 10;
+
 fig = figure(1); clf
 axis([-200 200 -200 200])
 axis off
 uicontrol('Parent',fig,'Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[200 200 60 20]);
 uicontrol('Parent',fig,'Style','pushbutton','String','Decrement','Callback',@cb_Decrement,'Position',[200 150 60 20]);
-edit = uicontrol('Parent',fig,'Style','edit','String', '15','Position',[200 250 60 20]);
+edit = uicontrol('Parent',fig,'Style','edit','String', num2str(distvar),'Position',[200 250 60 20]);
 drawnow, pause(0.1)
 
-distvar = 10;
 
     function cb_Increment(~,~)
         distvar = distvar + 1;
@@ -39,7 +40,7 @@ catch
 end
 
 % remember to clear this out for real experiments
-Screen('Preference', 'SkipSyncTests', 0);
+Screen('Preference', 'SkipSyncTests', 2);
 
 whichScreen = 2;
 res = Screen('Resolution',whichScreen);
@@ -94,7 +95,8 @@ try
     black = BlackIndex(window); % pixel value for black
     
     
-    ntrls = 10;
+    ntrls = 9;
+    
     storeGlobalTics = nan(ntrls, 1);
     storeLocIDs = nan(ntrls,1); % save the location of stimuli
     
@@ -112,14 +114,15 @@ try
         krStartTrial(dio)
         krEndTrial(dio)
         
-        
         % select random location
         % select random location
-        while indLoc == prevLoc
-            indLoc = randi(9);
-        end
-        prevLoc = indLoc;
+%         while indLoc == prevLoc
+%             indLoc = randi(9);
+%         end
+%         prevLoc = indLoc;
         
+        indLoc = indLoc + 1; % if you want to just go sequentially 
+
         storeGlobalTics(trls) = toc(ticGlobal); % trial start times
         storeLocIDs(trls) = indLoc; % these two to be saved later
         
@@ -133,20 +136,26 @@ try
             % draw fixation dot & add the mouse/eye position dot
             
             if isDaq 
-                [eyePosX eyePosY] = krGetEyePos(ai);
+                
+                try
+                    [eyePosX eyePosY] = krGetEyePos(ai);
+                catch
+                    disp('Missed Get Data')
+                end
+                
             else
                 [eyePosX,eyePosY] = GetMouse(window);
                 eyePosX = eyePosX - centX;
                 eyePosY = eyePosY - centY;
             end
             
-            set(hFix, 'Position', [sq(3,indLoc)-centX sq(4, indLoc)-centY 25 25]);
+            set(hFix, 'Position', [sq(3,indLoc)-centX -(sq(4, indLoc)-centY) 25 25]);
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
             drawnow
         end
         
         % give reward 
-        if isDaq, krDeliverReward(dio); end;
+        if isDaq, krDeliverReward(dio,2); end;
         
         % wipe screen & fill bac
         Screen(window, 'FillRect', black);
@@ -156,7 +165,7 @@ try
         krStartTrial(dio)
         krEndTrial(dio)
         
-        WaitSecs(2);
+        WaitSecs(1);
         
     end % end trl
     

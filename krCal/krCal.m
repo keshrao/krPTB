@@ -1,6 +1,6 @@
 function krCal()
 
-distvar = 5;
+distvar = 10;
 fig = figure(1); clf
 axis([-200 200 -200 200])
 axis off
@@ -99,7 +99,7 @@ fName = [date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 winTol = 30;
 
 
- viewingFigure = true;
+viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
     figure(2), clf
@@ -111,6 +111,19 @@ if viewingFigure
     axis off    
 end
 
+    function updateViewingFigure()
+        try
+            
+            set(hFix, 'Position', [sq(3,indLoc)-centX -(sq(4, indLoc)-centY) 25 25]);
+            set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
+            drawnow
+            
+        catch
+            % don't want the program to crash if something happens to a figure
+        end
+    end
+
+
 % ---- PTB segment
 try
     
@@ -121,7 +134,7 @@ try
     black = BlackIndex(window); % pixel value for black
     
     
-    ntrls = 100;
+    ntrls = 15;
     
     prevLoc = 0;
     indLoc = 0;
@@ -149,7 +162,7 @@ try
         thisPos = allLocsPos(indLoc,:); % x/y position of target
         % subtract out the screen offset bias
         thisPos(1) = thisPos(1) - centX;
-        thisPos(2) = thisPos(2) - centY;
+        thisPos(2) = -(thisPos(2) - centY);
         
         % ----------------- start
         if isDaq, krStartTrial(dio); end
@@ -169,22 +182,20 @@ try
         while toc(temptic) < 3 % wait 3 secs to enter window
             
             if isDaq
-                [eyePosX eyePosY] = krGetEyePos(ai);
+                
+                try
+                    [eyePosX eyePosY] = krGetEyePos(ai);
+                catch
+                    disp('Missed Eye Data')
+                end
             else
                 [eyePosX,eyePosY] = GetMouse(window);
                 eyePosX = eyePosX - centX;
                 eyePosY = eyePosY - centY;
             end
             
-            try 
-                if viewingFigure
-                    set(hFix, 'Position', [sq(3,indLoc)-centX -(sq(4, indLoc)-centY) 25 25]);
-                    set(hEye, 'Position', [eyePosX -eyePosY 25 25]); %note this different convention
-                    drawnow
-                end
-            catch
-               % don't want the program to crash if something happens to a figure 
-            end
+            %
+            if viewingFigure, updateViewingFigure(); end
             
             if abs(eyePosX - thisPos(1)) < winTol && abs(eyePosY - thisPos(2)) < winTol
                 isInWindow = true; % cue to begin wait period
@@ -212,15 +223,7 @@ try
                     eyePosY = eyePosY - centY;
                 end
                 
-                try
-                    if viewingFigure
-                        set(hFix, 'Position', [sq(3,indLoc)-centX -(sq(4, indLoc)-centY) 25 25]);
-                        set(hEye, 'Position', [eyePosX -eyePosY 25 25]); %note this different convention
-                        drawnow
-                    end
-                catch
-                    % don't want the program to crash if something happens to a figure
-                end
+                if viewingFigure, updateViewingFigure(); end
                 
                 if abs(eyePosX - thisPos(1)) < winTol && abs(eyePosY - thisPos(2)) < winTol
                     isInWindow = true; % cue to begin wait period
@@ -239,7 +242,7 @@ try
         
         % broke fixation during trial
         if isInWindow
-            if isDaq, krDeliverReward(dio);end
+            if isDaq, krDeliverReward(dio,2);end
             storeSuccesses(trls) = 1;
         end
         

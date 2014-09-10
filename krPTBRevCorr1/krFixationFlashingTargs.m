@@ -1,6 +1,8 @@
+function krFixationFlashingTargs()
+
 % testing psychtoolbox screen command
 
-clc, clear
+clc, clear; close all; pause(0.01);
 
 try
     [ai, dio] = krConnectDAQ();
@@ -20,6 +22,26 @@ centX = res.width/2;
 centY = res.height/2;
 
 
+viewingFigure = false;
+if viewingFigure
+    % now open up a second matlab figure to be used to view eye position
+    figure(2), clf
+    axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
+    hold on
+    rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
+    hEye = rectangle('Position', [0, 0 25 25],'FaceColor','red'); %<- note, x,y,w,h as opposed to PTB's convention
+    axis off    
+end
+
+    function updateViewingFigure()
+        try
+            set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
+            drawnow
+            % don't want the program to crash if something happens to a figure
+        end
+    end
+
+
 % data to be stored into this filename
 c = clock;
 fName = [date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
@@ -36,7 +58,7 @@ try
     
     % wipe screen & fill bac
     Screen(window, 'FillRect', black);
-    Screen(window, 'Flip')
+    Screen(window, 'Flip');
     
     ntrls = 100;
     
@@ -88,6 +110,8 @@ try
                 eyePosY = eyePosY - centY;
             end
             
+            if viewingFigure, updateViewingFigure(); end
+            
             % check if within window
             if abs(eyePosX) < winTol && abs(eyePosY) < winTol
                 isInWindow = true; % cue to begin wait period
@@ -138,6 +162,9 @@ try
                         eyePosY = eyePosY - centY;
                     end
                     
+                    % maybe this won't be good if we're worried about timing
+                    if viewingFigure, updateViewingFigure(); end
+                    
                     % check if within window
                     if abs(eyePosX) < winTol && abs(eyePosY) < winTol
                         isInWindow = true; % cue to begin wait period
@@ -154,7 +181,11 @@ try
                     
                     % generate nstim stimulus squares and not on the edges of the screen
                     randXpos = randi(res.width - stimoffsetW, 1, numstimthistrl) + stimoffsetW/2;
-                    randYpos = randi(res.height - stimoffsetH, 1, numstimthistrl) + stimoffsetH/2;
+                    %randYpos = randi(res.height - stimoffsetH, 1, numstimthistrl) + stimoffsetH/2;
+                    
+                    % testing to see if it only plots on the top half of the screen
+                    randYpos = randi([stimoffsetH/2 res.height/2], 1, numstimthistrl);
+                    
                     
                     xFlashesIter(nf,:) = randXpos;
                     yFlashesIter(nf,:) = randYpos;
@@ -212,15 +243,15 @@ try
                     Screen(window, 'FillRect', black);
                     Screen(window, 'Flip');
                     
-                    WaitSecs(1)
-                    if isDaq, krDeliverReward(dio); end;
+                    WaitSecs(1);
+                    if isDaq, krDeliverReward(dio, 4); end;
                     
                     % collect flashes
                     storeXlocs = [storeXlocs; xFlashesIter]; %#ok
                     storeYlocs = [storeYlocs; yFlashesIter]; %#ok
                     storeSuccess(trl) = trl;
                     
-                    WaitSecs(2);
+                    WaitSecs(1);
                     break
                 end
                 
@@ -231,7 +262,7 @@ try
         
         if isDaq, krEndTrial(dio); end
         
-        if mod(trl,20) == 0
+        if mod(trl,10) == 0
             save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
         end
         
@@ -246,9 +277,13 @@ catch %#ok
     if isDaq, krEndTrial(dio); end
     save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
     disp(fName)
+    keyboard
 end
 
 if isDaq, krEndTrial(dio); end
 save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
 Priority(0);
 
+
+keyboard
+end % function
