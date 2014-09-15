@@ -7,6 +7,7 @@ start(ai);
 flushdata(ai);
 stop(ai);
 
+
 eyePosX = d(end,1); % scaling from volts to deg
 eyePosY = d(end,2); % scaling from volts to deg
 trigger = d(end,3);

@@ -1,11 +1,12 @@
-function krFixationFlashingTargs()
+function krFixationFlashingTargs_OnlinePlot()
 
 % testing psychtoolbox screen command
 
-clc, clear; close all; pause(0.01);
+clc, clear; pause(0.01);
+%warning off
 
 try
-    [ai, dio] = krConnectDAQ();
+    [ai, dio] = krConnectDAQTrigger();
     isDaq = true;
 catch
     disp('no daq')
@@ -40,6 +41,8 @@ end
 
     function updateViewingFigure()
         try
+            
+            %figure(2)
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
             for drawi = 1:numstimthistrl 
                set(hTargs(drawi), 'Position', [randXpos(drawi)-centX -(randYpos(drawi)-centY) 10 10]) 
@@ -50,9 +53,16 @@ end
     end
 
 
+figure(3), clf
+global xdiv
+xdiv = 40;
+frmat = zeros(xdiv);
+frtrls = zeros(xdiv);
+
+
 % data to be stored into this filename
 c = clock;
-fName = ['fix_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
+fName = ['fixOnline_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
 Priority(2);
 
@@ -108,7 +118,7 @@ try
             
             if isDaq
                 try
-                    [eyePosX eyePosY] = krGetEyePos(ai);
+                    [eyePosX eyePosY trigger] = krGetEyePosTrigger(ai);
                 catch
                     disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                 end
@@ -159,7 +169,7 @@ try
                     % make sure still in window
                     if isDaq
                         try
-                            [eyePosX eyePosY] = krGetEyePos(ai);
+                            [eyePosX eyePosY trigger] = krGetEyePosTrigger(ai);
                         catch
                             disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                         end
@@ -189,7 +199,7 @@ try
                     % generate nstim stimulus squares and not on the edges of the screen
                     randXpos = randi([round(stimoffsetW/2) round(res.width - stimoffsetW/2)], 1, numstimthistrl);
                     randYpos = randi([stimoffsetH/2 round(res.height - stimoffsetH/2)], 1, numstimthistrl);
-                    
+                    % randpos = [1,n]
                     
                     xFlashesIter(nf,:) = randXpos;
                     yFlashesIter(nf,:) = randYpos;
@@ -202,14 +212,19 @@ try
                     
                     
                     
-                    % draw fixation dot
+                    % draw stimuli
                     Screen(window, 'FillRect', stimcolors , stims);
                     Screen(window, 'Flip');
+                    
+                    numtrigs = 0;
                     
                     % leave stimulus on for short priod of time
                     stimwaitdur = 0.05; % always 50ms
                     thisstimdur = tic;
                     while toc(thisstimdur) < stimwaitdur
+                        [eyePosX eyePosY trigger] = krGetEyePosTrigger(ai);
+                        % find out how many spikes occured
+                        numtrigs = numtrigs + ceil(length(findpeaks(abs(diff(trigger)),'MINPEAKHEIGHT',0.3))/2);
                         if viewingFigure, updateViewingFigure(); end
                     end
                     
@@ -221,8 +236,18 @@ try
                     
                     thisBlank = tic;
                     while toc(thisBlank) < blankDur
+                       % find out how many spikes occured
+                       numtrigs = numtrigs + ceil(length(findpeaks(abs(diff(trigger)),'MINPEAKHEIGHT',0.3))/2);
                        if viewingFigure, updateViewingFigure(); end
                     end
+                    
+                    
+                    % at this point, you know the number of spikes occured
+                    % for this particular location
+                    fprintf('Num Trigs: %i \n', numtrigs)
+                    
+                    
+                    if viewingFigure, [frmat, frtrls] = updateRFMap(frmat, frtrls, randXpos, randYpos, numtrigs); end
                     
                 end %nflahses
                 

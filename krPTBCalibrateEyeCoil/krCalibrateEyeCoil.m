@@ -95,7 +95,7 @@ try
     black = BlackIndex(window); % pixel value for black
     
     
-    ntrls = 9;
+    ntrls = 1;
     
     storeGlobalTics = nan(ntrls, 1);
     storeLocIDs = nan(ntrls,1); % save the location of stimuli
@@ -115,13 +115,12 @@ try
         krEndTrial(dio)
         
         % select random location
-        % select random location
-%         while indLoc == prevLoc
-%             indLoc = randi(9);
-%         end
-%         prevLoc = indLoc;
+        while indLoc == prevLoc
+            indLoc = randi(9);
+        end
+        prevLoc = indLoc;
         
-        indLoc = indLoc + 1; % if you want to just go sequentially 
+        %indLoc = indLoc + 1; % if you want to just go sequentially 
 
         storeGlobalTics(trls) = toc(ticGlobal); % trial start times
         storeLocIDs(trls) = indLoc; % these two to be saved later

@@ -1,4 +1,4 @@
-function [ai, dio] = krConnectDAQtemptest()
+function [ai, dio] = krConnectDAQTrigger()
 
 % connection to daq
 ai = analoginput('mcc');
@@ -8,8 +8,6 @@ addchannel(ai,1); % eyev
 addchannel(ai,2); % spike triggers
 addchannel(ai,3); % dummy channel
 ai.SamplesPerTrigger = 4000;
-
-fprintf('Duration Per Acquisition: %f\n', ai.SamplesPerTrigger/ai.SampleRate)
 
 % output connections
 dio = digitalio('mcc');
