@@ -22,7 +22,7 @@ function varargout = jhParadigmGUI(varargin)
 
 % Edit the above text to modify the response to help jhParadigmGUI
 
-% Last Modified by GUIDE v2.5 15-Sep-2014 17:23:35
+% Last Modified by GUIDE v2.5 16-Sep-2014 11:27:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -172,5 +172,14 @@ function Reward_Callback(hObject, eventdata, handles)
 % hObject    handle to Reward (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-krDeliverReward();
+krDeliverReward(dio,1);
 
+
+% --- Executes on button press in Initiate.
+function Initiate_Callback(hObject, eventdata, handles)
+% hObject    handle to Initiate (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[ai, dio] = krConnectDAQ();
+handles.ai = ai;
+handles.dio = dio;
