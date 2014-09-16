@@ -1,12 +1,11 @@
-function krFixationFlashingTargs_OnlinePlot()
+function krFixationFlashingTargs()
 
 % testing psychtoolbox screen command
 
-clc, clear; pause(0.01);
-warning off
+clc, clear; close all; pause(0.01);
 
 try
-    [ai, dio] = krConnectDAQTrigger();
+    [ai, dio] = krConnectDAQ();
     isDaq = true;
 catch
     disp('no daq')
@@ -41,8 +40,6 @@ end
 
     function updateViewingFigure()
         try
-            
-            %figure(2)
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
             for drawi = 1:numstimthistrl 
                set(hTargs(drawi), 'Position', [randXpos(drawi)-centX -(randYpos(drawi)-centY) 10 10]) 
@@ -53,16 +50,9 @@ end
     end
 
 
-figure(3), clf
-global xdiv
-xdiv = 40;
-frmat = zeros(xdiv);
-frtrls = zeros(xdiv);
-
-
 % data to be stored into this filename
 c = clock;
-fName = ['fixOnline_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
+fName = ['fixNB_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
 Priority(2);
 
@@ -104,7 +94,7 @@ try
     % show n stimuli combinations
     for trl = 1:ntrls
         
-        fprintf('Trl Number: %i', trl)
+        disp(['Trl Number: ' num2str(trl)])
         
         % present fixation square
         Screen(window, 'FillRect', colorBlue, fixSq);
@@ -118,7 +108,7 @@ try
             
             if isDaq
                 try
-                    [eyePosX eyePosY trigger] = krGetEyePosTrigger(ai);
+                    [eyePosX eyePosY] = krGetEyePos(ai);
                 catch
                     disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                 end
@@ -169,7 +159,7 @@ try
                     % make sure still in window
                     if isDaq
                         try
-                            [eyePosX eyePosY trigger] = krGetEyePosTrigger(ai);
+                            [eyePosX eyePosY] = krGetEyePos(ai);
                         catch
                             disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                         end
@@ -199,7 +189,7 @@ try
                     % generate nstim stimulus squares and not on the edges of the screen
                     randXpos = randi([round(stimoffsetW/2) round(res.width - stimoffsetW/2)], 1, numstimthistrl);
                     randYpos = randi([stimoffsetH/2 round(res.height - stimoffsetH/2)], 1, numstimthistrl);
-                    % randpos = [1,n]
+                    
                     
                     xFlashesIter(nf,:) = randXpos;
                     yFlashesIter(nf,:) = randYpos;
@@ -212,41 +202,19 @@ try
                     
                     
                     
-                    % draw stimuli
+                    % draw fixation dot
                     Screen(window, 'FillRect', stimcolors , stims);
                     Screen(window, 'Flip');
                     
-                    numtrigs = 0;
-                    
                     % leave stimulus on for short priod of time
-                    stimwaitdur = 0.05; % always 50ms
+                    stimwaitdur = 0.1; % always 50ms
                     thisstimdur = tic;
                     while toc(thisstimdur) < stimwaitdur
-                        [eyePosX eyePosY trigger] = krGetEyePosTrigger(ai);
-                        % find out how many spikes occured
-                        numtrigs = numtrigs + ceil(length(findpeaks(abs(diff(trigger)),'MINPEAKHEIGHT',0.3))/2);
                         if viewingFigure, updateViewingFigure(); end
                     end
+                  
                     
-                    blankDur = 0.1;
-                    % after stim duration, then blank screen (leave fixation) for 100ms
-                    Screen(window, 'FillRect', colorBlue, fixSq);
-                    Screen(window, 'Flip');
-                    
-                    thisBlank = tic;
-                    while toc(thisBlank) < blankDur
-                       % find out how many spikes occured
-                       numtrigs = numtrigs + ceil(length(findpeaks(abs(diff(trigger)),'MINPEAKHEIGHT',0.3))/2);
-                       if viewingFigure, updateViewingFigure(); end
-                    end
-                    
-                    
-                    % at this point, you know the number of spikes occured
-                    % for this particular location
-                    fprintf(', Num Trigs: %i \n', numtrigs)
-                    
-                    
-                    if viewingFigure, [frmat, frtrls] = updateRFMap(frmat, frtrls, randXpos, randYpos, numtrigs); end
+                    % --------- no blanking period
                     
                 end %nflahses
                 
@@ -266,6 +234,7 @@ try
                     % wipe screen & fill bac
                     Screen(window, 'FillRect', black);
                     Screen(window, 'Flip');
+                    
                     
                     WaitSecs(1);
                     if isDaq, krDeliverReward(dio, 4); end;

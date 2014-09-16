@@ -49,7 +49,7 @@ end
 
 % data to be stored into this filename
 c = clock;
-fName = [date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
+fName = ['noFix_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
 Priority(2);
 
@@ -65,7 +65,7 @@ try
     Screen(window, 'Flip');
     
     
-    ntrls = 10;
+    ntrls = 100;
     
     % --- variables and declarations common to all trials
         
