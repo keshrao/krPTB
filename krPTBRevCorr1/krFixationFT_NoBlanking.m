@@ -1,4 +1,4 @@
-function krFixationFlashingTargs()
+function krFixationFT_NoBlanking()
 
 % testing psychtoolbox screen command
 
