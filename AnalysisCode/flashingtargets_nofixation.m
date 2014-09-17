@@ -1,46 +1,52 @@
-clear
-% 
-xdiv = 60;
-ydiv = 60; % number of x/y divisions
+clear 
 
-% projector screen resolution: 1024 x 768
-screenres = [1024 768];
+xdiv = 40;
+ydiv = 40; % number of x/y divisions
 
 frmat = zeros(xdiv, ydiv);
 frtrls = zeros(xdiv, ydiv);
 
-datetimeDate = {'09-Sep'};
-datetimeDateLower = {'09_Sep'};
-datetimeTime = {'149'};
-    
-whichdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
+screenres = [1024 768];
 
-%% 
-for dt = 1:length(datetimeTime)
+targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
+[filename pathname] = uigetfile([targetdir '*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+fullpathname = strcat(pathname, filename); % all the files in pathname
+
+%% Because I want to combine files and build up the firing rate plots
+
+if iscell(fullpathname)
+    numfiles = length(fullpathname);
+else
+    numfiles = 1;
+end
+
+
+for dt = 1:numfiles
     
-    fName = [datetimeDate{dt} '-2014-' datetimeTime{dt}];
-    fEval = ['V' datetimeDate{dt} '_2014_' datetimeTime{dt}];
-    fvarname = ['V' datetimeDateLower{dt} '_2014_' datetimeTime{dt}];
-    
-    load([whichdir fName '.mat'])
-    load([whichdir fName '_sp2.mat'])
-    
-    eval(['eyeh = ' fvarname '_Ch3.values;'])
-    eval(['eyev = ' fvarname '_Ch4.values;'])
-    eval(['trig = ' fvarname '_Ch5.values;'])
-    eval(['photo = ' fvarname '_Ch6.values;'])
-    eval(['photoTS = ' fvarname '_Ch6.times;'])
-    
-    try
-        eval(['Allspktimes = ' fvarname '_Ch7.times;'])
-        eval(['spkcodes = ' fvarname '_Ch7.codes;'])
-    catch 
-        eval(['Allspktimes = ' fvarname '_Ch8.times;'])
-        eval(['spkcodes = ' fvarname '_Ch8.codes;'])
+    if iscell(fullpathname)
+        thisfilename = fullpathname{dt};
+        rawname = filename{dt};
+    else
+        thisfilename = fullpathname;
+        rawname = filename;
     end
     
-    eval(['eyeSamplingRate = ' fvarname '_Ch3.interval;'])
-    eval(['eyeTimeStamps = ' fvarname '_Ch3.times;'])
+    % first load the session file
+    load(thisfilename) % this has the locs and successes
+    load(strcat(thisfilename(1:end-4), '_sp2.mat'))
+    
+    eval(['eyeh = ' rawname(1:end-4) '_Ch3.values;'])
+    eval(['eyev = ' rawname(1:end-4) '_Ch4.values;'])
+    eval(['trig = ' rawname(1:end-4) '_Ch5.values;'])
+    eval(['photo = ' rawname(1:end-4) '_Ch6.values;'])
+    eval(['photoTS = ' rawname(1:end-4) '_Ch6.times;'])
+    
+    eval(['Allspktimes = ' rawname(1:end-4) '_Ch7.times;'])
+    eval(['spkcodes = ' rawname(1:end-4) '_Ch7.codes;'])
+    
+    
+    eval(['eyeSamplingRate = ' rawname(1:end-4) '_Ch3.interval;'])
+    eval(['eyeTimeStamps = ' rawname(1:end-4) '_Ch3.times;'])
     
     numIdx1sec = round(1/eyeSamplingRate);
     %numIdxLittlePost = round(0.5/eyeSamplingRate);
@@ -50,13 +56,13 @@ for dt = 1:length(datetimeTime)
         disp([num2str(length(unique(spkcodes(:,1)))) ' Clusters'])
     end
     
-    clus = 2;
+    clus = 1;
     spktimes = Allspktimes(spkcodes(:,1) == clus);
     
     %% Get data (bookkeeping)
     
     % smooth out the photocell
-    idxPhoto = photo > 0.1;
+    idxPhoto = photo > 0.15;
     photo(idxPhoto) = 0.3;
     photo(~idxPhoto) = 0;
     
@@ -85,7 +91,6 @@ for dt = 1:length(datetimeTime)
     idxTstop = find(dTrig == -0.5);
     
     
-    
     %% find the times during the trial start/stop in which 10 flashes triggered
     
     timeFlashes = [];
@@ -99,11 +104,11 @@ for dt = 1:length(datetimeTime)
             % full set
             timeFlashes(end+1:end+ numFlashesTBE,1) = photoTS(idxOn(thisIndFlashes));
         else
-            fprintf('Num flashes: %i', thisNumFlashes);
+            fprintf('Num flashes: %i \n', thisNumFlashes);
         end
     end
     
-    fprintf('Number of flashes Per Trial: %i. \nNumber of Flashes Total: %i \n', numFlashesTBE, length(timeFlashes))
+    fprintf('Number of flashes Per Trial: %i. \n Number of Flashes Total: %i \n', numFlashesTBE, length(timeFlashes))
         
     %% determine when the eye was stationary and where the eye was for each of the flashes
     
@@ -132,7 +137,7 @@ for dt = 1:length(datetimeTime)
     eyePosY = -eyePosY*100;
     
         
-%% Divide the space into smaller squares to collect firing rate data
+%% Divide the space into smaller squares to collect firing rate data ------------------- kesh -------- make all this into a loop. In case you use more than 2 stimuli per flash
     
     centeredStoreXlocs(:,1) = storeXlocs(:,1) - screenres(1)/2; centeredStoreXlocs(:,2) = storeXlocs(:,2) - screenres(1)/2;
     centeredStoreYlocs(:,1) = storeYlocs(:,1) - screenres(2)/2; centeredStoreYlocs(:,2) = storeYlocs(:,2) - screenres(2)/2;
