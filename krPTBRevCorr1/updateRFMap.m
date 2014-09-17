@@ -20,6 +20,6 @@ for i = 1:length(randXpos)
 end
 
 
-figure(3);
+%figure(3);
 heatmap(frmat./frtrls); colorbar()
 drawnow

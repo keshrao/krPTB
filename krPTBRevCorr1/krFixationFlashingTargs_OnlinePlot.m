@@ -39,6 +39,7 @@ if viewingFigure
     set(gca, 'color', 'none')
 end
 
+
     function updateViewingFigure()
         try
             
@@ -78,7 +79,7 @@ try
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip');
     
-    ntrls = 100;
+    ntrls = 25;
     
     % --- variables and declarations common to all trials
     
@@ -118,7 +119,7 @@ try
             
             if isDaq
                 try
-                    [eyePosX eyePosY trigger] = krGetEyePosTrigger(ai);
+                    [eyePosX eyePosY] = krGetEyePos(ai);
                 catch
                     disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                 end
@@ -159,6 +160,7 @@ try
                 xFlashesIter = nan(numflashes,numstimthistrl);
                 yFlashesIter = nan(numflashes,numstimthistrl);
                     
+                tottrltrigs = 0;
                 
                 for nf = 1:numflashes
                     
@@ -169,7 +171,7 @@ try
                     % make sure still in window
                     if isDaq
                         try
-                            [eyePosX eyePosY trigger] = krGetEyePosTrigger(ai);
+                            [eyePosX eyePosY] = krGetEyePos(ai);
                         catch
                             disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                         end
@@ -222,10 +224,8 @@ try
                     stimwaitdur = 0.05; % always 50ms
                     thisstimdur = tic;
                     while toc(thisstimdur) < stimwaitdur
-                        [eyePosX eyePosY trigger] = krGetEyePosTrigger(ai);
                         % find out how many spikes occured
-                        numtrigs = numtrigs + ceil(length(findpeaks(abs(diff(trigger)),'MINPEAKHEIGHT',0.3))/2);
-                        if viewingFigure, updateViewingFigure(); end
+                        numtrigs = numtrigs + krTriggers(ai, stimwaitdur);
                     end
                     
                     blankDur = 0.1;
@@ -236,19 +236,21 @@ try
                     thisBlank = tic;
                     while toc(thisBlank) < blankDur
                        % find out how many spikes occured
-                       numtrigs = numtrigs + ceil(length(findpeaks(abs(diff(trigger)),'MINPEAKHEIGHT',0.3))/2);
-                       if viewingFigure, updateViewingFigure(); end
+                       numtrigs = numtrigs + krTriggers(ai, stimwaitdur);
+                      
                     end
                     
-                    
-                    % at this point, you know the number of spikes occured
-                    % for this particular location
-                    fprintf(', Num Trigs: %i \n', numtrigs)
                     
                     
                     if viewingFigure, [frmat, frtrls] = updateRFMap(frmat, frtrls, randXpos, randYpos, numtrigs); end
                     
+                    tottrltrigs = tottrltrigs + numtrigs;
+                    
                 end %nflahses
+                
+                % at this point, you know the number of spikes occured
+                % for this particular location
+                fprintf(', Num Trigs: %i \n', tottrltrigs)
                 
                 if ~isInWindow
                     storeSuccess(trl) = 0;

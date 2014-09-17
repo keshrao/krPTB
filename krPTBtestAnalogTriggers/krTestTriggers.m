@@ -1,55 +1,48 @@
 %function krTestTriggers()
 clc, clear
+warning off
 
-[ai, ~] = krConnectDAQtemptest();
+[ai, ~] = krConnectDAQ_trigtest();
 
-%toplot = zeros(1,3);
+sampdur = 1; % 1 second acquisition
+ai.SampleRate = 100000;
+ai.SamplesPerTrigger = sampdur*ai.SampleRate;
+ai.TriggerType = 'manual';
 
-trig = zeros(200,4000);
-temptic = nan(1,200);
+timestamps = []; %nan(1000,1);
+numsamples = []; %nan(1000000,1);
 
-close all
-for p = 1:200
-    tic
-    try
-        
-        [eyePosX eyePosY trigger] = krGetEyePostemptest1(ai);
-        
-        temptic(p) = toc;
-        
-        
-        trig(p,:) = trigger;
-        
-        
-    catch
-        %disp(toc)
-    end
-    %toplot(end+1,:) = [eyePosX, eyePosY, trigger];
-%    tic
-    %plot(trigger); 
-    %plot(toplot);
-    %axis([size(toplot,1)-100 size(toplot,1)+20 -5 5])
+data = [];
+
+tscntr = 1;
+cntr = 1;
+
+
+start(ai)
+
+trigger(ai)
+tic
+
+
+t1 = toc;
+i=1;
+for k=1:5
+    data = getdata(ai, ai.SampleRate*sampdur/5);
+    ns = size(data,1);
     
-    %ylim([-1 10])
-    %drawnow
-    
-    
-%    tig(p*400000+1:(p+1)*400000)=  trigger;
-%    toc
+    timestamps(tscntr) = toc;
+    tscntr = tscntr + 1;
+    numsamples(cntr: cntr+ns-1) = data(:,3);
+    cntr = cntr + ns;
+    %flushdata(ai)
+    i=i+1;
 end
+toc
+flushdata(ai)
+stop(ai)
 
-fprintf('Mean Sample Delay: %f\n',nanmean(temptic))
+plot(numsamples)
 
 
-figure(1);clf;
-plot(trig(1,:));
-figure(2);clf;
-plot(diff(trig(1,:)));
-a = zeros(1,200);
-
-for row = 1:200, 
-    a(row) = ceil(length(findpeaks(abs(diff(trig(row,:))),'MINPEAKHEIGHT',0.3))/2); 
-end
-
-figure(3)
-hist(a)
+% determine the number of pulses that occured
+length(findpeaks(diff(numsamples),'MINPEAKHEIGHT',1))

@@ -1,4 +1,4 @@
-function [eyePosX eyePosY trigger] = krGetEyePostemptest(ai)
+function [eyePosX eyePosY trigger] = krGetEyePos_trigtest(ai)
 
 % this file is in krPlotEPos
 
