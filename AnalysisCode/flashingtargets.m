@@ -1,55 +1,63 @@
+clear 
+
 xdiv = 40;
 ydiv = 40; % number of x/y divisions
 
 frmat = zeros(xdiv, ydiv);
 frtrls = zeros(xdiv, ydiv);
 
-%datetime = {'1040', '1050', '1053'};
-%datetime = {'1025', '1029'};
-datetime = {'1124','1133','1143','1150','1159'};
-    
-whichdir = '\\ccn-sommerserv.win.duke.edu\Data\ke$ha\Sixx\krPTB\';
+targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
+[filename pathname] = uigetfile([targetdir '*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+fullpathname = strcat(pathname, filename); % all the files in pathname
+
 %% Because I want to combine files and build up the firing rate plots
 
-for dt = 1:5
+if iscell(fullpathname)
+    numfiles = length(fullpathname);
+else
+    numfiles = 1;
+end
+
+
+for dt = 1:numfiles
     
-    fName = ['28-Aug-2014-' datetime{dt}];
-    fEval = ['V28_Aug_2014_' datetime{dt}];
-    
-    load([whichdir fName '.mat'])
-    load([whichdir fName '_sp2.mat'])
-    
-    eval(['eyeh = ' fEval '_Ch3.values;'])
-    eval(['eyev = ' fEval '_Ch4.values;'])
-    eval(['trig = ' fEval '_Ch5.values;'])
-    eval(['photo = ' fEval '_Ch6.values;'])
-    eval(['photoTS = ' fEval '_Ch6.times;'])
-    
-    try
-        eval(['Allspktimes = ' fEval '_Ch7.times;'])
-        eval(['spkcodes = ' fEval '_Ch7.codes;'])
-    catch
-        eval(['Allspktimes = ' fEval '_Ch8.times;'])
-        eval(['spkcodes = ' fEval '_Ch8.codes;'])
+    if iscell(fullpathname)
+        thisfilename = fullpathname{dt};
+        rawname = filename{dt};
+    else
+        thisfilename = fullpathname;
+        rawname = filename;
     end
     
-    eval(['eyeSamplingRate = ' fEval '_Ch3.interval;'])
+    % first load the session file
+    load(thisfilename) % this has the locs and successes
+    load(strcat(thisfilename(1:end-4), '_sp2.mat'))
+    
+    eval(['eyeh = ' rawname(1:end-4) '_Ch3.values;'])
+    eval(['eyev = ' rawname(1:end-4) '_Ch4.values;'])
+    eval(['trig = ' rawname(1:end-4) '_Ch5.values;'])
+    eval(['photo = ' rawname(1:end-4) '_Ch6.values;'])
+    eval(['photoTS = ' rawname(1:end-4) '_Ch6.times;'])
+    
+    eval(['Allspktimes = ' rawname(1:end-4) '_Ch7.times;'])
+    eval(['spkcodes = ' rawname(1:end-4) '_Ch7.codes;'])
+    
+    
+    eval(['eyeSamplingRate = ' rawname(1:end-4) '_Ch3.interval;'])
     
     numIdx1sec = round(1/eyeSamplingRate);
     %numIdxLittlePost = round(0.5/eyeSamplingRate);
     
     
-    if length(unique(spkcodes(:,1))) > 1
-        disp([num2str(length(unique(spkcodes(:,1)))) ' Clusters'])
-    end
-    
-    clus = 3;
+    clus = 1;
     spktimes = Allspktimes(spkcodes(:,1) == clus);
+   
+    fprintf('Num Clusters: %i, Cluster Plotted: %i \n', length(unique(spkcodes(:,1))), clus)
     
     %% Get data (bookkeeping)
     
     % smooth out the photocell
-    idxPhoto = photo > 0.01;
+    idxPhoto = photo > 0.1;
     photo(idxPhoto) = 0.3;
     photo(~idxPhoto) = 0;
     
@@ -139,22 +147,22 @@ for dt = 1:5
     hbins = linspace(xrng(1), xrng(2), xdiv);
     vbins = linspace(yrng(1), yrng(2), ydiv);
     
-    poststimdur = 0.15; % in seconds
+       poststimdur = 0.15; % in seconds
     
     for col = 1:ydiv - 1
         for row = 1:xdiv - 1
             
-            indFlash1 = find(storeXlocs(:,1) > hbins(row) & storeXlocs(:,1) < hbins(row+1) & storeYlocs(:,1) > vbins(col) & storeYlocs(:,1) < vbins(col+1));
-            indFlash2 = find(storeXlocs(:,2) > hbins(row) & storeXlocs(:,2) < hbins(row+1) & storeYlocs(:,2) > vbins(col) & storeYlocs(:,2) < vbins(col+1));
-            
-            timeFlash = [];
-            try
-                timeFlash1 = timeFlashes(indFlash1);
-                timeFlash2 = timeFlashes(indFlash2);
-                frtrls(row,col) = frtrls(row,col) + 1;
+            totIndFlashes = [];
+            for nf = 1:size(storeXlocs,2)
+                indFlash = find(storeXlocs(:,nf) > hbins(row) & storeXlocs(:,nf) < hbins(row+1) & storeYlocs(:,nf) > vbins(col) & storeYlocs(:,nf) < vbins(col+1));
+                totIndFlashes = [totIndFlashes; indFlash];
             end
             
-            timeFlash = [timeFlash1; timeFlash2];
+            timeFlash = timeFlashes(totIndFlashes);
+            
+            if ~isempty(timeFlash)
+                frtrls(row,col) = frtrls(row,col) + 1;
+            end
             
             % determine the number of spikes that occur in the 200ms after the
             % flashs in this location
@@ -176,8 +184,8 @@ end
 %% plot what the heatmap looks like
 
 clf, hold on
-figure(1), heatmap(frmat)
-axis([0.5 30 0.5 27])
+figure(1), heatmap(frmat./frtrls)
+axis([0.5 xdiv 0.5 ydiv])
 
 ax = axis;
 line(ax(1:2),[mean(ax(3:4)) mean(ax(3:4))], 'LineStyle', '--','LineWidth', 2, 'Color', 'k')
