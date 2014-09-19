@@ -134,7 +134,7 @@ try
     black = BlackIndex(window); % pixel value for black
     
     
-    ntrls = 15;
+    ntrls = 100;
     
     prevLoc = 0;
     indLoc = 0;

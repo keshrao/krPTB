@@ -24,7 +24,8 @@ centY = res.height/2;
 
 numstimthistrl = 3;
 
-viewingFigure = true;
+viewingFigure = false;
+
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
     figure(2), clf
@@ -91,6 +92,8 @@ try
     storeXlocs = [];
     storeYlocs = [];
     storeSuccess = 0;
+    
+    
     % show n stimuli combinations
     for trl = 1:ntrls
         
@@ -138,6 +141,9 @@ try
             WaitSecs(2);
         else
             
+            % toggle the photodioed on and off
+            isPhotoOn = false;
+            
             % successful fixation trial logic goes here
             if isDaq, krStartTrial(dio); end
             
@@ -181,11 +187,16 @@ try
                     end
                     % --------------------------
                     
-                    
-                    stims = [fixSq photoSq];
-                    stimcolors = [colorBlue colorWhite];
-                    
-                    
+                    if ~isPhotoOn 
+                        stims = [fixSq photoSq];
+                        stimcolors = [colorBlue colorWhite];
+                        isPhotoOn = true;
+                    else
+                        stims = [fixSq];
+                        stimcolors = [colorBlue];
+                        isPhotoOn = false;
+                    end
+                       
                     % generate nstim stimulus squares and not on the edges of the screen
                     randXpos = randi([round(stimoffsetW/2) round(res.width - stimoffsetW/2)], 1, numstimthistrl);
                     randYpos = randi([stimoffsetH/2 round(res.height - stimoffsetH/2)], 1, numstimthistrl);

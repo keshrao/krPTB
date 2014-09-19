@@ -81,6 +81,8 @@ try
     
     ntrls = 25;
     
+    fprintf('Number of trials requested: %i \n', ntrls);
+    
     % --- variables and declarations common to all trials
     
     winTol = 30;
