@@ -227,7 +227,11 @@ try
                     thisstimdur = tic;
                     while toc(thisstimdur) < stimwaitdur
                         % find out how many spikes occured
-                        numtrigs = numtrigs + krTriggers(ai, stimwaitdur);
+                        try
+                            numtrigs = numtrigs + krTriggers(ai, stimwaitdur);
+                        catch
+                            disp('missed trigger')
+                        end
                     end
                     
                     blankDur = 0.1;
@@ -238,7 +242,11 @@ try
                     thisBlank = tic;
                     while toc(thisBlank) < blankDur
                        % find out how many spikes occured
-                       numtrigs = numtrigs + krTriggers(ai, stimwaitdur);
+                       try
+                            numtrigs = numtrigs + krTriggers(ai, stimwaitdur);
+                        catch
+                            disp('missed trigger')
+                        end
                       
                     end
                     

@@ -34,7 +34,7 @@ if viewingFigure
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
     hEye = rectangle('Position', [0, 0 25 25],'FaceColor','red'); %<- note, x,y,w,h as opposed to PTB's convention
     for numtargsi = 1:numstimthistrl
-        hTargs(numtargsi) = rectangle('Position', [0, 0 10 10],'FaceColor','white'); %#ok
+        hTargs(numtargsi) = rectangle('Position', [0, 0 10 10],'FaceColor','white'); 
     end
     set(gca, 'color', 'none')
 end
@@ -105,9 +105,9 @@ try
         
         % wait of eye to enter fixation square to begin trial
         isInWindow = false;
-        temptic = tic;
+        fixtic = tic;
         
-        while toc(temptic) < 3 % wait three seconds to enter fixation
+        while toc(fixtic) < 3 % wait three seconds to enter fixation
             
             if isDaq
                 try
