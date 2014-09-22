@@ -22,12 +22,8 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-ntrls = 500; % total number of trials requested
-numflashes = 5; % number of flashes per trial
-numstimthistrl = 10; % number of stimuli in each flash
+numstimthistrl = 10;
 
-            
-            
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
@@ -42,9 +38,8 @@ if viewingFigure
     set(gca, 'color', 'none')
     
     
-    % this is for the easy ending of programs
-    uicontrol('Parent',fig,'Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
-    drawnow
+    % this is the 
+    
 end
 
     function updateViewingFigure()
@@ -58,15 +53,8 @@ end
         end
     end
 
-    function cb_EndTask(~,~)
-        dbstop if error
-        ShowCursor
-        Screen('CloseAll');
-        if isDaq, krEndTrial(dio); end
-        %save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
-        %disp(fName)
-        error('Manually Stopped Program. Remember to Save File')
-    end
+fig = figure(1)
+uicontrol('Parent',fig,'Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[200 200 60 20]);
 
 
 
@@ -87,6 +75,8 @@ try
     % wipe screen & fill bac
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip');
+    
+    ntrls = 500;
     
     % --- variables and declarations common to all trials
     
@@ -159,6 +149,8 @@ try
             % successful fixation trial logic goes here
             if isDaq, krStartTrial(dio); end
             
+            % begin series of stimuli flashes
+            numflashes = 10;
             
             while isInWindow
                 

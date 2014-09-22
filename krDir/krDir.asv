@@ -188,6 +188,7 @@ try
             Screen(window, 'FillRect', black);
             Screen(window, 'Flip');
             storeSuccess(trls) = 0;
+            disp(
             if isDaq, krEndTrial(dio); end
             WaitSecs(2);
             
@@ -251,8 +252,6 @@ try
             WaitSecs(0.5);
             if isDaq, krDeliverReward(dio,2);end
             storeSuccesses(trls) = trls;
-            successCount = successCount+1;
-            disp(['Success Count: ',successCount]);
             WaitSecs(1);
         end
         

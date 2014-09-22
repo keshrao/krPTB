@@ -22,7 +22,7 @@ function varargout = jhParadigmGUI(varargin)
 
 % Edit the above text to modify the response to help jhParadigmGUI
 
-% Last Modified by GUIDE v2.5 16-Sep-2014 11:27:21
+% Last Modified by GUIDE v2.5 22-Sep-2014 16:40:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,12 +54,19 @@ function jhParadigmGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for jhParadigmGUI
 handles.output = hObject;
 
+
+% Connect the daq card
+[ai, dio] = krConnectDAQ();
+handles.ai = ai;
+handles.dio = dio;
+
 % Update handles structure
 guidata(hObject, handles);
 
 % This sets up the initial plot - only do when we are invisible
 % so window can get raised using jhParadigmGUI.
 if strcmp(get(hObject,'Visible'),'off')
+
     
 end
 
@@ -83,10 +90,12 @@ function Start_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-popup_sel_index = get(handles.ChooseParadigm, 'String');
+popup_sel_index = get(handles.ChooseParadigm, 'Value');
 switch popup_sel_index
-    case 'krCal'
+    case 1
         krCal();
+    case 2
+        krDir();
 end
 
 
@@ -137,7 +146,9 @@ function ChooseParadigm_Callback(hObject, eventdata, handles)
 
 % Hints: contents = get(hObject,'String') returns ChooseParadigm contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from ChooseParadigm
-set(hObject, 'String', 'krCal')
+%choice = get(hObject,'String');
+set(handles.ChooseParadigm, 'Value', get(hObject,'Value'));
+
 
 
 
@@ -153,7 +164,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
      set(hObject,'BackgroundColor','white');
 end
 
-set(hObject, 'String', {'krCal'});
+set(hObject, 'String', {'krCal','krDir'});
 
 
 % --- Executes on button press in krCalibrateEyePos.
@@ -172,14 +183,4 @@ function Reward_Callback(hObject, eventdata, handles)
 % hObject    handle to Reward (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-krDeliverReward(dio,1);
-
-
-% --- Executes on button press in Initiate.
-function Initiate_Callback(hObject, eventdata, handles)
-% hObject    handle to Initiate (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-[ai, dio] = krConnectDAQ();
-handles.ai = ai;
-handles.dio = dio;
+krDeliverReward(handles.dio,1);

@@ -95,7 +95,7 @@ try
     black = BlackIndex(window); % pixel value for black
     
     
-    ntrls = 1;
+    ntrls = 10;
     
     storeGlobalTics = nan(ntrls, 1);
     storeLocIDs = nan(ntrls,1); % save the location of stimuli
