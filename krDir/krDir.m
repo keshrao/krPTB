@@ -68,7 +68,7 @@ photocell = [0; 0; 50; 50;];
 c = clock;
 fName = ['dir_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
-winTol = 60;
+winTol = 30;
 
 
 viewingFigure = true;
@@ -102,13 +102,14 @@ end
 
 
     function cb_EndTask(~,~)
-        dbstop if error
+        
         ShowCursor
         Screen('CloseAll');
         if isDaq, krEndTrial(dio); end
-        %save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
-        %disp(fName)
-        error('Manually Stopped Program. Remember to Save File')
+        save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
+        
+        keyboard
+        %error('Manually Stopped Program. Remember to Save File')
     end
 
 % ---- PTB segment
@@ -120,19 +121,25 @@ try
     
     black = BlackIndex(window); % pixel value for black
     
-    ntrls = 300;
+    ntrls = 160;
     
     prevLoc = 0;
     indLoc = 1;
     
     storeLocs = nan(ntrls,2); % save the location of stimuli
     storeSuccesses = zeros(ntrls, 1);
+    storeDistVar = nan(ntrls,1);
     successCount = 0;
     
     % reset states
     if isDaq, krEndTrial(dio); end
     
     for trls = 1:ntrls
+        
+        distvar = randi([7 15],1,1);
+        
+        generateTableSquares(distvar)
+        
         % wipe screen & fill back
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
         
@@ -158,6 +165,8 @@ try
         % wait of eye to enter fixation square to begin trial
         isInWindow = false;
         fixtic = tic;
+        
+        set(hFix, 'visible', 'off')
         
         while toc(fixtic) < 3 % wait three seconds to enter fixation
             
@@ -199,20 +208,33 @@ try
             storeLocs(trls,:) = [thisPos(1), thisPos(2)]; % these two to be saved later
             
             % once fixation is acquired, hold fixation for 300 ms
-            WaitSecs(0.3);
+            temptic = tic;
+            while toc(temptic) < 0.5
+                try
+                    [eyePosX eyePosY] = krGetEyePos(ai);
+                end
+                if viewingFigure, updateViewingFigure(); end
+            end
+                        
             % draw target and photocell
             Screen(window, 'FillRect', [colorwhite colorwhite], [sq(:,indLoc) photocell]);
             Screen(window, 'Flip');
-            
+            set(hFix, 'visible', 'on')
             
             % give it another 500 seconds to get into target zone
-            WaitSecs(0.5);
+            temptic = tic;
+            while toc(temptic) < 0.5
+                try
+                    [eyePosX eyePosY] = krGetEyePos(ai);
+                end
+                if viewingFigure, updateViewingFigure(); end
+            end
             
             
             % successful fixation
             temptic = tic;
             
-            while toc(temptic) < 0.5 && isInWindow % maintin fix for 1 sec
+            while toc(temptic) < 0.3 && isInWindow % maintin fix for 0.5 sec
                 
                 if isDaq
                     try
@@ -241,24 +263,26 @@ try
         end % presentation of trial 
         
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
+        set(hFix, 'visible', 'off')
         
         % check if fixation failed
         if ~isInWindow
             if isDaq, krEndTrial(dio);end
+            WaitSecs(1);
         else
             WaitSecs(0.5);
             if isDaq, krEndTrial(dio);end
             WaitSecs(0.5);
             if isDaq, krDeliverReward(dio,2);end
             storeSuccesses(trls) = trls;
+            storeDistVar(trls) = distvar;
             successCount = successCount+1;
-            disp(['Success Count: ',successCount]);
             WaitSecs(1);
         end
         
         
         if mod(trls,20) == 0
-            save(fName, 'storeLocs','storeSuccesses')
+            save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
         end
         
         if isDaq, krEndTrial(dio); end
@@ -268,7 +292,7 @@ catch MException;
     
     ShowCursor;
     Screen('CloseAll');
-    save(fName, 'storeLocs','storeSuccesses')
+    save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
     close all
     
     disp(MException.message)
@@ -276,7 +300,7 @@ catch MException;
 end
 
 if isDaq, krEndTrial(dio);end
-save(fName, 'storeLocs','storeSuccesses')
+save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
 ShowCursor;
 Screen('CloseAll');
 

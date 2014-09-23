@@ -79,7 +79,7 @@ try
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip');
     
-    ntrls = 25;
+    ntrls = 100;
     
     fprintf('Number of trials requested: %i \n', ntrls);
     
