@@ -19,7 +19,7 @@ else
 end
 
 
-windows = 0.020:0.010:0.300;
+windows = 0.020:0.010:0.250;
 dur = 0.20;
 
 for wi = 1:length(windows)
