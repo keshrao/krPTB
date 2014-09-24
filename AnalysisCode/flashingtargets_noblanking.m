@@ -7,7 +7,7 @@ frmat = zeros(xdiv, ydiv);
 frtrls = zeros(xdiv, ydiv);
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir '*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename pathname] = uigetfile([targetdir 'S30*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -19,7 +19,7 @@ else
 end
 
 
-windows = 0.010:0.010:0.150;
+windows = 0.020:0.010:0.300;
 dur = 0.20;
 
 for wi = 1:length(windows)
@@ -43,7 +43,7 @@ for wi = 1:length(windows)
         eval(['trig = ' rawname(1:end-4) '_Ch5.values;'])
         eval(['trigTS = ' rawname(1:end-4) '_Ch5.times;'])
         eval(['photo = ' rawname(1:end-4) '_Ch6.values;'])
-        
+        eval(['photoTS = ' rawname(1:end-4) '_Ch6.times;'])
         
         eval(['Allspktimes = ' rawname(1:end-4) '_Ch7.times;'])
         eval(['spkcodes = ' rawname(1:end-4) '_Ch7.codes;'])
@@ -63,7 +63,7 @@ for wi = 1:length(windows)
         %% Get data (bookkeeping)
         
         % smooth out the photocell
-        idxPhoto = photo > 0.15;
+        idxPhoto = photo > 0.05;
         photo(idxPhoto) = 0.3;
         photo(~idxPhoto) = 0;
         
@@ -93,25 +93,61 @@ for wi = 1:length(windows)
         
         
         
-        %% find the times during the trial start/stop - for now i'm just check to see if greater than 1800ms
-        
-        trialdurations = idxTstop - idxTstart;
-        
-        succTrls = find(trialdurations > 1800);
-        
-        fprintf('Num Succ Trls Detected: %i. \nNum Succ Trls Stored: %i. \nNum Flashes: %i \n', length(succTrls), length(find(storeSuccess)), size(storeXlocs,1))
-        
+        %% find the times during the trial start/stop - the sequentional frames toggle the photocell being on and off
+%         
+%         succTrls = [];
+%         timeFlashes = [];
+% 
+%         for trl = 1:length(idxTstart)
+%             thisIndFlashes = find(idxOn > idxTstart(trl) & idxOn < idxTstop(trl));
+%             thisNumFlashes = length(thisIndFlashes);
+% 
+%             if thisNumFlashes == 5
+%                 % full set
+%                 succTrls(end+1) = trl; %#ok
+%                 
+%                 tflashes = nan(10,1);
+%                 tflashes([1,3,5,7,9]) = photoTS(idxOn(thisIndFlashes));
+%                 tflashes([2,4,6,8,10]) = photoTS(idxOff(thisIndFlashes));
+%                 
+%                 timeFlashes(end+1:end+10,1) = tflashes;
+% 
+%             end
+%         end
+% 
+%         
+%         fprintf('Num Succ Trls Detected: %i. \nNum storedSuccesses: %i. \nNum storelocs: %i \n', length(succTrls), length(find(storeSuccess)), size(storeXlocs,1))
+%         fprintf('Num Trials: %i. \n', length(idxTstart))
+%         
+
+        %% alternatively, just find when the flashes happened in the "storeSuccess" lists
         timeFlashes = [];
+        nonzeroidx = find(storeSuccess);
         
-        for trl = 1:length(succTrls)
+        for ti = 1:length(find(storeSuccess))
             
-            % I happen to know that there are ten targets flashed evenly spaced in time
-            tmptimes = linspace(idxTstart(succTrls(trl)), idxTstop(succTrls(trl)), 11);
-            timeFlashes(end+1:end+10,1) = trigTS(round(tmptimes(1:10)));
+            trl = storeSuccess(nonzeroidx(ti));
+            
+            thisIndFlashes = find(idxOn > idxTstart(trl) & idxOn < idxTstop(trl));
+            thisNumFlashes = length(thisIndFlashes);
+
+            if thisNumFlashes == 5
+
+                tflashes = nan(10,1);
+                tflashes([1,3,5,7,9]) = photoTS(idxOn(thisIndFlashes));
+                tflashes([2,4,6,8,10]) = photoTS(idxOff(thisIndFlashes));
+                
+                timeFlashes(end+1:end+10,1) = tflashes;
+            else
+                
+                fprintf('Possible Error with Trial: %i. Num flashes = %i. \n', trl, thisNumFlashes)
+                storeSuccess(ti) = 0;
+                
+            end
             
         end
-        
-        
+
+        fprintf('Num Flashes Detected: %i. Num storeXlocs: %i. \n', length(timeFlashes), length(storeXlocs))
         
         %% Divide the space into smaller squares to collect firing rate data
         
@@ -119,7 +155,6 @@ for wi = 1:length(windows)
         % yrange = 50 - 700
         xrng = [100 1000];
         yrng = [50 700];
-        
         
         hbins = linspace(xrng(1), xrng(2), xdiv);
         vbins = linspace(yrng(1), yrng(2), ydiv);
@@ -165,11 +200,12 @@ for wi = 1:length(windows)
     figure(1), heatmap(frmat./frtrls);
     axis([0.5 xdiv 0.5 ydiv])
     title(['Window: ' num2str(windows(wi))])
+    colorbar
     
     ax = axis;
     line(ax(1:2),[mean(ax(3:4)) mean(ax(3:4))], 'LineStyle', '--','LineWidth', 2, 'Color', 'k')
     line([mean(ax(1:2)) mean(ax(1:2))], ax(3:4), 'LineStyle', '--','LineWidth', 2, 'Color', 'k')
     
     
-    pause(1)
+    drawnow
 end% windows
