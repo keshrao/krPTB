@@ -150,46 +150,56 @@ for dt = 1:numfiles
     
     %% now that we have our flash times, saccade times, and directions, plot rasters
     
-    figure(1), clf
-    
-    % split up into 8 directions + 1 center
-    dirbins = linspace(-30,330,8);
-    % the analogous subplot numbers
-    subpdirs = [6,3,2,1,4,7,8,9];
-    
-    trly = zeros(9,1);
-    
-    prestimdur = .100;
-    poststimdur = .400;
-    
-    % first align to flash times
-    for ti = 1:length(find(storeSuccesses))
-
-        thisspkidx = find(spktimes > timeFlashes(ti)-prestimdur & spktimes < timeFlashes(ti)+poststimdur);
-        thisspktimes = spktimes(thisspkidx);
-        thisspkreltimes = thisspktimes - timeFlashes(ti);
+    for TorS = 1:2
         
-        if isnan(dirsac(ti))
-            subpnum = 5;
-        else
-            whichsubplot = find(dirbins < dirsac(ti), 1, 'last');
-            subpnum = subpdirs(whichsubplot); 
+        figure(TorS), clf
+        
+        % split up into 8 directions + 1 center
+        dirbins = linspace(-30,330,8);
+        % the analogous subplot numbers
+        subpdirs = [6,3,2,1,4,7,8,9];
+        
+        trly = zeros(9,1);
+        
+        prestimdur = .300;
+        poststimdur = .400;
+        
+        
+        if TorS == 1
+            aligntimes = timeFlashes;
+        elseif TorS == 2
+            aligntimes = sactimes;
         end
-
-        trly(subpnum) = trly(subpnum) + 1;
-        subplot(3,3,subpnum), hold on
-        for spi = 1:length(thisspkreltimes)
-            plot([thisspkreltimes(spi) thisspkreltimes(spi)], [0.1+trly(subpnum) 1+trly(subpnum)], 'k')
-            xlim([-.1 .5])
+        
+        
+        % first align to flash times
+        for ti = 1:length(find(storeSuccesses))
+            
+            thisspkidx = find(spktimes > aligntimes(ti)-prestimdur & spktimes < aligntimes(ti)+poststimdur);
+            thisspktimes = spktimes(thisspkidx);
+            thisspkreltimes = thisspktimes - aligntimes(ti);
+            
+            if isnan(dirsac(ti))
+                subpnum = 5;
+            else
+                whichsubplot = find(dirbins < dirsac(ti), 1, 'last');
+                subpnum = subpdirs(whichsubplot);
+            end
+            
+            trly(subpnum) = trly(subpnum) + 1;
+            subplot(3,3,subpnum), hold on
+            for spi = 1:length(thisspkreltimes)
+                plot([thisspkreltimes(spi) thisspkreltimes(spi)], [0.1+trly(subpnum) 1+trly(subpnum)], 'k')
+                xlim([-prestimdur poststimdur])
+            end
+            
+        end
+        
+        for subpnum = 1:9
+            subplot(3,3,subpnum)
+            ax = axis;
+            plot([0 0], [0 ax(4)], 'b', 'LineWidth', 2)
         end
         
     end
-    
-    for subpnum = 1:9
-        subplot(3,3,subpnum)
-        ax = axis;
-        plot([0 0], [0 ax(4)], 'b', 'LineWidth', 2)
-    end
-    
-    
 end
