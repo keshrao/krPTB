@@ -68,7 +68,7 @@ photocell = [0; 0; 50; 50;];
 c = clock;
 fName = ['dir_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
-winTol = 30;
+winTol = 50;
 
 
 viewingFigure = true;
@@ -121,7 +121,7 @@ try
     
     black = BlackIndex(window); % pixel value for black
     
-    ntrls = 160;
+    ntrls = 100;
     
     prevLoc = 0;
     indLoc = 1;
@@ -137,7 +137,6 @@ try
     for trls = 1:ntrls
         
         distvar = randi([7 15],1,1);
-        
         generateTableSquares(distvar)
         
         % wipe screen & fill back
@@ -296,6 +295,7 @@ catch MException;
     close all
     
     disp(MException.message)
+    keyboard
     
 end
 
@@ -304,6 +304,6 @@ save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
 ShowCursor;
 Screen('CloseAll');
 
-
+keyboard
 
 end
