@@ -4,7 +4,7 @@ clear, clc
 
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S30*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename pathname] = uigetfile([targetdir 'S3*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -48,7 +48,7 @@ for dt = 1:numfiles
     %numIdxLittlePost = round(0.5/eyeSamplingRate);
     
     
-    clus = 1;
+    clus = 2;
     spktimes = Allspktimes(spkcodes(:,1) == clus);
     
     fprintf('Num Clusters: %i, Cluster Plotted: %i \n', length(unique(spkcodes(:,1))), clus)
@@ -56,7 +56,7 @@ for dt = 1:numfiles
     %% Get data (bookkeeping)
     
     % smooth out the photocell
-    idxPhoto = photo > 0.1;
+    idxPhoto = photo > 0.05;
     photo(idxPhoto) = 0.3;
     photo(~idxPhoto) = 0;
     
@@ -88,11 +88,18 @@ for dt = 1:numfiles
     %% determine when stimuli were flashes during the successful trials
     
     timeFlashes = [];
-    nonzeroidx = find(storeSuccesses);
+    nonzerotrls = find(storeSuccesses);
     
-    for ti = 1:length(find(storeSuccesses))
+    if length(idxTstart) ~= max(nonzerotrls)
+        fprintf('Deleting Last Trial\n')
+        nonzerotrls(end) = [];
+    end
+    
+    numsucctrls = length(nonzerotrls);
+    
+    for ti = 1:numsucctrls
         
-        trl = storeSuccesses(nonzeroidx(ti));
+        trl = storeSuccesses(nonzerotrls(ti));
         
         % note that time stamps don't matter here bc all this is comapring indexes
         thisIndFlashes = find(idxOn > idxTstart(trl) & idxOn < idxTstop(trl));
@@ -107,19 +114,19 @@ for dt = 1:numfiles
         
     end
     
-    fprintf('Number of successful trials: %i. \nNumber of flashes: %i.\n', length(nonzeroidx), length(timeFlashes))
+    fprintf('Number of successful trials: %i. \nNumber of flashes: %i.\n', length(nonzerotrls), length(timeFlashes))
     
     %% if the distvar variable didn't get saved, then generate it here
     % but may also be good to run this anyway and determine when the saccade happens 
     
     %if ~exist('distvar', 'var'), ,end
     
-    dirsac = nan(length(nonzeroidx),1); % direction the saccade was made to
-    sactimes = nan(length(nonzeroidx),1);
+    dirsac = nan(length(nonzerotrls),1); % direction the saccade was made to
+    sactimes = nan(length(nonzerotrls),1);
     
-    for ti = 1:length(find(storeSuccesses))
+    for ti = 1:numsucctrls
         
-        trl = storeSuccesses(nonzeroidx(ti));
+        trl = storeSuccesses(nonzerotrls(ti));
         
         %time stamps matter here bc comaping different times and metrics
         idxThisTrl = find(eyeTS > timeFlashes(ti) & eyeTS < trigTS(idxTstop(trl)));
@@ -133,8 +140,13 @@ for dt = 1:numfiles
         spd = sqrt(velx.^2 + vely.^2);
         
         % find the peak in the first 600ms
-        if max(spd(1:600)) > 20
-            [~,locs] = findpeaks(spd(1:600), 'minpeakheight', 20, 'minpeakdistance',100);
+        if max(spd(100:min(length(spd),600))) > 20
+            [~,locs] = findpeaks(spd(1:min(length(spd),600)), 'minpeakheight', 20, 'minpeakdistance',100);
+                
+            while length(locs) > 1 && locs(1) < 100 % erroneous saccade during fixation
+                locs(1) = [];
+            end
+                    
             locs = locs(1);
             dirsac(ti) = atan2d(thiseyev(locs+100)-thiseyev(locs-100), thiseyeh(locs+100)-thiseyeh(locs-100));
             sactimes(ti) = thisEyeTS(locs);
@@ -173,7 +185,7 @@ for dt = 1:numfiles
         
         
         % first align to flash times
-        for ti = 1:length(find(storeSuccesses))
+        for ti = 1:numsucctrls
             
             thisspkidx = find(spktimes > aligntimes(ti)-prestimdur & spktimes < aligntimes(ti)+poststimdur);
             thisspktimes = spktimes(thisspkidx);
@@ -199,7 +211,15 @@ for dt = 1:numfiles
             subplot(3,3,subpnum)
             ax = axis;
             plot([0 0], [0 ax(4)], 'b', 'LineWidth', 2)
-        end
+            
+            if subpnum == 2 && TorS == 1
+                title('Aligned to Target Onset')
+            elseif subpnum == 2 && TorS == 2
+                title('Aligned to Saccade')
+            end
+             
+        end %subplot titles
         
-    end
-end
+    end % target or saccade
+    
+end %files

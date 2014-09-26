@@ -1,4 +1,4 @@
-clear 
+clear, clc 
 
 xdiv = 40;
 ydiv = 40; % number of x/y divisions
@@ -7,7 +7,7 @@ frmat = zeros(xdiv, ydiv);
 frtrls = zeros(xdiv, ydiv);
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S30*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename pathname] = uigetfile([targetdir 'S3*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -57,7 +57,7 @@ for dt = 1:numfiles
     %% Get data (bookkeeping)
     
     % smooth out the photocell
-    idxPhoto = photo > 0.1;
+    idxPhoto = photo > 0.05;
     photo(idxPhoto) = 0.3;
     photo(~idxPhoto) = 0;
     
@@ -107,35 +107,7 @@ for dt = 1:numfiles
     % note: the indexs for succTrls and storeSuccesses should be the
     % same. Both should report the accurate number of successful trials.
         
-    %% plot the eye position
-    
-    % figure(1), clf
-    % subplot(2,1,1), hold on, ylim([-5 5]),
-    % subplot(2,1,2), hold on, ylim([-5 5])
-    %
-    %
-    % for trl = 1:length(succTrls)
-    %
-    %     idxToPlot = idxTstart(succTrls(trl))-numIdx1sec:idxTstop(succTrls(trl))+numIdx1sec;
-    %
-    %     numSecs = length(idxToPlot)*eyeSamplingRate;
-    %     plotStartSecs = -1;
-    %     plotEndSecs = numSecs-1;
-    %     plotXvec = linspace(plotStartSecs,plotEndSecs,length(idxToPlot));
-    %
-    %     subplot(2,1,1)
-    %         plot(plotXvec,eyeh(idxToPlot), 'b')
-    %
-    %     subplot(2,1,2)
-    %         plot(plotXvec,eyev(idxToPlot), 'r')
-    %
-    %     drawnow
-    % end
-    %
-    % subplot(2,1,1), axis tight
-    % subplot(2,1,2), axis tight
-    
-    
+    fprintf('# SuccTrls: %i.\n# storeSuccesses %i.\n', length(succTrls), length(find(storeSuccess)))
     %% Divide the space into smaller squares to collect firing rate data
     
     % xrange = 100 - 1000
@@ -161,7 +133,7 @@ for dt = 1:numfiles
             timeFlash = timeFlashes(totIndFlashes);
             
             if ~isempty(timeFlash)
-                frtrls(row,col) = frtrls(row,col) + 1;
+                frtrls(row,col) = frtrls(row,col) + length(timeFlash);
             end
             
             % determine the number of spikes that occur in the 200ms after the
