@@ -22,7 +22,7 @@ function varargout = jhParadigmGUI(varargin)
 
 % Edit the above text to modify the response to help jhParadigmGUI
 
-% Last Modified by GUIDE v2.5 22-Sep-2014 16:40:57
+% Last Modified by GUIDE v2.5 27-Sep-2014 18:36:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -93,9 +93,9 @@ function Start_Callback(hObject, eventdata, handles)
 popup_sel_index = get(handles.ChooseParadigm, 'Value');
 switch popup_sel_index
     case 1
-        krCal();
+        krCal(get(handles.SetTrialNumber,'Value'));
     case 2
-        krDir();
+        krDir(get(handles.SetTrialNumber,'Value'));
 end
 
 
@@ -184,3 +184,73 @@ function Reward_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 krDeliverReward(handles.dio,1);
+
+
+
+function SetTrialNumber_Callback(hObject, eventdata, handles)
+% hObject    handle to SetTrialNumber (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of SetTrialNumber as text
+%        str2double(get(hObject,'String')) returns contents of SetTrialNumber as a double
+ntrls = str2num(get(hObject,'String'));
+set(handles.SetTrialNumber,'Value', ntrls);
+
+% --- Executes during object creation, after setting all properties.
+function SetTrialNumber_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to SetTrialNumber (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function TrialNumber_Callback(hObject, eventdata, handles)
+% hObject    handle to TrialNumber (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of TrialNumber as text
+%        str2double(get(hObject,'String')) returns contents of TrialNumber as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function TrialNumber_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to TrialNumber (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function SuccessCount_Callback(hObject, eventdata, handles)
+% hObject    handle to SuccessCount (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of SuccessCount as text
+%        str2double(get(hObject,'String')) returns contents of SuccessCount as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function SuccessCount_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to SuccessCount (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

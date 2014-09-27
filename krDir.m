@@ -1,5 +1,7 @@
-function krDir()
-
+function krDir(ntrls)
+if isempty(ntrls)
+    ntrls = 300;
+end
 distvar = 10;
 
 try
@@ -120,7 +122,7 @@ try
     
     black = BlackIndex(window); % pixel value for black
     
-    ntrls = 300;
+
     
     prevLoc = 0;
     indLoc = 1;
@@ -252,7 +254,6 @@ try
             if isDaq, krDeliverReward(dio,2);end
             storeSuccesses(trls) = trls;
             successCount = successCount+1;
-            disp(['Success Count: ',successCount]);
             WaitSecs(1);
         end
         

@@ -1,5 +1,7 @@
-function krCal()
-
+function krCal(ntrls)
+if isempty(ntrls)
+    ntrls = 300;
+end
 distvar = 10;
 fig = figure(1); clf
 axis([-200 200 -200 200])
@@ -133,8 +135,6 @@ try
     
     black = BlackIndex(window); % pixel value for black
     
-    
-    ntrls = 15;
     
     prevLoc = 0;
     indLoc = 0;
