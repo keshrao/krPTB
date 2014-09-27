@@ -12,7 +12,7 @@ vbins = linspace(yrng(1), yrng(2), xdiv);
 
 
 for i = 1:length(randXpos)
-    row = find(hbins > randXpos(i), 1, 'first');
+    row = find(hbins > randXpos(i), 1, 'first'); 
     col = find(vbins > randYpos(i), 1, 'first');
     
     frmat(row, col) = frmat(row, col) + numtrigs;

@@ -1,9 +1,10 @@
 function krDir()
 
 distvar = 10;
+warning off
 
 try
-    [ai, dio] = krConnectDAQ();
+    [ai, dio] = krConnectDAQTrigger();
     isDaq = true;
 catch MException;
     disp('no daq')
@@ -82,9 +83,16 @@ if viewingFigure
     hEye = rectangle('Position', [0, 0 25 25],'FaceColor','red');
     axis off    
     
+    
     % this is for the easy ending of programs
     uicontrol('Parent',fig,'Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
     drawnow
+    
+    
+    figure(3); clf;
+    hTune = plot(zeros(9,1), 'o','MarkerSize',3);
+    set(gca, 'XTick', 1:9, 'XTickLabel',{'UL', 'U','UR','L','M','R','DL','D','DR'})
+    xlim([0 10])
     
 end
 
@@ -94,7 +102,6 @@ end
             set(hFix, 'Position', [sq(3,indLoc)-centX -(sq(4, indLoc)-centY) 25 25]);
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
             drawnow
-            
         catch
             % don't want the program to crash if something happens to a figure
         end
@@ -121,7 +128,7 @@ try
     
     black = BlackIndex(window); % pixel value for black
     
-    ntrls = 100;
+    ntrls = 160;
     
     prevLoc = 0;
     indLoc = 1;
@@ -130,6 +137,9 @@ try
     storeSuccesses = zeros(ntrls, 1);
     storeDistVar = nan(ntrls,1);
     successCount = 0;
+    
+    plottuning = zeros(9,1); % just add the num peaks to appropriate location
+    plottrls = zeros(9,1); % to normalize firing rates
     
     % reset states
     if isDaq, krEndTrial(dio); end
@@ -221,15 +231,29 @@ try
             set(hFix, 'visible', 'on')
             
             % give it another 500 seconds to get into target zone
+            getspikesonce = false;
+            numPeaks = 0;
+            
             temptic = tic;
             while toc(temptic) < 0.5
+                if ~getspikesonce 
+                    try
+                        trigtic = tic;
+                        numPeaks = krTriggers(ai, 0.2); % capture 200ms after onset of stimulus
+                        trigtime = toc(trigtic);
+                    end
+                    getspikesonce = true;
+                end
+                
                 try
                     [eyePosX eyePosY] = krGetEyePos(ai);
                 end
                 if viewingFigure, updateViewingFigure(); end
+                
+                
             end
             
-            
+           
             % successful fixation
             temptic = tic;
             
@@ -241,10 +265,6 @@ try
                     catch
                         disp(['Missed Eye Pos Acquisition: ' num2str(trls)])
                     end
-                else
-                    [eyePosX,eyePosY] = GetMouse(window);
-                    eyePosX = eyePosX - centX;
-                    eyePosY = eyePosY - centY;
                 end
                 
                 if viewingFigure, updateViewingFigure(); end
@@ -273,10 +293,22 @@ try
             if isDaq, krEndTrial(dio);end
             WaitSecs(0.5);
             if isDaq, krDeliverReward(dio,2);end
+            
+            
+            plottuning(indLoc) = plottuning(indLoc) + numPeaks;
+            plottrls(indLoc) = plottrls(indLoc) + 1;
+            try
+                set(hTune, 'ydata', plottuning./plottrls);
+                ylim([-1 max(plottuning./plottrls)+3])
+            end
+            
+            fprintf('Time Spent in Trigger: %f. \n', trigtime)
+            
             storeSuccesses(trls) = trls;
             storeDistVar(trls) = distvar;
             successCount = successCount+1;
             WaitSecs(1);
+
         end
         
         

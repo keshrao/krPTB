@@ -72,7 +72,6 @@ try
     window = Screen(whichScreen, 'OpenWindow');
     ShowCursor;
     
-    white = WhiteIndex(window); % pixel value for white
     black = BlackIndex(window); % pixel value for black
     
     % wipe screen & fill bac
