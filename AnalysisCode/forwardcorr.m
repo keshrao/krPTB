@@ -113,13 +113,18 @@ for dt = 1:numfiles
     % xrange = 100 - 1000
     % yrange = 50 - 700
     xrng = [100 1000];
-    yrng = [50 700];
+    yrng = [-350 350];
     
+    % screen resolution 1024x768
+    ycent = 384;
+    
+    % the yaxis is flipped
+    storeYlocs = -(storeYlocs - ycent);
     
     hbins = linspace(xrng(1), xrng(2), xdiv);
     vbins = linspace(yrng(1), yrng(2), ydiv);
     
-       poststimdur = 0.15; % in seconds
+    poststimdur = 0.15; % in seconds
     
     for col = 1:ydiv - 1
         for row = 1:xdiv - 1
@@ -156,7 +161,7 @@ end
 %% plot what the heatmap looks like
 
 clf, hold on
-figure(1), heatmap(frmat./frtrls)
+figure(1), heatmap(frmat'./frtrls') % the x/y axis is flipped. So transpose
 axis([0.5 xdiv 0.5 ydiv])
 
 ax = axis;

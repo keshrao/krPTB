@@ -4,7 +4,7 @@ clear, clc
 
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S3*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename pathname] = uigetfile([targetdir 'S32*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -48,7 +48,7 @@ for dt = 1:numfiles
     %numIdxLittlePost = round(0.5/eyeSamplingRate);
     
     
-    clus = 2;
+    clus = 1;
     spktimes = Allspktimes(spkcodes(:,1) == clus);
     
     fprintf('Num Clusters: %i, Cluster Plotted: %i \n', length(unique(spkcodes(:,1))), clus)
@@ -56,15 +56,15 @@ for dt = 1:numfiles
     %% Get data (bookkeeping)
     
     % smooth out the photocell
-    idxPhoto = photo > 0.05;
-    photo(idxPhoto) = 0.3;
+    idxPhoto = photo > 0.09;
+    photo(idxPhoto) = 0.5;
     photo(~idxPhoto) = 0;
     
     dphoto = diff(photo);
     dphoto = [0; dphoto]; % to take care of the indexing issue
     
-    idxOn = find(dphoto == 0.3); % photocell on
-    idxOff = find(dphoto == -0.3);
+    idxOn = find(dphoto == 0.5); % photocell on
+    idxOff = find(dphoto == -0.5);
     
     % note, the first one will be due to the PTB syncing routine
     idxOn(1) = [];
@@ -84,6 +84,14 @@ for dt = 1:numfiles
     idxTstart = find(dTrig == 0.5);
     idxTstop = find(dTrig == -0.5);
     
+    % sometimes, the trial whole system doesn't shut down properly and 
+    % spike2 starts with trig on. Somehow eliminate that. 
+    if length(idxTstop) > length(idxTstart)
+        idxTstop(1) = [];
+        disp('Eliminated first idxTstop')
+    end
+        
+        
     
     %% determine when stimuli were flashes during the successful trials
     
