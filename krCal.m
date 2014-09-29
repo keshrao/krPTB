@@ -3,7 +3,7 @@ if isempty(ntrls)
     ntrls = 300;
 end
 distvar = 10;
-fig = figure(1); clf
+fig=gcf;
 axis([-200 200 -200 200])
 axis off
 uicontrol('Parent',fig,'Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[200 200 60 20]);
@@ -104,7 +104,7 @@ winTol = 30;
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
-    figure(2), clf
+    gui = gcf;
     axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen

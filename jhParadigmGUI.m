@@ -22,7 +22,7 @@ function varargout = jhParadigmGUI(varargin)
 
 % Edit the above text to modify the response to help jhParadigmGUI
 
-% Last Modified by GUIDE v2.5 27-Sep-2014 18:36:08
+% Last Modified by GUIDE v2.5 29-Sep-2014 18:26:49
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -254,3 +254,12 @@ function SuccessCount_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes during object creation, after setting all properties.
+function EyePosition_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to EyePosition (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate EyePosition
