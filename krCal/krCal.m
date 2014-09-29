@@ -240,7 +240,7 @@ try
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
         if isDaq, krEndTrial(dio);end
         
-        % broke fixation during trial
+        % kept fixation during trial
         if isInWindow
             if isDaq, krDeliverReward(dio,2);end
             storeSuccesses(trls) = 1;

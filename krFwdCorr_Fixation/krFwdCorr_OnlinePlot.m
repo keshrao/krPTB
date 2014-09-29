@@ -1,4 +1,4 @@
-function krFixationFlashingTargs_OnlinePlot()
+function krFwdCorr_OnlinePlot()
 
 % testing psychtoolbox screen command
 

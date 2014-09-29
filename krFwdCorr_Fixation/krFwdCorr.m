@@ -1,4 +1,4 @@
-function krFixationFlashingTargs()
+function krFwdCorr()
 
 % testing psychtoolbox screen command
 
@@ -58,17 +58,11 @@ end
         end
     end
 
-    function cb_EndTask(~,~)
-        dbstop if error
-        ShowCursor
-        Screen('CloseAll');
-        if isDaq, krEndTrial(dio); end
-        %save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
-        %disp(fName)
-        error('Manually Stopped Program. Remember to Save File')
+     function cb_EndTask(~,~)
+        isRun = false;
     end
 
-
+isRun = true;
 
 % data to be stored into this filename
 c = clock;
@@ -81,7 +75,6 @@ try
     window = Screen(whichScreen, 'OpenWindow');
     ShowCursor;
     
-    white = WhiteIndex(window); % pixel value for white
     black = BlackIndex(window); % pixel value for black
     
     % wipe screen & fill bac
@@ -110,7 +103,8 @@ try
     storeYlocs = [];
     storeSuccess = 0;
     % show n stimuli combinations
-    for trl = 1:ntrls
+    trl = 1;
+    while trl <= ntrls && isRun
         
         disp(['Trl Number: ' num2str(trl)])
         
@@ -218,7 +212,7 @@ try
                     
                     
                     
-                    % draw fixation dot
+                    % draw fixation dot + all stimuli
                     Screen(window, 'FillRect', stimcolors , stims);
                     Screen(window, 'Flip');
                     
