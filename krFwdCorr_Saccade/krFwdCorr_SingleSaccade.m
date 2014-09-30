@@ -369,6 +369,7 @@ try
             
         else
             % failed trial
+            storeSuccess(trl) = 0;
             WaitSecs(2);
         end
         

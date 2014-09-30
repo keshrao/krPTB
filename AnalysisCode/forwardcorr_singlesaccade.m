@@ -77,25 +77,55 @@ for dt = 1:numfiles
     
     nztrig = find(dTrig > 0);
     
+    idxTstart = [];
+    idxTstop = [];
+    
     id = 1;
     while id <= length(nztrig)
         
-        threecheck = nztrig(id:id+2);
+        % check to see if the next pulse happens within 45 indexes (approximate distance of each)
+        d1 = nztrig(id+1) - nztrig(id);
+        d2 = nztrig(id+2) - nztrig(id+1);
+        
+        if d1 < 45 && d2 < 45 % triple trigger
+            idxTstop(end+1) = nztrig(id);
+            id = id + 3;
+        elseif d1 < 45 && d2 > 45 % double trigger
+            idxTstart(end+1) = nztrig(id);
+            id = id + 2;
+        else
+            id = id + 1;
+        end
         
     end
     
+    if ~isempty(find(idxTstart > idxTstop, 1)), keyboard, end
     
-    % sometimes, the trial whole system doesn't shut down properly and
-    % spike2 starts with trig on. Somehow eliminate that.
-    if length(idxTstop) > length(idxTstart)
-        idxTstop(1) = [];
-        disp('Eliminated first idxTstop')
+    fprintf('Start/Stop Trigs & Successes: %i/%i/%i\n', length(idxTstart), length(idxTstop), length(storeSuccess));
+    
+    %% find successful trials & total flashes
+    
+    nonzeroTrls = find(storeSuccess); 
+    
+    timeFlashes = []; % store all the times when stimuli were flashes during successful trials
+    
+    for st = 1:length(nonzeroTrls)
+        
+        trl = nonzeroTrls(st);
+        
+        % since trigTS & trlTS are essentially identical, just compare indexes
+        thisIndFlashes = find(idxOn > idxTstart(trl) & idxOn < idxTstop(trl));
+        timeFlashes(end+1:end+length(thisIndFlashes),1) = photoTS(idxOn(thisIndFlashes));
     end
     
     
-    %% find successful trials
-    
-    
+    fprintf('Successful Flashes Detected: %i/%i.\n', length(timeFlashes), length(storeXlocs))
     
     
 end
+
+
+
+
+
+
