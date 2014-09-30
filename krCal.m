@@ -1,7 +1,9 @@
 function krCal(ntrls)
+
 if isempty(ntrls)
-    ntrls = 300;
+    ntrls = 100;
 end
+
 distvar = 10;
 fig=gcf;
 axis([-200 200 -200 200])

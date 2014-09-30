@@ -93,7 +93,7 @@ if viewingFigure
     hTune = plot(zeros(9,1), 'o','MarkerSize',3);
     set(gca, 'XTick', 1:9, 'XTickLabel',{'UL', 'U','UR','L','M','R','DL','D','DR'})
     xlim([0 10])
-    
+    ylim([-1 20])
 end
 
     function updateViewingFigure()
@@ -299,10 +299,10 @@ try
             plottrls(indLoc) = plottrls(indLoc) + 1;
             try
                 set(hTune, 'ydata', plottuning./plottrls);
-                ylim([-1 max(plottuning./plottrls)+3])
+                %ylim([-1 max(plottuning./plottrls)+3])
             end
             
-            fprintf('Time Spent in Trigger: %f. \n', trigtime)
+            %fprintf('Time Spent in Trigger: %f. \n', trigtime)
             
             storeSuccesses(trls) = trls;
             storeDistVar(trls) = distvar;

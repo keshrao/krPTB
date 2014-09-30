@@ -79,6 +79,8 @@ try
     
     winTol = 30;
     
+    fixdur = 0.5; % how long to fixate on pre and post saccadic targets
+    
     % fixation square left: 100pix ~ 10deg
     pixOffset = 50;
     fixSqLeft = [res.width/2-pixOffset-5, res.height/2-5, res.width/2-pixOffset, res.height/2]';
@@ -160,7 +162,7 @@ try
             
             %% left fixation - phase 1 
             lefttic = tic;
-            while toc(lefttic) < 0.75 && isInWindow %left fixation
+            while toc(lefttic) < fixdur && isInWindow %left fixation
                 
                 if isDaq
                     try
@@ -285,7 +287,7 @@ try
             if isDaq, krStartTrial(dio); krEndTrial(dio); end
             
             righttic = tic;
-            while toc(righttic) < 0.75 && isInWindow %right fixation
+            while toc(righttic) < fixdur && isInWindow %right fixation
                 
                 if isDaq
                     try
@@ -358,7 +360,7 @@ try
         
         if isInWindow
             
-            if isDaq, krDeliverReward(dio,10); end
+            if isDaq, krDeliverReward(dio,5); end
             
             % collect flashes
             storeXlocs = [storeXlocs; xFlashesIter]; %#ok
