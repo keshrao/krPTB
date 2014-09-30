@@ -20,7 +20,7 @@ end
 
 hasPrintedOnce = false;
 windows = 0.020:0.010:0.250;
-dur = 0.20;
+dur = 0.1;
 
 for wi = 1:length(windows)
     
@@ -154,7 +154,13 @@ for wi = 1:length(windows)
         % xrange = 100 - 1000
         % yrange = 50 - 700
         xrng = [100 1000];
-        yrng = [50 700];
+        yrng = [-350 350];
+        
+        % screen resolution 1024x768
+        ycent = 384;
+        
+        % the yaxis is flipped
+        storeYlocs = -(storeYlocs - ycent);
         
         hbins = linspace(xrng(1), xrng(2), xdiv);
         vbins = linspace(yrng(1), yrng(2), ydiv);
@@ -197,7 +203,7 @@ for wi = 1:length(windows)
     %% plot what the heatmap looks like
     
     clf, hold on
-    figure(1), heatmap(frmat./frtrls);
+    figure(1), heatmap(frmat'./frtrls');
     axis([0.5 xdiv 0.5 ydiv])
     title(['Time Back: ' num2str(windows(wi))])
     colorbar

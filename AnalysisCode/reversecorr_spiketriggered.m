@@ -2,7 +2,7 @@ clear, clc
 
 
 xrng = [100 1000];
-yrng = [50 700];
+yrng = [-350 350];
 
 xdiv = 40;
 ydiv = 40; % number of x/y divisions
@@ -141,6 +141,12 @@ for wi = 1:length(allwindow) % time back
         
         %% find every spike and determine what the frame was some time before it
         
+        % screen resolution 1024x768
+        ycent = 384;
+        
+        % the yaxis is flipped
+        storeYlocs = -(storeYlocs - ycent);
+        
         numavgs = 1;
         
         for spi = 1:length(spktimes)
@@ -176,7 +182,7 @@ for wi = 1:length(allwindow) % time back
     end
     
     clf, hold on
-    figure(1), heatmap(frmat); % the data is averaged on the go
+    figure(1), heatmap(frmat'); % the data is averaged on the go
     axis([0.5 xdiv 0.5 ydiv])
     title(['Time Back: ' num2str(allwindow(wi))])
     colorbar
