@@ -1,11 +1,12 @@
-function krFwdCorr_SingleSaccade()
+function krFwdCorr_SingleSaccade_OnlinePlot()
 
 % testing psychtoolbox screen command
 
 clc, clear; close all; pause(0.01);
+warning off
 
 try
-    [ai, dio] = krConnectDAQ();
+    [ai, dio] = krConnectDAQTrigger();
     isDaq = true;
 catch
     disp('no daq')
@@ -22,7 +23,7 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-ntrls = 200; % total number of trials requested
+ntrls = 10; % total number of trials requested
 numstimthistrl = 15; % number of stimuli in each flash
 
 viewingFigure = true;
@@ -57,11 +58,18 @@ end
         isRun = false;
     end
 
+
+figure(3), clf
+global xdiv
+xdiv = 40;
+frmat = zeros(xdiv);
+frtrls = zeros(xdiv);
+
 isRun = true;
 
 % data to be stored into this filename
 c = clock;
-fName = ['sacFwd_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
+fName = ['sacFwdOn_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
 Priority(2);
 try
@@ -82,7 +90,7 @@ try
     fixdur = 0.75; % how long to fixate on pre and post saccadic targets
     
     % fixation square left: 100pix ~ 10deg
-    pixOffset = 75;
+    pixOffset = 50;
     fixSqLeft = [res.width/2-pixOffset-5, res.height/2-5, res.width/2-pixOffset, res.height/2]';
     fixSqRight = [res.width/2+pixOffset-5, res.height/2-5, res.width/2+pixOffset, res.height/2]';
     
@@ -203,10 +211,17 @@ try
                 Screen(window, 'FillRect', stimcolors , stims);
                 Screen(window, 'Flip');
                 
+                numtrigs = 0;
+                
                 % leave stimulus on for short priod of time
                 stimwaitdur = 0.05; % always 50ms
                 thisstimdur = tic;
                 while toc(thisstimdur) < stimwaitdur
+                    try
+                        numtrigs = numtrigs + krTriggers(ai, stimwaitdur-0.05);
+                    catch
+                        %disp('missed trigger')
+                    end
                     if viewingFigure, updateViewingFigure(); end
                     % --- use this to acquire the triggers for online plotting 
                 end
@@ -218,11 +233,21 @@ try
                 
                 thisBlank = tic;
                 while toc(thisBlank) < blankDur
+                    % find out how many spikes occured
+                    try
+                        numtrigs = numtrigs + krTriggers(ai, blankDur-0.05);
+                    catch
+                        %%disp('missed trigger')
+                    end
                     if viewingFigure, updateViewingFigure(); end
                     % --- use this to acquire the triggers for online plotting 
                 end
                 % ------ end flashing targets segement -----
                 
+                subpnum = 1;
+                if viewingFigure, [frmat, frtrls] = updateRFMapSac(frmat, frtrls, randXpos, randYpos, numtrigs, subpnum); end
+                
+                fprintf('Trigs: %i/', numtrigs)
             end %left fixation
             
             %% Present Right Fixation (pre-saccade) - phase 2
@@ -259,10 +284,17 @@ try
                 Screen(window, 'FillRect', stimcolors , stims);
                 Screen(window, 'Flip');
                 
+                numtrigs = 0;
+                
                 % leave stimulus on for short priod of time
                 stimwaitdur = 0.05; % always 50ms
                 thisstimdur = tic;
                 while toc(thisstimdur) < stimwaitdur
+                    try
+                        numtrigs = numtrigs + krTriggers(ai, stimwaitdur-0.05);
+                    catch
+                        %disp('missed trigger')
+                    end
                     if viewingFigure, updateViewingFigure(); end
                     % --- use this to acquire the triggers for online plotting 
                 end
@@ -274,12 +306,22 @@ try
                 
                 thisBlank = tic;
                 while toc(thisBlank) < blankDur
+                    % find out how many spikes occured
+                    try
+                        numtrigs = numtrigs + krTriggers(ai, blankDur-0.05);
+                    catch
+                        %disp('missed trigger')
+                    end
                     if viewingFigure, updateViewingFigure(); end
                     % --- use this to acquire the triggers for online plotting 
                 end
                 % ------ end flashing targets segement -----
                 
-            end
+                subpnum = 2;
+                if viewingFigure, [frmat, frtrls] = updateRFMapSac(frmat, frtrls, randXpos, randYpos, numtrigs, subpnum); end
+                
+                fprintf('%i/', numtrigs)
+            end % saccade phase
             
             %% Right Fixation - phase 3
             
@@ -332,6 +374,11 @@ try
                 stimwaitdur = 0.05; % always 50ms
                 thisstimdur = tic;
                 while toc(thisstimdur) < stimwaitdur
+                    try
+                        numtrigs = numtrigs + krTriggers(ai, stimwaitdur-0.05);
+                    catch
+                        %disp('missed trigger')
+                    end
                     if viewingFigure, updateViewingFigure(); end
                     % --- use this to acquire the triggers for online plotting 
                 end
@@ -343,11 +390,21 @@ try
                 
                 thisBlank = tic;
                 while toc(thisBlank) < blankDur
+                    % find out how many spikes occured
+                    try
+                        numtrigs = numtrigs + krTriggers(ai, blankDur-0.05);
+                    catch
+                        %disp('missed trigger')
+                    end
                     if viewingFigure, updateViewingFigure(); end
                     % --- use this to acquire the triggers for online plotting 
                 end
                 % ------ end flashing targets segement -----
                 
+                subpnum = 3;
+                if viewingFigure, [frmat, frtrls] = updateRFMapSac(frmat, frtrls, randXpos, randYpos, numtrigs, subpnum); end
+                
+                fprintf('%i.\n', numtrigs)
                 
             end %right fixation
             
@@ -369,7 +426,6 @@ try
             
         else
             % failed trial
-            storeSuccess(trl) = 0;
             WaitSecs(2);
         end
         

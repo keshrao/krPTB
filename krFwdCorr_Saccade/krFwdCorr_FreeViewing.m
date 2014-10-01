@@ -20,7 +20,7 @@ res = Screen('Resolution',whichScreen);
 centX = res.width/2;
 centY = res.height/2;
 
-numstimthistrl = 2;
+numstimthistrl = 20;
 
 viewingFigure = true;
 if viewingFigure

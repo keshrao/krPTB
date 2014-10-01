@@ -1,11 +1,11 @@
-function [frmat, frtrls] = updateRFMap(frmat, frtrls, randXpos, randYpos, numtrigs)
+function [frmat, frtrls] = updateRFMapSac(frmat, frtrls, randXpos, randYpos, numtrigs, subpnum)
 
 global xdiv
 
 xdiv = 40;
 
-xrng = [100 1000];
-yrng = [50 700];
+xrng = [150 850]; % try to keep the ratio of 1048x768 ~~ 4:3
+yrng = [50 650];
 
 hbins = linspace(xrng(1), xrng(2), xdiv);
 vbins = linspace(yrng(1), yrng(2), xdiv);
@@ -21,5 +21,6 @@ end
 
 
 figure(3);
-heatmap(rot90(frmat./frtrls)); colorbar()
+subplot(2,2,subpnum)
+heatmap(rot90(frmat./frtrls));
 drawnow

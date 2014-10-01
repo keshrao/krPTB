@@ -23,7 +23,7 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-numstimthistrl = 3;
+numstimthistrl = 15;
 
 viewingFigure = true;
 if viewingFigure
@@ -36,6 +36,10 @@ if viewingFigure
     for numtargsi = 1:numstimthistrl
         hTargs(numtargsi) = rectangle('Position', [0, 0 10 10],'FaceColor','white'); %#ok
     end
+     % this is for the easy ending of programs
+    uicontrol('Parent',fig,'Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
+    drawnow
+    
     set(gca, 'color', 'none')
 end
 
@@ -52,7 +56,11 @@ end
             % don't want the program to crash if something happens to a figure
         end
     end
+    function cb_EndTask(~,~)
+        isRun = false;
+    end
 
+isRun = true;
 
 figure(3), clf
 global xdiv
@@ -78,7 +86,7 @@ try
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip');
     
-    ntrls = 100;
+    ntrls = 25;
     
     fprintf('Number of trials requested: %i \n', ntrls);
     
@@ -103,8 +111,8 @@ try
     storeXlocs = [];
     storeYlocs = [];
     storeSuccess = 0;
-    % show n stimuli combinations
-    for trl = 1:ntrls
+    trl = 1;
+    while trl <= ntrls && isRun
         
         fprintf('Trl Number: %i', trl)
         
@@ -300,6 +308,8 @@ try
         if mod(trl,10) == 0
             save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
         end
+        
+        trl = trl + 1;
         
     end % ntrials
     

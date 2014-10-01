@@ -109,15 +109,10 @@ end
 
 
     function cb_EndTask(~,~)
-        
-        ShowCursor
-        Screen('CloseAll');
-        if isDaq, krEndTrial(dio); end
-        save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
-        
-        keyboard
-        %error('Manually Stopped Program. Remember to Save File')
+        isRun = false;
     end
+
+isRun = true;
 
 % ---- PTB segment
 try
@@ -128,7 +123,7 @@ try
     
     black = BlackIndex(window); % pixel value for black
     
-    ntrls = 160;
+    ntrls = 80;
     
     prevLoc = 0;
     indLoc = 1;
@@ -144,7 +139,8 @@ try
     % reset states
     if isDaq, krEndTrial(dio); end
     
-    for trls = 1:ntrls
+    trls = 1;
+    while trls <= ntrls && isRun
         
         distvar = randi([7 15],1,1);
         generateTableSquares(distvar)
@@ -317,6 +313,8 @@ try
         end
         
         if isDaq, krEndTrial(dio); end
+        
+        trls = trls + 1;
     end
     
 catch MException;
