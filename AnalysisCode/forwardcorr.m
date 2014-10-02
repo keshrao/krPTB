@@ -20,6 +20,8 @@ else
 end
 
 
+hasprinted = false;
+
 subpnum = 1;
 clf,
 
@@ -60,9 +62,10 @@ for poststimdur = 0.05:0.05:(8*0.05+0.05)
         
         
         clus = 1;
-        spktimes = Allspktimes(spkcodes(:,1) == clus);
+        %spktimes = Allspktimes(spkcodes(:,1) == clus);
+        spktimes = Allspktimes;
         
-        fprintf('Num Clusters: %i, Cluster Plotted: %i \n', length(unique(spkcodes(:,1))), clus)
+        if ~hasprinted, fprintf('Num Clusters: %i, Cluster Plotted: %i \n', length(unique(spkcodes(:,1))), clus), end
         
         %% Get data (bookkeeping)
         
@@ -117,7 +120,7 @@ for poststimdur = 0.05:0.05:(8*0.05+0.05)
         % note: the indexs for succTrls and storeSuccesses should be the
         % same. Both should report the accurate number of successful trials.
         
-        fprintf('# SuccTrls: %i.\n# storeSuccesses %i.\n', length(succTrls), length(find(storeSuccess)))
+        if ~hasprinted, fprintf('# SuccTrls: %i.\n# storeSuccesses %i.\n', length(succTrls), length(find(storeSuccess))); hasprinted = true; end
         %% Divide the space into smaller squares to collect firing rate data
         
         % screen resolution 1024x768
@@ -163,8 +166,6 @@ for poststimdur = 0.05:0.05:(8*0.05+0.05)
                     thisNeuSpks(numF) = sum(spktimes > timeFlash(numF) + prestimdur & spktimes < timeFlash(numF) + poststimdur);
                 end % numF
                 
-                
-                thisNeuSpks
                 frmat(row,col) = sum(thisNeuSpks);
                 
                 if length(timeFlash) > 3
@@ -182,7 +183,7 @@ for poststimdur = 0.05:0.05:(8*0.05+0.05)
     %% plot what the heatmap looks like
     
     hold on
-    heatmap(rot90(frmat./frtrls./frstd)) % the x/y axis is flipped. So transpose
+    heatmap(rot90(frmat./frtrls./frstd)); % the x/y axis is flipped. So transpose
     axis([0.5 xdiv 0.5 ydiv])
     
     ax = axis;

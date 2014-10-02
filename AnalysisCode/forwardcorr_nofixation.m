@@ -62,7 +62,7 @@ for dt = 1:numfiles
     %% Get data (bookkeeping)
     
     % smooth out the photocell
-    idxPhoto = photo > 0.15;
+    idxPhoto = photo > 0.05;
     photo(idxPhoto) = 0.3;
     photo(~idxPhoto) = 0;
     
@@ -151,8 +151,8 @@ for dt = 1:numfiles
     %plot(eyePosX(2), eyePosY(2), '.b', storeXlocs(2,1), storeYlocs(2,1), '.r', relXlocs1(2), relYlocs1(2), 'bo'); axis([-screenres(1) screenres(1) -screenres(2) screenres(2)]);
     
     % x range and y range
-    xrng = [-screenres(1) screenres(1)];
-    yrng = [-screenres(2) screenres(2)];
+    xrng = [-screenres(1)/1.5 screenres(1)/1.5];
+    yrng = [-screenres(2)/1.5 screenres(2)/1.5];
     
     hbins = linspace(xrng(1), xrng(2), xdiv);
     vbins = linspace(yrng(1), yrng(2), ydiv);
@@ -201,7 +201,7 @@ end
 
 
 figure(1), clf, hold on,
-heatmap(frmat./frtrls)
+heatmap(rot90(frmat./frtrls));
 axis([0 xdiv 0 ydiv])
 ax = axis;
 line(ax(1:2),[mean(ax(3:4)) mean(ax(3:4))], 'LineStyle', '--','LineWidth', 2, 'Color', 'k')
@@ -209,6 +209,6 @@ line([mean(ax(1:2)) mean(ax(1:2))], ax(3:4), 'LineStyle', '--','LineWidth', 2, '
 
 figure(2), clf
 subplot(2,2,1)
-heatmap(frmat)
+heatmap(rot90(frmat));
 subplot(2,2,2)
-heatmap(frtrls)
+heatmap(rot90(frtrls));
