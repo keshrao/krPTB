@@ -97,7 +97,7 @@ switch popup_sel_index
     case 2
         krDir(get(handles.SetTrialNumber,'Value'));
     case 3
-        krFwdCorr();
+        krFwdCorr(get(handles.SetTrialNumber,'Value'));
 end
 
 
