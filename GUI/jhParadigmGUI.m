@@ -56,9 +56,9 @@ handles.output = hObject;
 
 
 % Connect the daq card
-[ai, dio] = krConnectDAQ();
-handles.ai = ai;
-handles.dio = dio;
+% [ai, dio] = krConnectDAQ();
+% handles.ai = ai;
+% handles.dio = dio;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -99,7 +99,10 @@ switch popup_sel_index
     case 3
         krFwdCorr(get(handles.SetTrialNumber,'Value'));
     case 4
+        krFwdCorr_OnlinePlot(get(handles.SetTrialNumber,'Value'));
+    case 5
         krRevCorr(get(handles.SetTrialNumber,'Value'));
+        
 end
 
 
@@ -168,7 +171,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
      set(hObject,'BackgroundColor','white');
 end
 
-set(hObject, 'String', {'krCal','krDir','krFwdCorr','krRevCorr'});
+set(hObject, 'String', {'krCal','krDir','krFwdCorr','krFwdCorr_OnlinePlot','krRevCorr'});
 
 
 % --- Executes on button press in krCalibrateEyePos.
