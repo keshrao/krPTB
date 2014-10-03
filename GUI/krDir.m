@@ -1,4 +1,5 @@
 function krDir(ntrls)
+
 if isempty(ntrls)
     ntrls = 300;
 end
@@ -78,6 +79,7 @@ if viewingFigure
     % now open up a second matlab figure to be used to view eye position
     fig = gcf;
     axes = gca;
+%     fig = figure(2);
     axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
@@ -105,14 +107,10 @@ end
 
 
     function cb_EndTask(~,~)
-        dbstop if error
-        ShowCursor
-        Screen('CloseAll');
-        if isDaq, krEndTrial(dio); end
-        %save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
-        %disp(fName)
-        error('Manually Stopped Program. Remember to Save File')
+        isRun = false;
     end
+
+isRun = true;
 
 % ---- PTB segment
 try
@@ -134,8 +132,8 @@ try
     
     % reset states
     if isDaq, krEndTrial(dio); end
-    
-    for trls = 1:ntrls
+    trls = 1;
+    while trls <= ntrls && isRun
         % wipe screen & fill back
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
         
@@ -154,6 +152,7 @@ try
         % ----------------- start --------------------------- %
         
         disp(['Trl Number: ' num2str(trls)])
+        set(handles.TrialNumber,'String',trls);
         % present fixation square
         Screen(window, 'FillRect', colorBlue, sq(:,5));
         Screen(window, 'Flip');
@@ -264,6 +263,8 @@ try
         end
         
         if isDaq, krEndTrial(dio); end
+        
+        trls = trls + 1;
     end
     
 catch MException;

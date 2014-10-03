@@ -30,7 +30,7 @@ numstimthistrl = 15;
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
-    figure(2), clf
+    fig = gcf;
     axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
@@ -50,6 +50,7 @@ end
         try
             
             %figure(2)
+            fig;
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
             for drawi = 1:numstimthistrl 
                set(hTargs(drawi), 'Position', [randXpos(drawi)-centX -(randYpos(drawi)-centY) 10 10]) 

@@ -56,9 +56,9 @@ handles.output = hObject;
 
 
 % Connect the daq card
-% [ai, dio] = krConnectDAQ();
-% handles.ai = ai;
-% handles.dio = dio;
+[ai, dio] = krConnectDAQ();
+handles.ai = ai;
+handles.dio = dio;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -89,6 +89,10 @@ function Start_Callback(hObject, eventdata, handles)
 % hObject    handle to Start (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+if(get(handles.SetTrialNumber,'Value') == 0)
+    set(handles.SetTrialNumber,'Value',100);
+end
 
 popup_sel_index = get(handles.ChooseParadigm, 'Value');
 switch popup_sel_index

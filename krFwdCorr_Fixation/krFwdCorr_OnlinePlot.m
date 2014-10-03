@@ -23,12 +23,12 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-numstimthistrl = 15;
+numstimthistrl = 10;
 
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
-    figure(2), clf
+    fig = figure(2); clf
     axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
@@ -86,7 +86,7 @@ try
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip');
     
-    ntrls = 25;
+    ntrls = 100;
     
     fprintf('Number of trials requested: %i \n', ntrls);
     
@@ -106,6 +106,8 @@ try
     stimoffsetW = round(res.width/2);
     stimoffsetH = round(res.height/2);
     % ---- starting trial loop
+    
+    disp(fName)
     
     % this will be used to store all flash locations
     storeXlocs = [];

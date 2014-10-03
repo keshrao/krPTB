@@ -33,7 +33,7 @@ numstimthistrl = 10; % number of stimuli in each flash
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
-    fig = gcf;
+    fig = figure(2); clf
     axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
