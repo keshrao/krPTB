@@ -98,6 +98,8 @@ switch popup_sel_index
         krDir(get(handles.SetTrialNumber,'Value'));
     case 3
         krFwdCorr(get(handles.SetTrialNumber,'Value'));
+    case 4
+        krRevCorr(get(handles.SetTrialNumber,'Value'));
 end
 
 
@@ -166,7 +168,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
      set(hObject,'BackgroundColor','white');
 end
 
-set(hObject, 'String', {'krCal','krDir','krFwdCorr'});
+set(hObject, 'String', {'krCal','krDir','krFwdCorr','krRevCorr'});
 
 
 % --- Executes on button press in krCalibrateEyePos.
