@@ -1,4 +1,4 @@
-function krFwdCorr_OnlinePlot(ntrls)
+function krFwdCorr_OnlinePlot(ntrls,handles)
 if isempty(ntrls)
     ntrls = 300;
 end

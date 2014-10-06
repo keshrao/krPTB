@@ -1,4 +1,4 @@
-function krCal(ntrls)
+function krCal(ntrls,handles)
 
 if isempty(ntrls)
     ntrls = 100;
@@ -168,6 +168,8 @@ try
         
         % ----------------- start
         if isDaq, krStartTrial(dio); end
+        
+        set(handles.TrialNumber,'String',num2str(trls));
         
         storeGlobalTics(trls) = toc(ticGlobal); % trial start times
         storeLocIDs(trls) = indLoc; % these two to be saved later

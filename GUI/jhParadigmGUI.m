@@ -97,15 +97,15 @@ end
 popup_sel_index = get(handles.ChooseParadigm, 'Value');
 switch popup_sel_index
     case 1
-        krCal(get(handles.SetTrialNumber,'Value'));
+        krCal(get(handles.SetTrialNumber,'Value'),handles);
     case 2
-        krDir(get(handles.SetTrialNumber,'Value'));
+        krDir(get(handles.SetTrialNumber,'Value'),handles);
     case 3
-        krFwdCorr(get(handles.SetTrialNumber,'Value'));
+        krFwdCorr(get(handles.SetTrialNumber,'Value'),handles);
     case 4
-        krFwdCorr_OnlinePlot(get(handles.SetTrialNumber,'Value'));
+        krFwdCorr_OnlinePlot(get(handles.SetTrialNumber,'Value'),handles);
     case 5
-        krRevCorr(get(handles.SetTrialNumber,'Value'));
+        krRevCorr(get(handles.SetTrialNumber,'Value'),handles);
         
 end
 

@@ -77,7 +77,7 @@ try
     
     % --- variables and declarations common to all trials
     
-    winTol = 30;
+    winTol = 300;
     
     fixdur = 0.75; % how long to fixate on pre and post saccadic targets
     

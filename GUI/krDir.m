@@ -1,4 +1,4 @@
-function krDir(ntrls)
+function krDir(ntrls,handles)
 
 if isempty(ntrls)
     ntrls = 300;
@@ -132,7 +132,7 @@ try
     
     % reset states
     if isDaq, krEndTrial(dio); end
-    trls = 1;
+    trls = 1; success=0;
     while trls <= ntrls && isRun
         % wipe screen & fill back
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
@@ -151,8 +151,8 @@ try
         
         % ----------------- start --------------------------- %
         
-        disp(['Trl Number: ' num2str(trls)])
-        set(handles.TrialNumber,'String',trls);
+        %disp(['Trl Number: ' num2str(trls)])
+        set(handles.TrialNumber,'String',num2str(trls));
         % present fixation square
         Screen(window, 'FillRect', colorBlue, sq(:,5));
         Screen(window, 'Flip');
@@ -253,7 +253,8 @@ try
             WaitSecs(0.5);
             if isDaq, krDeliverReward(dio,2);end
             storeSuccesses(trls) = trls;
-            successCount = successCount+1;
+            success = success+1;
+            set(handles.SuccessCount,'String',num2str(success));
             WaitSecs(1);
         end
         

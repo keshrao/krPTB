@@ -1,4 +1,4 @@
-function krFwdCorr(ntrls)
+function krFwdCorr(ntrls,handles)
 if isempty(ntrls)
     ntrls = 300;
 end
@@ -108,7 +108,7 @@ try
     trl = 1;
     while trl <= ntrls && isRun
         
-        disp(['Trl Number: ' num2str(trl)])
+        set(handles.TrialNumber,'String',num2str(trls));
         
         % present fixation square
         Screen(window, 'FillRect', colorBlue, fixSq);
