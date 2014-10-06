@@ -23,7 +23,7 @@ centY = res.height/2;
 
 
 ntrls = 200; % total number of trials requested
-numstimthistrl = 15; % number of stimuli in each flash
+numstimthistrl = 5; % number of stimuli in each flash
 
 viewingFigure = true;
 if viewingFigure
@@ -82,7 +82,7 @@ try
     fixdur = 0.75; % how long to fixate on pre and post saccadic targets
     
     % fixation square left: 100pix ~ 10deg
-    pixOffset = 75;
+    pixOffset = 50;
     fixSqLeft = [res.width/2-pixOffset-5, res.height/2-5, res.width/2-pixOffset, res.height/2]';
     fixSqRight = [res.width/2+pixOffset-5, res.height/2-5, res.width/2+pixOffset, res.height/2]';
     

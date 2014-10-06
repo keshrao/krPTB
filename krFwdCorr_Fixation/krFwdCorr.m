@@ -22,7 +22,7 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-ntrls = 500; % total number of trials requested
+ntrls = 200; % total number of trials requested
 numflashes = 5; % number of flashes per trial
 numstimthistrl = 10; % number of stimuli in each flash
 
@@ -275,6 +275,8 @@ try
         if mod(trl,10) == 0
             save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
         end
+        
+        trl = trl + 1;
         
     end % ntrials
     
