@@ -22,7 +22,7 @@ function varargout = jhParadigmGUI(varargin)
 
 % Edit the above text to modify the response to help jhParadigmGUI
 
-% Last Modified by GUIDE v2.5 29-Sep-2014 18:26:49
+% Last Modified by GUIDE v2.5 08-Oct-2014 16:33:50
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -274,3 +274,10 @@ function EyePosition_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: place code in OpeningFcn to populate EyePosition
+
+
+% --- Executes on button press in ResetEyePlot.
+function ResetEyePlot_Callback(hObject, eventdata, handles)
+% hObject    handle to ResetEyePlot (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

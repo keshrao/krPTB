@@ -95,15 +95,15 @@ if viewingFigure
     xlim([0 10])
     ylim([-1 10])
     
-    uicontrol('Parent',fig3,'Style','pushbutton','String','UL','Callback',@cb_UL,'Position',[130 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','U','Callback',@cb_U,'Position',  [160 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','UR','Callback',@cb_UR,'Position',[190 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','L','Callback',@cb_L,'Position',  [210 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','M','Callback',@cb_M,'Position',  [240 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','R','Callback',@cb_R,'Position',  [270 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','DL','Callback',@cb_DL,'Position',[300 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','D','Callback',@cb_D,'Position',  [330 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','DR','Callback',@cb_DR,'Position',[360 300 20 20]);
+    uicontrol('Parent',fig3,'Style','pushbutton','String','UL','Callback',@cb_UL,'Position',[100 300 20 20]);
+    uicontrol('Parent',fig3,'Style','pushbutton','String','U','Callback',@cb_U,'Position',  [150 300 20 20]);
+    uicontrol('Parent',fig3,'Style','pushbutton','String','UR','Callback',@cb_UR,'Position',[200 300 20 20]);
+    uicontrol('Parent',fig3,'Style','pushbutton','String','L','Callback',@cb_L,'Position',  [250 300 20 20]);
+    uicontrol('Parent',fig3,'Style','pushbutton','String','M','Callback',@cb_M,'Position',  [290 300 20 20]);
+    uicontrol('Parent',fig3,'Style','pushbutton','String','R','Callback',@cb_R,'Position',  [330 300 20 20]);
+    uicontrol('Parent',fig3,'Style','pushbutton','String','DL','Callback',@cb_DL,'Position',[370 300 20 20]);
+    uicontrol('Parent',fig3,'Style','pushbutton','String','D','Callback',@cb_D,'Position',  [410 300 20 20]);
+    uicontrol('Parent',fig3,'Style','pushbutton','String','DR','Callback',@cb_DR,'Position',[450 300 20 20]);
     
     drawnow
     
@@ -146,7 +146,7 @@ try
     
     black = BlackIndex(window); % pixel value for black
     
-    ntrls = 10;
+    ntrls = 80;
     
     prevLoc = 0;
     indLoc = 1;

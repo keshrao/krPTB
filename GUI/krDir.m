@@ -13,7 +13,29 @@ catch MException;
     isDaq = false;
 end
 
+%% Degree Control
+fig = gcf;
+uicontrol('Parent',fig,'Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[450 275 60 20]);
+uicontrol('Parent',fig,'Style','pushbutton','String','Decrement','Callback',@cb_Decrement,'Position',[450 300 60 20]);
+edit = uicontrol('Parent',fig,'Style','edit','String', num2str(distvar),'Position',[450 325 60 20]);
+drawnow, pause(0.1)
 
+    function cb_Increment(~,~)
+        distvar = distvar + 1;
+        TextBox()
+    end
+    function cb_Decrement(~,~)
+        distvar = distvar - 1;
+        if distvar < 1
+            distvar = 1;
+        end
+        TextBox()
+    end
+    function TextBox(~,~)
+        set(edit,'String',num2str(distvar));
+    end
+
+%% Dir
 Priority(2); % realtime priority
 
 % remember to clear this out for real experiments
