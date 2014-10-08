@@ -1,10 +1,20 @@
+function diramp()
 % this program will help analyze the dir
-
 clear, clc
 
 
+figure(1), clf
+figure(2), clf
+
+for i = 1:9, totRelSpksT{i} = []; end
+for i = 1:9, totRelSpksS{i} = []; end
+trlyT = zeros(9,1);
+trlyS = zeros(9,1);
+
+clus = 1;
+
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S33*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename pathname] = uigetfile([targetdir 'S36*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -48,8 +58,8 @@ for dt = 1:numfiles
     %numIdxLittlePost = round(0.5/eyeSamplingRate);
     
     
-    clus = 1;
     spktimes = Allspktimes(spkcodes(:,1) == clus);
+    %spktimes = Allspktimes;
     
     fprintf('Num Clusters: %i, Cluster Plotted: %i \n', length(unique(spkcodes(:,1))), clus)
     
@@ -156,8 +166,16 @@ for dt = 1:numfiles
             end
                     
             locs = locs(1);
-            dirsac(ti) = atan2d(thiseyev(locs+100)-thiseyev(locs-100), thiseyeh(locs+100)-thiseyeh(locs-100));
+            
+            if length(thiseyev) < locs + 100
+                gotill = length(thiseyev)-locs-1;
+            else
+                gotill = 100;
+            end
+            
+            dirsac(ti) = atan2d(thiseyev(locs+gotill)-thiseyev(locs-gotill), thiseyeh(locs+gotill)-thiseyeh(locs-gotill));
             sactimes(ti) = thisEyeTS(locs);
+            
         else
             % no saccade made
             dirsac(ti) = nan;
@@ -172,15 +190,14 @@ for dt = 1:numfiles
     
     for TorS = 1:2
         
-        figure(TorS), clf
+        figure(TorS)
         
         % split up into 8 directions + 1 center
         dirbins = linspace(-30,330,8);
         % the analogous subplot numbers
         subpdirs = [6,3,2,1,4,7,8,9];
         
-        trly = zeros(9,1);
-        
+         
         prestimdur = .300;
         poststimdur = .400;
         
@@ -191,11 +208,10 @@ for dt = 1:numfiles
             aligntimes = sactimes;
         end
         
-        
-        % first align to flash times
+                % first align to flash times
         for ti = 1:numsucctrls
             
-            thisspkidx = find(spktimes > aligntimes(ti)-prestimdur & spktimes < aligntimes(ti)+poststimdur);
+            thisspkidx = spktimes > aligntimes(ti)-prestimdur & spktimes < aligntimes(ti)+poststimdur;
             thisspktimes = spktimes(thisspkidx);
             thisspkreltimes = thisspktimes - aligntimes(ti);
             
@@ -206,28 +222,80 @@ for dt = 1:numfiles
                 subpnum = subpdirs(whichsubplot);
             end
             
-            trly(subpnum) = trly(subpnum) + 1;
+            if TorS == 1
+                trlyT(subpnum) = trlyT(subpnum) + 1;
+                trly = trlyT;
+            else
+                trlyS(subpnum) = trlyS(subpnum) + 1;
+                trly = trlyS;
+            end
+            
             subplot(3,3,subpnum), hold on
             for spi = 1:length(thisspkreltimes)
                 plot([thisspkreltimes(spi) thisspkreltimes(spi)], [0.1+trly(subpnum) 1+trly(subpnum)], 'k')
                 xlim([-prestimdur poststimdur])
             end
             
+            if TorS == 1
+                totRelSpksT{subpnum} = [totRelSpksT{subpnum}; thisspkreltimes];
+            else
+                totRelSpksS{subpnum} = [totRelSpksS{subpnum}; thisspkreltimes];
+            end
+            
+            drawnow
         end
         
-        for subpnum = 1:9
-            subplot(3,3,subpnum)
-            ax = axis;
-            plot([0 0], [0 ax(4)], 'b', 'LineWidth', 2)
-            
-            if subpnum == 2 && TorS == 1
-                title('Aligned to Target Onset')
-            elseif subpnum == 2 && TorS == 2
-                title('Aligned to Saccade')
-            end
-             
-        end %subplot titles
         
     end % target or saccade
     
 end %files
+
+for TorS = 1:2
+    
+    figure(TorS)
+    if TorS == 1
+        totRelSpks = totRelSpksT;
+    else
+        totRelSpks = totRelSpksS;
+    end
+    
+    for subpnum = 1:9
+        subplot(3,3,subpnum)
+        ax = axis;
+        
+        plot([0 0], [0 ax(4)], 'b', 'LineWidth', 2)
+        
+        
+        [bins, binwidth, psth] = buildpsth(prestimdur, poststimdur, totRelSpks{subpnum});
+        
+        plot(bins(1:end-1)+(binwidth/2), psth./40, 'r', 'LineWidth', 1)
+        
+        if subpnum == 2 && TorS == 1
+            title('Aligned to Target Onset')
+        elseif subpnum == 2 && TorS == 2
+            title('Aligned to Saccade')
+        end
+        
+        drawnow
+    end %subplot titles
+end
+
+
+function [bins, binwidth, psth] = buildpsth(prestimdur, poststimdur, totRelSpks)
+
+    
+    % bin data into 5ms bins & determine firing rate
+    binwidth = 0.001;
+    bins = -prestimdur:binwidth:poststimdur;
+    binned = nan(1,length(bins)-1);
+    
+        
+    for bi = 1:length(bins)-1
+        thisDataIdx = totRelSpks > bins(bi) & totRelSpks < bins(bi+1);
+        binned(bi) = sum(thisDataIdx)./binwidth;
+    end
+    
+    gausKer = normpdf(-0.05:0.001:0.05, 0, 0.01);
+    psth = conv(binned, gausKer, 'same') ./ sum(gausKer);
+       
+    

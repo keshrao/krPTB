@@ -1,8 +1,9 @@
 clear, clc
 
+clus = 3;
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S33*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename pathname] = uigetfile([targetdir 'S3*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -42,7 +43,6 @@ for dt = 1:numfiles
     eval(['Allspktimes = ' rawname(1:end-4) '_Ch7.times;'])
     eval(['spkcodes = ' rawname(1:end-4) '_Ch7.codes;'])
     
-    clus = 1;
     spktimes = Allspktimes(spkcodes(:,1) == clus);
     
     fprintf('Num Clusters: %i, Cluster Plotted: %i \n', length(unique(spkcodes(:,1))), clus)

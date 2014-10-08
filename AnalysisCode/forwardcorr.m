@@ -1,14 +1,14 @@
 clear, clc
 
-xdiv = 40;
-ydiv = 40; % number of x/y divisions
+xdiv = 30;
+ydiv = 30; % number of x/y divisions
 
 frmat = zeros(xdiv, ydiv);
 frtrls = zeros(xdiv, ydiv);
 frstd = zeros(xdiv, ydiv);
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S3*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename pathname] = uigetfile([targetdir 'S36*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -23,12 +23,18 @@ end
 hasprinted = false;
 
 subpnum = 1;
-clf,
+figure(1), clf,
 
-for poststimdur = 0.05:0.05:(8*0.05+0.05)
+for prestimdur = [0.05:0.05:(8*0.05+0.05) 0]
     
-    subplot(3,3,subpnum)
-    subpnum = subpnum + 1;
+    if prestimdur == 0 % accumulate all times for like 300ms
+        figure(2), clf
+        timeforward = 0.300;
+    else
+        subplot(3,3,subpnum)
+        subpnum = subpnum + 1;
+        timeforward = 0.05;
+    end
     
     
     for dt = 1:numfiles
@@ -62,15 +68,15 @@ for poststimdur = 0.05:0.05:(8*0.05+0.05)
         
         
         clus = 1;
-        %spktimes = Allspktimes(spkcodes(:,1) == clus);
-        spktimes = Allspktimes;
+        spktimes = Allspktimes(spkcodes(:,1) == clus);
+        %spktimes = Allspktimes;
         
         if ~hasprinted, fprintf('Num Clusters: %i, Cluster Plotted: %i \n', length(unique(spkcodes(:,1))), clus), end
         
         %% Get data (bookkeeping)
         
         % smooth out the photocell
-        idxPhoto = photo > 0.05;
+        idxPhoto = photo > 0.02;
         photo(idxPhoto) = 0.3;
         photo(~idxPhoto) = 0;
         
@@ -140,7 +146,7 @@ for poststimdur = 0.05:0.05:(8*0.05+0.05)
         vbins = linspace(yrng(1), yrng(2), ydiv);
         
         %    poststimdur = 0.150; % in seconds
-        prestimdur = poststimdur - 0.05;
+        poststimdur = prestimdur + timeforward;
         
         for col = 1:ydiv - 1
             for row = 1:xdiv - 1
@@ -151,28 +157,28 @@ for poststimdur = 0.05:0.05:(8*0.05+0.05)
                     totIndFlashes = [totIndFlashes; indFlash];
                 end
                 
-                timeFlash = timeFlashes(totIndFlashes);
+                thisTimeFlash = timeFlashes(totIndFlashes);
                 
-                if ~isempty(timeFlash)
-                    frtrls(row,col) = frtrls(row,col) + length(timeFlash);
+                if ~isempty(thisTimeFlash)
+                    frtrls(row,col) = frtrls(row,col) + length(thisTimeFlash);
                 end
                 
                 % determine the number of spikes that occur in the 200ms after the
                 % flashs in this location
                 
-                thisNeuSpks = zeros(1,length(timeFlash));
+                thisNeuSpks = zeros(1,length(thisTimeFlash));
                 
-                for numF = 1:length(timeFlash)
-                    thisNeuSpks(numF) = sum(spktimes > timeFlash(numF) + prestimdur & spktimes < timeFlash(numF) + poststimdur);
+                for numF = 1:length(thisTimeFlash)
+                    thisNeuSpks(numF) = sum(spktimes > thisTimeFlash(numF) + prestimdur & spktimes < thisTimeFlash(numF) + poststimdur);
                 end % numF
                 
                 frmat(row,col) = sum(thisNeuSpks);
                 
-                if length(timeFlash) > 3
-                     frstd(row,col) = var(thisNeuSpks);
-                else
-                    frstd(row,col) = 1;
-                end
+                %if length(thisTimeFlash) > 3
+                    frstd(row,col) = std(thisNeuSpks);
+                %else
+                %    frstd(row,col) = 1;
+                %end
                 
                 
             end %row
@@ -184,11 +190,141 @@ for poststimdur = 0.05:0.05:(8*0.05+0.05)
     
     hold on
     heatmap(rot90(frmat./frtrls./frstd)); % the x/y axis is flipped. So transpose
-    axis([0.5 xdiv 0.5 ydiv])
+    axis([0 xdiv 0 ydiv])
     
     ax = axis;
     line(ax(1:2),[mean(ax(3:4)) mean(ax(3:4))], 'LineStyle', '--','LineWidth', 2, 'Color', 'k')
     line([mean(ax(1:2)) mean(ax(1:2))], ax(3:4), 'LineStyle', '--','LineWidth', 2, 'Color', 'k')
-    title([num2str(prestimdur) 'ms : ' num2str(poststimdur) 'ms']) 
+    title([num2str(prestimdur) 'ms : ' num2str(poststimdur) 'ms'])
     drawnow
 end
+
+%% I want to get the center location of the perceived RF and plot the rasters for RF & non-RF stimuli
+
+% on figure, bottom left is (0,0) & top right is (xdiv,ydiv)
+
+% % figure(2)
+% % fprintf('\nPick the center of the RF\n')
+% % [xfig,yfig] = ginput(1);
+% % 
+% % xmid = hbins(round(xfig));
+% % ymid = vbins(round(yfig));
+% % 
+% % sizerf = input('Num Bins Size RF: ');
+% % 
+% % % assume the size is like 3 bins on either side
+% % xlow = hbins(round(xfig)-sizerf); xhigh = hbins(round(xfig)+sizerf);
+% % ylow = vbins(round(yfig)-sizerf); yhigh = vbins(round(yfig)+sizerf);
+
+figure(2)
+fprintf('\nOutline The RF - xlow,xhigh,ylow,yhigh\n')
+[xfig,yfig] = ginput(4);
+xlow = hbins(round(xfig(1))); xhigh = hbins(round(xfig(2))); 
+ylow = vbins(round(yfig(3))); yhigh = vbins(round(yfig(4))); 
+
+
+% time before and after raster
+raspre = 0.1;
+raspost = 0.3;
+
+% vectores of time points relative to flash to when spikes occur
+hasRFstim = [];
+noRFstim = [];
+
+% index counters for rasters
+rfcntr = 1;
+norfcntr = 1;
+
+figure(3), clf
+
+% iterate through all the presented locations
+for sloc = 1:size(storeXlocs,1)
+    
+    % spikes that occured after this stimulus
+    relSpkTimes = spktimes(spktimes > timeFlashes(sloc) - raspre & spktimes < timeFlashes(sloc) + raspost) - timeFlashes(sloc);
+    
+    % in each row, check if stimulus lands in RF
+    idxInRF = storeXlocs(sloc,:) > xlow & storeXlocs(sloc,:) < xhigh & storeYlocs(sloc,:) > ylow & storeYlocs(sloc,:) < yhigh;
+    
+    if sum(idxInRF) > 0 % RF stim
+        
+        hasRFstim = [hasRFstim relSpkTimes'];
+        
+        subplot(2,2,1), hold on
+        if ~isempty(relSpkTimes) && length(relSpkTimes) == 2
+            plot([relSpkTimes'; relSpkTimes'], [rfcntr-0.9 rfcntr-0.1], 'k')
+        elseif ~isempty(relSpkTimes)
+            plot([relSpkTimes relSpkTimes], [rfcntr-0.9 rfcntr-0.1], 'k', 'LineWidth', 3)
+        end
+        
+        rfcntr = rfcntr + 1;
+    else %no rf stim
+        
+        
+        noRFstim = [noRFstim relSpkTimes'];
+        
+        subplot(2,2,2), hold on
+        if ~isempty(relSpkTimes) && length(relSpkTimes) == 2
+            plot([relSpkTimes'; relSpkTimes'], [norfcntr-0.9 norfcntr-0.1], 'k')
+        elseif ~isempty(relSpkTimes)
+            plot([relSpkTimes relSpkTimes], [norfcntr-0.9 norfcntr-0.1], 'k', 'LineWidth', 3)
+        end
+        
+        norfcntr = norfcntr + 1;
+    end % raster accumulation
+    
+end
+
+
+for subp = 1:2
+    subplot(2,2,subp)
+    ax = axis;
+    plot([0 0], [-1 ax(4)], 'b', 'LineWidth', 3)
+end
+
+
+% construct psth
+
+for subp = 1:2
+    
+    % bin data into 5ms bins & determine firing rate
+    binwidth = 0.001;
+    bins = -raspre:binwidth:raspost;
+    binned = nan(1,length(bins)-1);
+    
+    subplot(2,2,subp)
+    if subp == 1
+        ax = axis;
+        plot([0 0], [-1 ax(4)], 'b', 'LineWidth', 3)
+        title('Within RF Stimulus')
+        
+        totRelSpks = hasRFstim;
+        normalizer = rfcntr;
+    else
+        ax = axis;
+        plot([0 0], [-1 ax(4)], 'b', 'LineWidth', 3)
+        title('No RF Stimulus')
+        
+        totRelSpks = noRFstim;
+        normalizer = norfcntr;
+    end
+        
+    for bi = 1:length(bins)-1
+        thisDataIdx = totRelSpks > bins(bi) & totRelSpks < bins(bi+1);
+        binned(bi) = sum(thisDataIdx)./binwidth;
+    end
+    
+    gausKer = normpdf(-0.01:0.001:0.01, 0, 0.1);
+    psth = conv(binned, gausKer, 'same');
+    
+    plot(bins(1:end-1)+(binwidth/2), psth./sum(gausKer)./normalizer*2,'r', 'LineWidth',2)
+    
+    ax = axis;
+    ymaxval(subp) = ax(4);
+    ylim([-10 ax(4)])
+end
+
+[miv,mii]= min(ymaxval);
+[mav, mai] = max(ymaxval);
+subplot(2,2,mii)
+ylim([-10 mav])

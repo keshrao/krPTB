@@ -18,8 +18,8 @@ for numstim = 1:20
     storeXlocs = randi(xrng,[numtrls, numstim]);
     storeYlocs = randi(yrng,[numtrls, numstim]);
     
-    RFxloc = [-200 -100];
-    RFyloc = [-200 -100];
+    RFxloc = [-100 -100];
+    RFyloc = [-100 -100];
     spks = zeros(numtrls,1);
     
     for t = 1:numtrls
@@ -59,7 +59,7 @@ for numstim = 1:20
     ax = axis;
     line(ax(1:2),[mean(ax(3:4)) mean(ax(3:4))], 'LineStyle', '--','LineWidth', 5, 'Color', 'k')
     line([mean(ax(1:2)) mean(ax(1:2))], ax(3:4), 'LineStyle', '--','LineWidth', 5, 'Color', 'k')
-    title(['NumStim: ' num2str(numstim)])
+    title(['NumStim Per Flash: ' num2str(numstim)])
     
     subplot(2,2,2)
     heatmap(rot90(frmat./frstd));
