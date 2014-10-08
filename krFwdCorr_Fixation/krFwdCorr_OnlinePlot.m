@@ -23,7 +23,7 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-numstimthistrl = 10;
+numstimthistrl = 5;
 
 viewingFigure = true;
 if viewingFigure

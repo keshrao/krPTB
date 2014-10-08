@@ -93,7 +93,7 @@ if viewingFigure
     hTune = plot(zeros(9,1), 'o','MarkerSize',3);
     set(gca, 'XTick', 1:9, 'XTickLabel',{'UL', 'U','UR','L','M','R','DL','D','DR'})
     xlim([0 10])
-    ylim([-1 20])
+    ylim([-1 10])
 end
 
     function updateViewingFigure()
@@ -117,9 +117,7 @@ isRun = true;
 % ---- PTB segment
 try
     
-    HideCursor;
     window = Screen(whichScreen, 'OpenWindow');
-    ShowCursor;
     
     black = BlackIndex(window); % pixel value for black
     

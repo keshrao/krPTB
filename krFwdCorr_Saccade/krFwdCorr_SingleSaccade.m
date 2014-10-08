@@ -22,7 +22,7 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-ntrls = 200; % total number of trials requested
+ntrls = 100; % total number of trials requested
 numstimthistrl = 5; % number of stimuli in each flash
 
 viewingFigure = true;
@@ -77,7 +77,7 @@ try
     
     % --- variables and declarations common to all trials
     
-    winTol = 300;
+    winTol = 30;
     
     fixdur = 0.75; % how long to fixate on pre and post saccadic targets
     
