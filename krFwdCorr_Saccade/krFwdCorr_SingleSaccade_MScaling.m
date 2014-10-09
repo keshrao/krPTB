@@ -1,4 +1,4 @@
-function krFwdCorr_SingleSaccade()
+function krFwdCorr_SingleSaccade_MScaling()
 
 % testing psychtoolbox screen command
 
@@ -22,8 +22,8 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-ntrls = 25; % total number of trials requested
-numstimthistrl = 5; % number of stimuli in each flash
+ntrls = 100; % total number of trials requested
+numstimthistrl = 4; % number of stimuli in each flash
 
 viewingFigure = true;
 if viewingFigure
@@ -110,6 +110,7 @@ try
     % accumulate after every successful trial
     storeXlocs = [];
     storeYlocs = [];
+    storeSizes = [];
     storeSuccess = 0;
     % show n stimuli combinations
     trl = 1;
@@ -155,6 +156,8 @@ try
             % accumulate flashes after each flash
             xFlashesIter = zeros(1, numstimthistrl);
             yFlashesIter = zeros(1, numstimthistrl);
+            sizeFlashIter = zeros(1, numstimthistrl);
+            
             nf = 1;
             
             % successful fixation trial logic goes here
@@ -189,12 +192,18 @@ try
                 randXpos = randi([round(stimoffsetW/2) round(res.width - stimoffsetW/2)], 1, numstimthistrl);
                 randYpos = randi([stimoffsetH/2 round(res.height - stimoffsetH/2)], 1, numstimthistrl);
                 
+                % comupte the distance of each stimulus
+                diststims = sqrt((randXpos-(centX-pixOffset)).^2 + (randYpos-centY).^2);
+                sizesq = diststims/7;
+                
+                
                 xFlashesIter(nf,:) = randXpos;
                 yFlashesIter(nf,:) = randYpos;
+                sizeFlashIter(nf,:) = sizesq;
                 nf = nf + 1;
                 
                 for ni = 1:numstimthistrl
-                    thisSq = [randXpos(ni)-10 randYpos(ni)-10 randXpos(ni) randYpos(ni)]';
+                    thisSq = [randXpos(ni)-sizesq(ni)/2 randYpos(ni)-sizesq(ni)/2 randXpos(ni)+sizesq(ni)/2 randYpos(ni)+sizesq(ni)/2]';
                     stims = [stims thisSq];
                     stimcolors = [stimcolors colorWhite];
                 end
@@ -245,12 +254,18 @@ try
                 randXpos = randi([round(stimoffsetW/2) round(res.width - stimoffsetW/2)], 1, numstimthistrl);
                 randYpos = randi([stimoffsetH/2 round(res.height - stimoffsetH/2)], 1, numstimthistrl);
                 
+                % comupte the distance of each stimulus
+                diststims = sqrt((randXpos-centX).^2 + (randYpos-centY).^2);
+                sizesq = diststims/7;
+                
+                
                 xFlashesIter(nf,:) = randXpos;
                 yFlashesIter(nf,:) = randYpos;
+                sizeFlashIter(nf,:) = sizesq;
                 nf = nf + 1;
                 
                 for ni = 1:numstimthistrl
-                    thisSq = [randXpos(ni)-10 randYpos(ni)-10 randXpos(ni) randYpos(ni)]';
+                    thisSq = [randXpos(ni)-sizesq(ni)/2 randYpos(ni)-sizesq(ni)/2 randXpos(ni)+sizesq(ni)/2 randYpos(ni)+sizesq(ni)/2]';
                     stims = [stims thisSq];
                     stimcolors = [stimcolors colorWhite];
                 end
@@ -314,12 +329,17 @@ try
                 randXpos = randi([round(stimoffsetW/2) round(res.width - stimoffsetW/2)], 1, numstimthistrl);
                 randYpos = randi([stimoffsetH/2 round(res.height - stimoffsetH/2)], 1, numstimthistrl);
                 
+                % comupte the distance of each stimulus
+                diststims = sqrt((randXpos-(centX+pixOffset)).^2 + (randYpos-centY).^2);
+                sizesq = diststims/7;
+                
                 xFlashesIter(nf,:) = randXpos;
                 yFlashesIter(nf,:) = randYpos;
+                sizeFlashIter(nf,:) = sizesq;
                 nf = nf + 1;
                 
                 for ni = 1:numstimthistrl
-                    thisSq = [randXpos(ni)-10 randYpos(ni)-10 randXpos(ni) randYpos(ni)]';
+                    thisSq = [randXpos(ni)-sizesq(ni)/2 randYpos(ni)-sizesq(ni)/2 randXpos(ni)+sizesq(ni)/2 randYpos(ni)+sizesq(ni)/2]';
                     stims = [stims thisSq];
                     stimcolors = [stimcolors colorWhite];
                 end
@@ -365,6 +385,7 @@ try
             % collect flashes
             storeXlocs = [storeXlocs; xFlashesIter]; %#ok
             storeYlocs = [storeYlocs; yFlashesIter]; %#ok
+            storeSizes = [storeSizes; sizeFlashIter]; %#ok
             storeSuccess(trl) = trl;
             
         else
@@ -376,7 +397,7 @@ try
         
         
         if mod(trl,10) == 0
-            save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+            save(fName, 'storeXlocs', 'storeYlocs','storeSizes','storeSuccess')
         end
         
         
@@ -389,7 +410,7 @@ catch lasterr
     ShowCursor
     Screen('CloseAll');
     if isDaq, krEndTrial(dio); end
-    save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+    save(fName, 'storeXlocs', 'storeYlocs','storeSizes','storeSuccess')
     disp(fName)
     keyboard
 end
@@ -397,7 +418,7 @@ end
 
 Screen('CloseAll');
 if isDaq, krEndTrial(dio); end
-save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+save(fName, 'storeXlocs', 'storeYlocs','storeSizes','storeSuccess')
 Priority(0);
 
 

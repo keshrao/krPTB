@@ -168,10 +168,10 @@ try
     trls = 1;
     while trls <= ntrls && isRun
         
-        distvar = randi([5 15],1,1);
+        distvar = randi([6 12],1,1);
         generateTableSquares(distvar)
         
-        if distvar <= 7
+        if distvar <= 8
             winTol = 50;
         else
             winTol = 30;
@@ -267,7 +267,7 @@ try
             numPeaks = 0;
             
             temptic = tic;
-            while toc(temptic) < 0.3
+            while toc(temptic) < 0.300
                 if ~getspikesonce 
                     try
                         trigtic = tic;
