@@ -366,6 +366,7 @@ catch MException;
 end
 
 if isDaq, krEndTrial(dio);end
+disp(fName)
 save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
 ShowCursor;
 Screen('CloseAll');

@@ -23,7 +23,7 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-numstimthistrl = 5;
+numstimthistrl = 4;
 
 viewingFigure = true;
 if viewingFigure
@@ -220,7 +220,8 @@ try
                     
                     % comupte the distance of each stimulus
                     diststims = sqrt((randXpos-centX).^2 + (randYpos-centY).^2);
-                    sizesq = diststims/7;
+                    sizesq = diststims/10;
+                    sizesq(sizesq < 5) = 5; % keep a lower limit on sizes.
                     
                     for i = 1:numstimthistrl
                         thisSq = [randXpos(i)-sizesq(i)/2 randYpos(i)-sizesq(i)/2 randXpos(i)+sizesq(i)/2 randYpos(i)+sizesq(i)/2]';
@@ -339,7 +340,7 @@ end
 if isDaq, krEndTrial(dio); end
 save(fName, 'storeXlocs', 'storeYlocs','storeSizes','storeSuccess')
 Priority(0);
-
+disp(fName)
 
 keyboard
 end % function

@@ -195,7 +195,7 @@ try
                 % comupte the distance of each stimulus
                 diststims = sqrt((randXpos-(centX-pixOffset)).^2 + (randYpos-centY).^2);
                 sizesq = diststims/7;
-                
+                sizesq(sizesq < 10) = 10; % keep a lower limit on sizes.
                 
                 xFlashesIter(nf,:) = randXpos;
                 yFlashesIter(nf,:) = randYpos;
@@ -257,7 +257,7 @@ try
                 % comupte the distance of each stimulus
                 diststims = sqrt((randXpos-centX).^2 + (randYpos-centY).^2);
                 sizesq = diststims/7;
-                
+                sizesq(sizesq < 10) = 10; % keep a lower limit on sizes.
                 
                 xFlashesIter(nf,:) = randXpos;
                 yFlashesIter(nf,:) = randYpos;
@@ -332,6 +332,7 @@ try
                 % comupte the distance of each stimulus
                 diststims = sqrt((randXpos-(centX+pixOffset)).^2 + (randYpos-centY).^2);
                 sizesq = diststims/7;
+                sizesq(sizesq < 10) = 10; % keep a lower limit on sizes.
                 
                 xFlashesIter(nf,:) = randXpos;
                 yFlashesIter(nf,:) = randYpos;
