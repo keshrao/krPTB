@@ -1,14 +1,14 @@
 clear, clc
 
-xdiv = 30;
-ydiv = 30; % number of x/y divisions
+xdiv = 35;
+ydiv = 35; % number of x/y divisions
 
 frmat = zeros(xdiv, ydiv);
 frtrls = zeros(xdiv, ydiv);
 frstd = zeros(xdiv, ydiv);
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S36*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename pathname] = uigetfile([targetdir 'S32*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -175,9 +175,9 @@ for prestimdur = [0.05:0.05:(8*0.05+0.05) 0]
                 frmat(row,col) = sum(thisNeuSpks);
                 
                 %if length(thisTimeFlash) > 3
-                    frstd(row,col) = std(thisNeuSpks);
+                %    frstd(row,col) = std(thisNeuSpks);
                 %else
-                %    frstd(row,col) = 1;
+                    frstd(row,col) = 1;
                 %end
                 
                 

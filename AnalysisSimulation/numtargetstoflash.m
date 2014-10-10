@@ -11,20 +11,21 @@ yrng = [-500 500];
 
 %% Generate fake flashed stimulus locations & neural responses
 
-for numstim = 1:20
+for numstim = [5 10]
     
     numtrls = 500;
+    
     
     storeXlocs = randi(xrng,[numtrls, numstim]);
     storeYlocs = randi(yrng,[numtrls, numstim]);
     
-    RFxloc = [-100 -100];
-    RFyloc = [-100 -100];
+    RFxloc = [-200 300];
+    RFyloc = [-300 -100];
     spks = zeros(numtrls,1);
     
     for t = 1:numtrls
         if sum(storeXlocs(t,:) > RFxloc(1) & storeXlocs(t,:) < RFxloc(2) & storeYlocs(t,:) > RFyloc(1) & storeYlocs(t,:) < RFyloc(2)) > 0
-            spks(t) = randi([10 20],1);
+            spks(t) = randi([2 5],1);
         end
     end
     
@@ -53,7 +54,7 @@ for numstim = 1:20
     %% plot the data
     
     figure(1), clf,
-    subplot(2,2,1)
+    %subplot(2,2,1)
     heatmap(rot90(frmat)); % -- why would this plot it rotated? wtf??!
     axis([0.5 xdiv 0.5 ydiv])
     ax = axis;
@@ -61,13 +62,13 @@ for numstim = 1:20
     line([mean(ax(1:2)) mean(ax(1:2))], ax(3:4), 'LineStyle', '--','LineWidth', 5, 'Color', 'k')
     title(['NumStim Per Flash: ' num2str(numstim)])
     
-    subplot(2,2,2)
-    heatmap(rot90(frmat./frstd));
-    axis([0.5 xdiv 0.5 ydiv])
-    ax = axis;
-    line(ax(1:2),[mean(ax(3:4)) mean(ax(3:4))], 'LineStyle', '--','LineWidth', 5, 'Color', 'k')
-    line([mean(ax(1:2)) mean(ax(1:2))], ax(3:4), 'LineStyle', '--','LineWidth', 5, 'Color', 'k')
-    
+%     subplot(2,2,2)
+%     heatmap(rot90(frmat./frstd));
+%     axis([0.5 xdiv 0.5 ydiv])
+%     ax = axis;
+%     line(ax(1:2),[mean(ax(3:4)) mean(ax(3:4))], 'LineStyle', '--','LineWidth', 5, 'Color', 'k')
+%     line([mean(ax(1:2)) mean(ax(1:2))], ax(3:4), 'LineStyle', '--','LineWidth', 5, 'Color', 'k')
+%     
     drawnow
     pause(0.1)
 end
