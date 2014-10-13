@@ -1,4 +1,4 @@
-function krFwdCorr_OnlinePlot()
+function krFwdCorr_MScale()
 
 % testing psychtoolbox screen command
 
@@ -23,7 +23,7 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-numstimthistrl = 3;
+numstimthistrl = 4;
 
 viewingFigure = true;
 if viewingFigure
@@ -86,7 +86,7 @@ try
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip');
     
-    ntrls = 100;
+    ntrls = 200;
     
     fprintf('Number of trials requested: %i \n', ntrls);
     
@@ -112,8 +112,11 @@ try
     % this will be used to store all flash locations
     storeXlocs = [];
     storeYlocs = [];
+    storeSizes = [];
+    
     storeSuccess = 0;
     trl = 1;
+    
     while trl <= ntrls && isRun
         
         fprintf('Trl Number: %i', trl)
@@ -170,7 +173,8 @@ try
                 
                 xFlashesIter = nan(numflashes,numstimthistrl);
                 yFlashesIter = nan(numflashes,numstimthistrl);
-                    
+                sizeFlashIter = nan(numflashes, numstimthistrl);
+                
                 tottrltrigs = 0;
                 
                 for nf = 1:numflashes
@@ -210,20 +214,24 @@ try
                     
                     
                     % generate nstim stimulus squares and not on the edges of the screen
-                    randXpos = randi([round(stimoffsetW/2) round(res.width - stimoffsetW/2)], 1, numstimthistrl);
-                    randYpos = randi([stimoffsetH/2 round(res.height - stimoffsetH/2)], 1, numstimthistrl);
-                    % randpos = [1,n]
+                    randXpos = randi([round(stimoffsetW/2) round(res.width - stimoffsetW/2)], 1, numstimthistrl); % ~250 to ~768
+                    randYpos = randi([stimoffsetH/2 round(res.height - stimoffsetH/2)], 1, numstimthistrl); % ~190 to ~ 575
+                    % randpos [=] 1,...,n
                     
-                    xFlashesIter(nf,:) = randXpos;
-                    yFlashesIter(nf,:) = randYpos;
+                    % comupte the distance of each stimulus
+                    diststims = sqrt((randXpos-centX).^2 + (randYpos-centY).^2);
+                    sizesq = diststims/10;
+                    sizesq(sizesq < 5) = 5; % keep a lower limit on sizes.
                     
                     for i = 1:numstimthistrl
-                        thisSq = [randXpos(i)-10 randYpos(i)-10 randXpos(i) randYpos(i)]';
+                        thisSq = [randXpos(i)-sizesq(i)/2 randYpos(i)-sizesq(i)/2 randXpos(i)+sizesq(i)/2 randYpos(i)+sizesq(i)/2]';
                         stims = [stims thisSq];
                         stimcolors = [stimcolors colorWhite];
                     end
                     
-                    
+                    xFlashesIter(nf,:) = randXpos;
+                    yFlashesIter(nf,:) = randYpos;
+                    sizeFlashIter(nf,:) = sizesq;
                     
                     % draw stimuli
                     Screen(window, 'FillRect', stimcolors , stims);
@@ -294,6 +302,8 @@ try
                     % collect flashes
                     storeXlocs = [storeXlocs; xFlashesIter]; %#ok
                     storeYlocs = [storeYlocs; yFlashesIter]; %#ok
+                    storeSizes = [storeSizes; sizeFlashIter]; %#ok
+                    
                     storeSuccess(trl) = trl;
                     
                     WaitSecs(1);
@@ -308,7 +318,7 @@ try
         if isDaq, krEndTrial(dio); end
         
         if mod(trl,10) == 0
-            save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+            save(fName, 'storeXlocs', 'storeYlocs','storeSizes','storeSuccess')
         end
         
         trl = trl + 1;
@@ -322,15 +332,15 @@ catch lasterr
     ShowCursor
     Screen('CloseAll');
     if isDaq, krEndTrial(dio); end
-    save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+    save(fName, 'storeXlocs', 'storeYlocs','storeSizes','storeSuccess')
     disp(fName)
     keyboard
 end
 
 if isDaq, krEndTrial(dio); end
-save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+save(fName, 'storeXlocs', 'storeYlocs','storeSizes','storeSuccess')
 Priority(0);
-
+disp(fName)
 
 keyboard
 end % function
