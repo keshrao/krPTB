@@ -22,7 +22,7 @@ function varargout = jhParadigmGUI(varargin)
 
 % Edit the above text to modify the response to help jhParadigmGUI
 
-% Last Modified by GUIDE v2.5 08-Oct-2014 16:33:50
+% Last Modified by GUIDE v2.5 13-Oct-2014 14:05:35
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -56,7 +56,7 @@ handles.output = hObject;
 
 
 % Connect the daq card
-[ai, dio] = krConnectDAQ();
+[ai, dio] = krConnectDAQTrigger();
 handles.ai = ai;
 handles.dio = dio;
 
@@ -93,6 +93,10 @@ function Start_Callback(hObject, eventdata, handles)
 if(get(handles.SetTrialNumber,'Value') == 0)
     set(handles.SetTrialNumber,'Value',100);
 end
+
+handles.isRun = 1;
+% Update handles structure
+guidata(hObject, handles);
 
 popup_sel_index = get(handles.ChooseParadigm, 'Value');
 switch popup_sel_index
@@ -281,5 +285,25 @@ function EyePosition_CreateFcn(hObject, eventdata, handles)
 % --- Executes on button press in ResetEyePlot.
 function ResetEyePlot_Callback(hObject, eventdata, handles)
 % hObject    handle to ResetEyePlot (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in End_pb.
+function End_pb_Callback(hObject, eventdata, handles)
+% hObject    handle to End_pb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+disp('called')
+handles.isRun = 0;
+% Update handles structure
+guidata(hObject, handles);
+
+
+
+
+% --- Executes on mouse press over axes background.
+function EyePosition_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to EyePosition (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)

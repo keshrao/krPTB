@@ -116,8 +116,7 @@ try
     
     storeSuccess = 0;
     trl = 1;
-    
-    while trl <= ntrls && isRun
+    while trl <= ntrls 
         
         fprintf('Trl Number: %i', trl)
         

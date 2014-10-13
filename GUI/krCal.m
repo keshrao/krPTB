@@ -131,12 +131,9 @@ end
 % ---- PTB segment
 try
     
-    HideCursor;
     window = Screen(whichScreen, 'OpenWindow');
-    ShowCursor;
     
     black = BlackIndex(window); % pixel value for black
-    
     
     prevLoc = 0;
     indLoc = 0;
@@ -150,7 +147,9 @@ try
     
     ticGlobal = tic;
     
-    for trls = 1:ntrls
+    trl = 1;
+    
+    while trl <= ntrls 
         % wipe screen & fill back
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
         
@@ -169,10 +168,10 @@ try
         % ----------------- start
         if isDaq, krStartTrial(dio); end
         
-        set(handles.TrialNumber,'String',num2str(trls));
+        set(handles.TrialNumber,'String',num2str(trl));
         
-        storeGlobalTics(trls) = toc(ticGlobal); % trial start times
-        storeLocIDs(trls) = indLoc; % these two to be saved later
+        storeGlobalTics(trl) = toc(ticGlobal); % trial start times
+        storeLocIDs(trl) = indLoc; % these two to be saved later
         
         % draw fixation dot
         Screen(window, 'FillRect', [colorblue colorwhite], [sq(:,indLoc) photocell]);
@@ -247,13 +246,14 @@ try
         % broke fixation during trial
         if isInWindow
             if isDaq, krDeliverReward(dio,2);end
-            storeSuccesses(trls) = 1;
+            storeSuccesses(trl) = 1;
         end
         
-        if mod(trls,20) == 0
+        if mod(trl,20) == 0
             save(fName, 'storeGlobalTics', 'storeLocIDs','storeSuccesses')
         end
         
+        trl = trl + 1;
     end
     
 catch MException;

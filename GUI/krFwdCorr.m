@@ -106,7 +106,7 @@ try
     storeSuccess = 0;
     % show n stimuli combinations
     trl = 1;
-    while trl <= ntrls && isRun
+    while trl <= ntrls 
         
         set(handles.TrialNumber,'String',num2str(trls));
         

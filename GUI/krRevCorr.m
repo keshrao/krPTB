@@ -96,8 +96,8 @@ try
     storeSuccess = 0;
     
     
-    % show n stimuli combinations
-    for trl = 1:ntrls
+    trl = 1;
+    while trl <= ntrls 
         
         disp(['Trl Number: ' num2str(trl)])
         
@@ -272,6 +272,7 @@ try
             save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
         end
         
+        trl = trl + 1;
     end % ntrials
     
     Screen('CloseAll');

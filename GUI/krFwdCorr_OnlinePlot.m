@@ -1,9 +1,13 @@
-function krFwdCorr_OnlinePlot()
+function krFwdCorr_OnlinePlot(ntrls, handles)
 
 % testing psychtoolbox screen command
 
-clc, clear; pause(0.01);
+clc; pause(0.01);
 warning off
+
+if isempty(ntrls)
+    ntrls = 300;
+end
 
 try
     [ai, dio] = krConnectDAQTrigger();
@@ -113,10 +117,12 @@ try
     storeXlocs = [];
     storeYlocs = [];
     storeSuccess = 0;
+    success = 0;
     trl = 1;
-    while trl <= ntrls && isRun
+    while trl <= ntrls 
         
-        fprintf('Trl Number: %i', trl)
+        set(handles.TrialNumber,'String',num2str(trls));
+
         
         % present fixation square
         Screen(window, 'FillRect', colorBlue, fixSq);
@@ -295,7 +301,8 @@ try
                     storeXlocs = [storeXlocs; xFlashesIter]; %#ok
                     storeYlocs = [storeYlocs; yFlashesIter]; %#ok
                     storeSuccess(trl) = trl;
-                    
+                    success = success+1;
+                    set(handles.SuccessCount,'String',num2str(success));
                     WaitSecs(1);
                     break
                 end

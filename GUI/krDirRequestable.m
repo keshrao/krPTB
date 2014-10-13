@@ -14,29 +14,6 @@ catch MException;
     isDaq = false;
 end
 
-%% Degree Control
-fig = gcf;
-uicontrol('Parent',fig,'Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[450 300 60 20]);
-uicontrol('Parent',fig,'Style','pushbutton','String','Decrement','Callback',@cb_Decrement,'Position',[450 275 60 20]);
-edit = uicontrol('Parent',fig,'Style','edit','String', num2str(distvar),'Position',[450 325 60 20]);
-drawnow, pause(0.1)
-
-    function cb_Increment(~,~)
-        distvar = distvar + 1;
-        TextBox()
-        generateTableSquares(distvar);
-    end
-    function cb_Decrement(~,~)
-        distvar = distvar - 1;
-        if distvar < 1
-            distvar = 1;
-        end
-        TextBox()
-        generateTableSquares(distvar);
-    end
-    function TextBox(~,~)
-        set(edit,'String',num2str(distvar));
-    end
 %%
 Priority(2); % realtime priority
 
@@ -101,7 +78,7 @@ winTol = 30;
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
-    fig2 = gcf;
+    axes(handles.EyePosition);cla;
     axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
@@ -111,25 +88,25 @@ if viewingFigure
     
     
     % this is for the easy ending of programs
-    uicontrol('Parent',fig2,'Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
+    uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[400 350 60 20]);
     drawnow
     
     
-    fig3 = figure(2); clf;
+    axes(handles.TaskSpecificPlot);cla;
     hTune = plot(zeros(9,1), 'o','MarkerSize',3);
     set(gca, 'XTick', 1:9, 'XTickLabel',{'UL', 'U','UR','L','M','R','DL','D','DR'})
     xlim([0 10])
     ylim([-1 10])
     
-    uicontrol('Parent',fig3,'Style','pushbutton','String','UL','Callback',@cb_UL,'Position',[100 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','U','Callback',@cb_U,'Position',  [150 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','UR','Callback',@cb_UR,'Position',[200 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','L','Callback',@cb_L,'Position',  [250 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','M','Callback',@cb_M,'Position',  [290 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','R','Callback',@cb_R,'Position',  [330 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','DL','Callback',@cb_DL,'Position',[370 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','D','Callback',@cb_D,'Position',  [410 300 20 20]);
-    uicontrol('Parent',fig3,'Style','pushbutton','String','DR','Callback',@cb_DR,'Position',[450 300 20 20]);
+    uicontrol('Style','pushbutton','String','UL','Callback',@cb_UL,'Position',[550 300 20 20]);
+    uicontrol('Style','pushbutton','String','U','Callback',@cb_U,'Position',  [600 300 20 20]);
+    uicontrol('Style','pushbutton','String','UR','Callback',@cb_UR,'Position',[650 300 20 20]);
+    uicontrol('Style','pushbutton','String','L','Callback',@cb_L,'Position',  [690 300 20 20]);
+    uicontrol('Style','pushbutton','String','M','Callback',@cb_M,'Position',  [730 300 20 20]);
+    uicontrol('Style','pushbutton','String','R','Callback',@cb_R,'Position',  [770 300 20 20]);
+    uicontrol('Style','pushbutton','String','DL','Callback',@cb_DL,'Position',[810 300 20 20]);
+    uicontrol('Style','pushbutton','String','D','Callback',@cb_D,'Position',  [850 300 20 20]);
+    uicontrol('Style','pushbutton','String','DR','Callback',@cb_DR,'Position',[890 300 20 20]);
     
     drawnow
     
@@ -189,17 +166,16 @@ try
     
     disp(fName)
 
-    
-    trls = 1;
-    while trls <= ntrls && isRun
+    trl = 1;
+    while trl <= ntrls && isRun
         
-%         distvar = randi([6 12],1,1);
-%         generateTableSquares(distvar)
+        distvar = randi([6 12],1,1);
+        generateTableSquares(distvar)
         
         if distvar <= 8
-            winTol = 50;
+            winTol = 100;
         else
-            winTol = 30;
+            winTol = 100;
         end
         
         % wipe screen & fill back
@@ -223,7 +199,7 @@ try
         
         % ----------------- start --------------------------- %
         
-        set(handles.TrialNumber,'String',num2str(trls));
+        set(handles.TrialNumber,'String',num2str(trl));
         % present fixation square
         Screen(window, 'FillRect', colorBlue, sq(:,5));
         Screen(window, 'Flip');
@@ -240,7 +216,7 @@ try
                 try
                     [eyePosX eyePosY] = krGetEyePos(ai);
                 catch
-                    disp(['Missed Eye Pos Acquisition: ' num2str(trls)])
+                    disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                 end
             else
                 [eyePosX,eyePosY] = GetMouse(window);
@@ -262,7 +238,7 @@ try
         if ~isInWindow
             Screen(window, 'FillRect', black);
             Screen(window, 'Flip');
-            storeSuccess(trls) = 0;
+            storeSuccess(trl) = 0;
             if isDaq, krEndTrial(dio); end
             WaitSecs(2);
             
@@ -271,7 +247,7 @@ try
             % continue the trial now that fixation is acquired
             if isDaq, krStartTrial(dio); end
 
-            storeLocs(trls,:) = [thisPos(1), thisPos(2)]; % these two to be saved later
+            storeLocs(trl,:) = [thisPos(1), thisPos(2)]; % these two to be saved later
             
             % once fixation is acquired, hold fixation for 300 ms
             temptic = tic;
@@ -320,7 +296,7 @@ try
                     try
                         [eyePosX eyePosY] = krGetEyePos(ai);
                     catch
-                        disp(['Missed Eye Pos Acquisition: ' num2str(trls)])
+                        disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                     end
                 end
                 
@@ -361,8 +337,8 @@ try
             
             %fprintf('Time Spent in Trigger: %f. \n', trigtime)
             
-            storeSuccesses(trls) = trls;
-            storeDistVar(trls) = distvar;
+            storeSuccesses(trl) = trl;
+            storeDistVar(trl) = distvar;
             successCount = successCount+1;
             set(handles.SuccessCount,'String',num2str(successCount));
             WaitSecs(1);
@@ -370,13 +346,13 @@ try
         end
         
         
-        if mod(trls,20) == 0
+        if mod(trl,20) == 0
             save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
         end
         
         if isDaq, krEndTrial(dio); end
         
-        trls = trls + 1;
+        trl = trl + 1;
     end
     
 catch MException;

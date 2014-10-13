@@ -113,7 +113,7 @@ try
     storeSuccess = 0;
     % show n stimuli combinations
     trl = 1;
-    while trl <= ntrls && isRun
+    while trl <= ntrls 
         
         disp(['Trl Number: ' num2str(trl)])
         

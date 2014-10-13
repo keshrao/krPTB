@@ -14,28 +14,7 @@ catch MException;
 end
 
 %% Degree Control
-fig = handles.EyePosition;
-% uicontrol('Parent',fig,'Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[450 300 60 20]);
-% uicontrol('Parent',fig,'Style','pushbutton','String','Decrement','Callback',@cb_Decrement,'Position',[450 275 60 20]);
-% edit = uicontrol('Parent',fig,'Style','edit','String', num2str(distvar),'Position',[450 325 60 20]);
-% drawnow, pause(0.1)
-% 
-%     function cb_Increment(~,~)
-%         distvar = distvar + 1;
-%         TextBox()
-%         generateTableSquares(distvar);
-%     end
-%     function cb_Decrement(~,~)
-%         distvar = distvar - 1;
-%         if distvar < 1
-%             distvar = 1;
-%         end
-%         TextBox()
-%         generateTableSquares(distvar);
-%     end
-%     function TextBox(~,~)
-%         set(edit,'String',num2str(distvar));
-%     end
+handles.EyePosition;
 
 %% Dir
 Priority(2); % realtime priority
@@ -101,7 +80,7 @@ winTol = 30;
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
-    fig = handles.EyePosition;
+    handles.EyePosition;
     axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
@@ -110,8 +89,8 @@ if viewingFigure
     axis off    
     
     % this is for the easy ending of programs
-%     uicontrol('Parent',fig,'Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
-%     drawnow
+     uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
+     drawnow
     
 end
 
@@ -154,8 +133,13 @@ try
     
     % reset states
     if isDaq, krEndTrial(dio); end
-    trls = 1; success=0;
-    while trls <= ntrls && isRun
+    success=0;
+    
+    trl = 1;
+    while trl <= ntrls  && isRun
+        
+        disp(handles.isRun)
+        
         % wipe screen & fill back
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
         
@@ -173,8 +157,8 @@ try
         
         % ----------------- start --------------------------- %
         
-        %disp(['Trl Number: ' num2str(trls)])
-        set(handles.TrialNumber,'String',num2str(trls));
+        %disp(['Trl Number: ' num2str(trl)])
+        set(handles.TrialNumber,'String',num2str(trl));
         % present fixation square
         Screen(window, 'FillRect', colorBlue, sq(:,5));
         Screen(window, 'Flip');
@@ -189,7 +173,7 @@ try
                 try
                     [eyePosX eyePosY] = krGetEyePos(ai);
                 catch
-                    disp(['Missed Eye Pos Acquisition: ' num2str(trls)])
+                    disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                 end
             else
                 [eyePosX,eyePosY] = GetMouse(window);
@@ -211,7 +195,7 @@ try
         if ~isInWindow
             Screen(window, 'FillRect', black);
             Screen(window, 'Flip');
-            storeSuccess(trls) = 0;
+            storeSuccess(trl) = 0;
             if isDaq, krEndTrial(dio); end
             WaitSecs(2);
             
@@ -220,7 +204,7 @@ try
             % continue the trial now that fixation is acquired
             if isDaq, krStartTrial(dio); end
 
-            storeLocs(trls,:) = [thisPos(1), thisPos(2)]; % these two to be saved later
+            storeLocs(trl,:) = [thisPos(1), thisPos(2)]; % these two to be saved later
             
             % once fixation is acquired, hold fixation for 300 ms
             WaitSecs(0.3);
@@ -242,7 +226,7 @@ try
                     try
                         [eyePosX eyePosY] = krGetEyePos(ai);
                     catch
-                        disp(['Missed Eye Pos Acquisition: ' num2str(trls)])
+                        disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                     end
                 else
                     [eyePosX,eyePosY] = GetMouse(window);
@@ -274,20 +258,20 @@ try
             if isDaq, krEndTrial(dio);end
             WaitSecs(0.5);
             if isDaq, krDeliverReward(dio,2);end
-            storeSuccesses(trls) = trls;
+            storeSuccesses(trl) = trl;
             success = success+1;
             set(handles.SuccessCount,'String',num2str(success));
             WaitSecs(1);
         end
         
         
-        if mod(trls,20) == 0
+        if mod(trl,20) == 0
             save(fName, 'storeLocs','storeSuccesses')
         end
         
         if isDaq, krEndTrial(dio); end
         
-        trls = trls + 1;
+        trl = trl + 1;
     end
     
 catch MException;

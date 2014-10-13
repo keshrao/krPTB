@@ -1,13 +1,12 @@
-function krFwdCorr(ntrls)
-if isempty(ntrls)
-    ntrls = 300;
-end
+function krFwdCorr_MScale()
+
 % testing psychtoolbox screen command
 
 clc, clear; pause(0.01);
+warning off
 
 try
-    [ai, dio] = krConnectDAQ();
+    [ai, dio] = krConnectDAQTrigger();
     isDaq = true;
 catch
     disp('no daq')
@@ -24,13 +23,9 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-%ntrls = 300; % total number of trials requested
-numflashes = 5; % number of flashes per trial
-numstimthistrl = 10; % number of stimuli in each flash
+numstimthistrl = 4;
 
-            
-            
-viewingFigure = true;
+viewingFigure = false;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
     fig = figure(2); clf
@@ -41,16 +36,18 @@ if viewingFigure
     for numtargsi = 1:numstimthistrl
         hTargs(numtargsi) = rectangle('Position', [0, 0 10 10],'FaceColor','white'); %#ok
     end
-    set(gca, 'color', 'none')
-    
-    
-    % this is for the easy ending of programs
+     % this is for the easy ending of programs
     uicontrol('Parent',fig,'Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
     drawnow
+    
+    set(gca, 'color', 'none')
 end
+
 
     function updateViewingFigure()
         try
+            
+            %figure(2)
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
             for drawi = 1:numstimthistrl 
                set(hTargs(drawi), 'Position', [randXpos(drawi)-centX -(randYpos(drawi)-centY) 10 10]) 
@@ -59,16 +56,22 @@ end
             % don't want the program to crash if something happens to a figure
         end
     end
-
-     function cb_EndTask(~,~)
+    function cb_EndTask(~,~)
         isRun = false;
     end
 
 isRun = true;
 
+figure(3), clf
+global xdiv
+xdiv = 40;
+frmat = zeros(xdiv);
+frtrls = zeros(xdiv);
+
+
 % data to be stored into this filename
 c = clock;
-fName = ['fix_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
+fName = ['fixOnline_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
 Priority(2);
 
@@ -82,6 +85,10 @@ try
     % wipe screen & fill bac
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip');
+    
+    ntrls = 200;
+    
+    fprintf('Number of trials requested: %i \n', ntrls);
     
     % --- variables and declarations common to all trials
     
@@ -100,15 +107,19 @@ try
     stimoffsetH = round(res.height/2);
     % ---- starting trial loop
     
+    disp(fName)
+    
     % this will be used to store all flash locations
     storeXlocs = [];
     storeYlocs = [];
+    storeSizes = [];
+    
     storeSuccess = 0;
-    % show n stimuli combinations
     trl = 1;
+    
     while trl <= ntrls && isRun
         
-        disp(['Trl Number: ' num2str(trl)])
+        fprintf('Trl Number: %i', trl)
         
         % present fixation square
         Screen(window, 'FillRect', colorBlue, fixSq);
@@ -155,12 +166,16 @@ try
             % successful fixation trial logic goes here
             if isDaq, krStartTrial(dio); end
             
+            % begin series of stimuli flashes
+            numflashes = 10;
             
             while isInWindow
                 
                 xFlashesIter = nan(numflashes,numstimthistrl);
                 yFlashesIter = nan(numflashes,numstimthistrl);
-                    
+                sizeFlashIter = nan(numflashes, numstimthistrl);
+                
+                tottrltrigs = 0;
                 
                 for nf = 1:numflashes
                     
@@ -199,32 +214,42 @@ try
                     
                     
                     % generate nstim stimulus squares and not on the edges of the screen
-                    randXpos = randi([round(stimoffsetW/2) round(res.width - stimoffsetW/2)], 1, numstimthistrl);
-                    randYpos = randi([stimoffsetH/2 round(res.height - stimoffsetH/2)], 1, numstimthistrl);
+                    randXpos = randi([round(stimoffsetW/2) round(res.width - stimoffsetW/2)], 1, numstimthistrl); % ~250 to ~768
+                    randYpos = randi([stimoffsetH/2 round(res.height - stimoffsetH/2)], 1, numstimthistrl); % ~190 to ~ 575
+                    % randpos [=] 1,...,n
                     
-                    
-                    xFlashesIter(nf,:) = randXpos;
-                    yFlashesIter(nf,:) = randYpos;
+                    % comupte the distance of each stimulus
+                    diststims = sqrt((randXpos-centX).^2 + (randYpos-centY).^2);
+                    sizesq = diststims/10;
+                    sizesq(sizesq < 5) = 5; % keep a lower limit on sizes.
                     
                     for i = 1:numstimthistrl
-                        thisSq = [randXpos(i)-10 randYpos(i)-10 randXpos(i) randYpos(i)]';
+                        thisSq = [randXpos(i)-sizesq(i)/2 randYpos(i)-sizesq(i)/2 randXpos(i)+sizesq(i)/2 randYpos(i)+sizesq(i)/2]';
                         stims = [stims thisSq];
                         stimcolors = [stimcolors colorWhite];
                     end
                     
+                    xFlashesIter(nf,:) = randXpos;
+                    yFlashesIter(nf,:) = randYpos;
+                    sizeFlashIter(nf,:) = sizesq;
                     
-                    
-                    % draw fixation dot + all stimuli
+                    % draw stimuli
                     Screen(window, 'FillRect', stimcolors , stims);
                     Screen(window, 'Flip');
+                    
+                    numtrigs = 0;
                     
                     % leave stimulus on for short priod of time
                     stimwaitdur = 0.05; % always 50ms
                     thisstimdur = tic;
                     while toc(thisstimdur) < stimwaitdur
-                        if viewingFigure, updateViewingFigure(); end
+                        % find out how many spikes occured
+                        try
+                            numtrigs = numtrigs + krTriggers(ai, stimwaitdur);
+                        catch
+                            disp('missed trigger')
+                        end
                     end
-                    
                     
                     blankDur = 0.1;
                     % after stim duration, then blank screen (leave fixation) for 100ms
@@ -233,10 +258,26 @@ try
                     
                     thisBlank = tic;
                     while toc(thisBlank) < blankDur
-                       if viewingFigure, updateViewingFigure(); end
+                       % find out how many spikes occured
+                       try
+                            numtrigs = numtrigs + krTriggers(ai, stimwaitdur);
+                        catch
+                            disp('missed trigger')
+                        end
+                      
                     end
                     
+                    
+                    
+                    if viewingFigure, [frmat, frtrls] = updateRFMap(frmat, frtrls, randXpos, randYpos, numtrigs); end
+                    
+                    tottrltrigs = tottrltrigs + numtrigs;
+                    
                 end %nflahses
+                
+                % at this point, you know the number of spikes occured
+                % for this particular location
+                fprintf(', Num Trigs: %i \n', tottrltrigs)
                 
                 if ~isInWindow
                     storeSuccess(trl) = 0;
@@ -261,6 +302,8 @@ try
                     % collect flashes
                     storeXlocs = [storeXlocs; xFlashesIter]; %#ok
                     storeYlocs = [storeYlocs; yFlashesIter]; %#ok
+                    storeSizes = [storeSizes; sizeFlashIter]; %#ok
+                    
                     storeSuccess(trl) = trl;
                     
                     WaitSecs(1);
@@ -275,8 +318,10 @@ try
         if isDaq, krEndTrial(dio); end
         
         if mod(trl,10) == 0
-            save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+            save(fName, 'storeXlocs', 'storeYlocs','storeSizes','storeSuccess')
         end
+        
+        trl = trl + 1;
         
     end % ntrials
     
@@ -287,15 +332,15 @@ catch lasterr
     ShowCursor
     Screen('CloseAll');
     if isDaq, krEndTrial(dio); end
-    save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+    save(fName, 'storeXlocs', 'storeYlocs','storeSizes','storeSuccess')
     disp(fName)
     keyboard
 end
 
 if isDaq, krEndTrial(dio); end
-save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+save(fName, 'storeXlocs', 'storeYlocs','storeSizes','storeSuccess')
 Priority(0);
-
+disp(fName)
 
 keyboard
 end % function
