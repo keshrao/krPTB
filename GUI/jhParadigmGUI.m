@@ -22,7 +22,7 @@ function varargout = jhParadigmGUI(varargin)
 
 % Edit the above text to modify the response to help jhParadigmGUI
 
-% Last Modified by GUIDE v2.5 13-Oct-2014 14:05:35
+% Last Modified by GUIDE v2.5 14-Oct-2014 10:32:47
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -69,7 +69,6 @@ if strcmp(get(hObject,'Visible'),'off')
 
     
 end
-
 % UIWAIT makes jhParadigmGUI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
@@ -94,24 +93,26 @@ if(get(handles.SetTrialNumber,'Value') == 0)
     set(handles.SetTrialNumber,'Value',100);
 end
 
-handles.isRun = 1;
 % Update handles structure
 guidata(hObject, handles);
+
+% {'krDirRequestable','krFwdCorr_OnlinePlot','krFwdCorr_MScale', ... 
+%                    'krFwdCorr_SingleSaccade','krFwdCorr_SingleSaccade_MScaling'}
 
 popup_sel_index = get(handles.ChooseParadigm, 'Value');
 switch popup_sel_index
     case 1
-        krCal(get(handles.SetTrialNumber,'Value'),handles);
-    case 2
-        krDir(get(handles.SetTrialNumber,'Value'),handles);
-    case 3
-        krFwdCorr(get(handles.SetTrialNumber,'Value'),handles);
-    case 4
-        krFwdCorr_OnlinePlot(get(handles.SetTrialNumber,'Value'),handles);
-    case 5
-        krRevCorr(get(handles.SetTrialNumber,'Value'),handles);
-    case 6
         krDirRequestable(get(handles.SetTrialNumber,'Value'),handles);
+    case 2
+        krFwdCorr_OnlinePlot(get(handles.SetTrialNumber,'Value'),handles);
+    case 3
+        krFwdCorr_MScale(get(handles.SetTrialNumber,'Value'),handles);
+    case 4
+        krFwdCorr_SingleSaccade(get(handles.SetTrialNumber,'Value'),handles);
+    case 5
+        krFwdCorr_SingleSaccade_MScaling(get(handles.SetTrialNumber,'Value'),handles);
+    case 6
+        
         
 end
 
@@ -181,7 +182,8 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
      set(hObject,'BackgroundColor','white');
 end
 
-set(hObject, 'String', {'krCal','krDir','krFwdCorr','krFwdCorr_OnlinePlot','krRevCorr','krDirRequestable'});
+set(hObject, 'String', {'krDirRequestable','krFwdCorr_OnlinePlot','krFwdCorr_MScale', ... 
+                    'krFwdCorr_SingleSaccade','krFwdCorr_SingleSaccade_MScaling'});
 
 
 % --- Executes on button press in krCalibrateEyePos.
@@ -190,7 +192,7 @@ function krCalibrateEyePos_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 try
-    krCalibrateEyeCoil();
+    krCalibrateEyeCoil(handles);
 catch
 end
 
@@ -213,6 +215,7 @@ function SetTrialNumber_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of SetTrialNumber as a double
 ntrls = str2num(get(hObject,'String'));
 set(handles.SetTrialNumber,'Value', ntrls);
+
 
 % --- Executes during object creation, after setting all properties.
 function SetTrialNumber_CreateFcn(hObject, eventdata, handles)
@@ -248,8 +251,6 @@ function TrialNumber_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
 
 function SuccessCount_Callback(hObject, eventdata, handles)
 % hObject    handle to SuccessCount (see GCBO)
@@ -287,19 +288,6 @@ function ResetEyePlot_Callback(hObject, eventdata, handles)
 % hObject    handle to ResetEyePlot (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in End_pb.
-function End_pb_Callback(hObject, eventdata, handles)
-% hObject    handle to End_pb (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-disp('called')
-handles.isRun = 0;
-% Update handles structure
-guidata(hObject, handles);
-
-
 
 
 % --- Executes on mouse press over axes background.

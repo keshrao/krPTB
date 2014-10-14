@@ -1,8 +1,11 @@
-function krFwdCorr_SingleSaccade()
+function krFwdCorr_SingleSaccade(ntrls,handles)
 
-% testing psychtoolbox screen command
+if isempty(ntrls)
+    ntrls = 300;
+end
 
-clc, clear; close all; pause(0.01);
+clc, pause(0.01);
+warning off
 
 try
     [ai, dio] = krConnectDAQ();
@@ -22,13 +25,12 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-ntrls = 25; % total number of trials requested
 numstimthistrl = 5; % number of stimuli in each flash
 
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
-    fig = figure(2); clf
+    axes(handles.EyePosition);cla;
     axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
@@ -39,7 +41,7 @@ if viewingFigure
     set(gca, 'color', 'none')
     
     % this is for the easy ending of programs
-    uicontrol('Parent',fig,'Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
+    uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[350 350 60 20]);
     drawnow
 end
 
@@ -113,9 +115,9 @@ try
     storeSuccess = 0;
     % show n stimuli combinations
     trl = 1;
-    while trl <= ntrls 
+    while trl <= ntrls && isRun
         
-        disp(['Trl Number: ' num2str(trl)])
+        set(handles.TrialNumber,'String',num2str(trl));
         
         % pulse dio on/off twice to signal start trial
         for i = 1:2, if isDaq, krStartTrial(dio); krEndTrial(dio); end, end

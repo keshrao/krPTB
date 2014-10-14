@@ -1,8 +1,10 @@
-function krFwdCorr_MScale()
+function krFwdCorr_MScale(ntrls,handles)
 
-% testing psychtoolbox screen command
+if isempty(ntrls)
+    ntrls = 300;
+end
 
-clc, clear; pause(0.01);
+clc, pause(0.01);
 warning off
 
 try
@@ -23,12 +25,12 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-numstimthistrl = 4;
+numstimthistrl = 3;
 
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
-    fig = figure(2); clf
+    axes(handles.EyePosition);cla
     axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
@@ -46,8 +48,7 @@ end
 
     function updateViewingFigure()
         try
-            
-            %figure(2)
+
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
             for drawi = 1:numstimthistrl 
                set(hTargs(drawi), 'Position', [randXpos(drawi)-centX -(randYpos(drawi)-centY) 10 10]) 
@@ -62,7 +63,6 @@ end
 
 isRun = true;
 
-figure(3), clf
 global xdiv
 xdiv = 40;
 frmat = zeros(xdiv);
@@ -85,11 +85,7 @@ try
     % wipe screen & fill bac
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip');
-    
-    ntrls = 200;
-    
-    fprintf('Number of trials requested: %i \n', ntrls);
-    
+
     % --- variables and declarations common to all trials
     
     winTol = 30;
@@ -116,9 +112,9 @@ try
     
     storeSuccess = 0;
     trl = 1;
-    while trl <= ntrls 
+    while trl <= ntrls && isRun
         
-        fprintf('Trl Number: %i', trl)
+        set(handles.TrialNumber,'String',num2str(trls));
         
         % present fixation square
         Screen(window, 'FillRect', colorBlue, fixSq);
@@ -220,7 +216,8 @@ try
                     % comupte the distance of each stimulus
                     diststims = sqrt((randXpos-centX).^2 + (randYpos-centY).^2);
                     sizesq = diststims/10;
-                    sizesq(sizesq < 5) = 5; % keep a lower limit on sizes.
+                    sizesq(sizesq < 10) = 10; % keep a lower limit on sizes.
+                    sizesq(sizesq > 40) = 40; % upper limit
                     
                     for i = 1:numstimthistrl
                         thisSq = [randXpos(i)-sizesq(i)/2 randYpos(i)-sizesq(i)/2 randXpos(i)+sizesq(i)/2 randYpos(i)+sizesq(i)/2]';
@@ -268,7 +265,7 @@ try
                     
                     
                     
-                    if viewingFigure, [frmat, frtrls] = updateRFMap(frmat, frtrls, randXpos, randYpos, numtrigs); end
+                    if viewingFigure, [frmat, frtrls] = updateRFMapHandles(handles, frmat, frtrls, randXpos, randYpos, numtrigs); end
                     
                     tottrltrigs = tottrltrigs + numtrigs;
                     

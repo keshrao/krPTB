@@ -72,9 +72,6 @@ photocell = [0; 0; 50; 50;];
 c = clock;
 fName = ['dir_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
-winTol = 30;
-
-
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
@@ -125,7 +122,6 @@ end
 
     function updateViewingFigure()
         try
-            gcf;
             set(hFix, 'Position', [sq(3,indLoc)-centX -(sq(4, indLoc)-centY) 25 25]);
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
             drawnow
@@ -173,9 +169,9 @@ try
         generateTableSquares(distvar)
         
         if distvar <= 8
-            winTol = 100;
+            winTol = 50;
         else
-            winTol = 100;
+            winTol = 30;
         end
         
         % wipe screen & fill back

@@ -1,14 +1,14 @@
-function krCalibrateEyeCoil()
+function krCalibrateEyeCoil(handles)
 
 distvar = 10;
 
-fig = figure(1); clf
+axes(handles.TaskSpecificPlot); cla;
 axis([-200 200 -200 200])
 axis off
-uicontrol('Parent',fig,'Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[200 200 60 20]);
-uicontrol('Parent',fig,'Style','pushbutton','String','Decrement','Callback',@cb_Decrement,'Position',[200 150 60 20]);
-edit = uicontrol('Parent',fig,'Style','edit','String', num2str(distvar),'Position',[200 250 60 20]);
-drawnow, pause(0.1)
+uicontrol('Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[600 200 60 20]);
+uicontrol('Style','pushbutton','String','Decrement','Callback',@cb_Decrement,'Position',[600 150 60 20]);
+edit = uicontrol('Style','edit','String', num2str(distvar),'Position',[600 250 60 20]);
+drawnow,
 
 
     function cb_Increment(~,~)
@@ -76,7 +76,7 @@ photoSq = [0 0 30 30]';
 colorwhite = [255; 255; 255];
 
 % now open up a second matlab figure to be used to view eye position
-figure(2), clf 
+axes(handles.EyePosition); cla;
 axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
 hold on
 rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
@@ -88,9 +88,7 @@ axis off
 
 try
     
-    HideCursor;
     window = Screen(whichScreen, 'OpenWindow');
-    ShowCursor;
     
     black = BlackIndex(window); % pixel value for black
     
@@ -173,7 +171,7 @@ catch MException;
     ShowCursor;
     Screen('CloseAll');
     disp(MException.message)
-    
+    keyboard
 end
 
 

@@ -27,12 +27,12 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-numstimthistrl = 3;
+numstimthistrl = 5;
 
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
-    fig = figure(2); clf
+    axes(handles.EyePosition); cla;
     axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
@@ -41,7 +41,7 @@ if viewingFigure
         hTargs(numtargsi) = rectangle('Position', [0, 0 10 10],'FaceColor','white'); %#ok
     end
      % this is for the easy ending of programs
-    uicontrol('Parent',fig,'Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
+    uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
     drawnow
     
     set(gca, 'color', 'none')
@@ -50,8 +50,6 @@ end
 
     function updateViewingFigure()
         try
-            
-            %figure(2)
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
             for drawi = 1:numstimthistrl 
                set(hTargs(drawi), 'Position', [randXpos(drawi)-centX -(randYpos(drawi)-centY) 10 10]) 
@@ -66,7 +64,7 @@ end
 
 isRun = true;
 
-figure(3), clf
+axes(handles.TaskSpecificPlot); cla;
 global xdiv
 xdiv = 40;
 frmat = zeros(xdiv);
@@ -80,20 +78,14 @@ fName = ['fixOnline_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and
 Priority(2);
 
 try
-    HideCursor;
     window = Screen(whichScreen, 'OpenWindow');
-    ShowCursor;
     
     black = BlackIndex(window); % pixel value for black
     
     % wipe screen & fill bac
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip');
-    
-    ntrls = 100;
-    
-    fprintf('Number of trials requested: %i \n', ntrls);
-    
+
     % --- variables and declarations common to all trials
     
     winTol = 30;
@@ -111,19 +103,17 @@ try
     stimoffsetH = round(res.height/2);
     % ---- starting trial loop
     
-    disp(fName)
-    
     % this will be used to store all flash locations
     storeXlocs = [];
     storeYlocs = [];
     storeSuccess = 0;
     success = 0;
     trl = 1;
-    while trl <= ntrls 
+    
+    while trl <= ntrls && isRun
         
-        set(handles.TrialNumber,'String',num2str(trls));
+        set(handles.TrialNumber,'String',num2str(trl));
 
-        
         % present fixation square
         Screen(window, 'FillRect', colorBlue, fixSq);
         Screen(window, 'Flip');
@@ -267,7 +257,7 @@ try
                     
                     
                     
-                    if viewingFigure, [frmat, frtrls] = updateRFMap(frmat, frtrls, randXpos, randYpos, numtrigs); end
+                    if viewingFigure, [frmat, frtrls] = updateRFMapHandles(handles, frmat, frtrls, randXpos, randYpos, numtrigs); end
                     
                     tottrltrigs = tottrltrigs + numtrigs;
                     
