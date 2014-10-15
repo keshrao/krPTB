@@ -41,7 +41,7 @@ if viewingFigure
     set(gca, 'color', 'none')
     
     % this is for the easy ending of programs
-    uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[350 350 60 20]);
+    uic = uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[350 350 60 20]);
     drawnow
 end
 
@@ -396,6 +396,9 @@ catch lasterr
     keyboard
 end
 
+delete(uic)
+axes(handles.EyePosition);cla;
+axes(handles.TaskSpecificPlot);cla;
 
 Screen('CloseAll');
 if isDaq, krEndTrial(dio); end

@@ -6,14 +6,9 @@ end
 distvar = 10;
 warning off
 
-try
-    [ai, dio] = krConnectDAQTrigger();
-    isDaq = true;
-catch MException;
-    disp('no daq')
-    isDaq = false;
-end
-
+ai = handles.ai;
+dio = handles.dio;
+isDaq = true;
 %%
 Priority(2); % realtime priority
 
@@ -85,9 +80,8 @@ if viewingFigure
     
     
     % this is for the easy ending of programs
-    uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[400 350 60 20]);
+    uic(1) = uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[400 350 60 20]);
     drawnow
-    
     
     axes(handles.TaskSpecificPlot);cla;
     hTune = plot(zeros(9,1), 'o','MarkerSize',3);
@@ -95,15 +89,15 @@ if viewingFigure
     xlim([0 10])
     ylim([-1 10])
     
-    uicontrol('Style','pushbutton','String','UL','Callback',@cb_UL,'Position',[550 300 20 20]);
-    uicontrol('Style','pushbutton','String','U','Callback',@cb_U,'Position',  [600 300 20 20]);
-    uicontrol('Style','pushbutton','String','UR','Callback',@cb_UR,'Position',[650 300 20 20]);
-    uicontrol('Style','pushbutton','String','L','Callback',@cb_L,'Position',  [690 300 20 20]);
-    uicontrol('Style','pushbutton','String','M','Callback',@cb_M,'Position',  [730 300 20 20]);
-    uicontrol('Style','pushbutton','String','R','Callback',@cb_R,'Position',  [770 300 20 20]);
-    uicontrol('Style','pushbutton','String','DL','Callback',@cb_DL,'Position',[810 300 20 20]);
-    uicontrol('Style','pushbutton','String','D','Callback',@cb_D,'Position',  [850 300 20 20]);
-    uicontrol('Style','pushbutton','String','DR','Callback',@cb_DR,'Position',[890 300 20 20]);
+    uic(2) = uicontrol('Style','pushbutton','String','UL','Callback',@cb_UL,'Position',[550 300 20 20]);
+    uic(3) = uicontrol('Style','pushbutton','String','U','Callback',@cb_U,'Position',  [600 300 20 20]);
+    uic(4) = uicontrol('Style','pushbutton','String','UR','Callback',@cb_UR,'Position',[650 300 20 20]);
+    uic(5) = uicontrol('Style','pushbutton','String','L','Callback',@cb_L,'Position',  [690 300 20 20]);
+    uic(6) = uicontrol('Style','pushbutton','String','M','Callback',@cb_M,'Position',  [730 300 20 20]);
+    uic(7) = uicontrol('Style','pushbutton','String','R','Callback',@cb_R,'Position',  [770 300 20 20]);
+    uic(8) = uicontrol('Style','pushbutton','String','DL','Callback',@cb_DL,'Position',[810 300 20 20]);
+    uic(9) = uicontrol('Style','pushbutton','String','D','Callback',@cb_D,'Position',  [850 300 20 20]);
+    uic(10) = uicontrol('Style','pushbutton','String','DR','Callback',@cb_DR,'Position',[890 300 20 20]);
     
     drawnow
     
@@ -264,21 +258,22 @@ try
             numPeaks = 0;
             
             temptic = tic;
-            while toc(temptic) < 0.300
+            while toc(temptic) < 0.2
                 if ~getspikesonce 
                     try
                         trigtic = tic;
-                        numPeaks = krTriggers(ai, 0.2); % capture 200ms after onset of stimulus
+                        numPeaks = krTriggers(ai, 0.15); % capture 200ms after onset of stimulus
                         trigtime = toc(trigtic);
                     end
                     getspikesonce = true;
+                    %fprintf('Trig Time: %d\n',trigtime);
                 end
                 
                 try
                     [eyePosX eyePosY] = krGetEyePos(ai);
                 end
                 if viewingFigure, updateViewingFigure(); end
-                
+               
                 
             end
             
@@ -349,6 +344,7 @@ try
         if isDaq, krEndTrial(dio); end
         
         trl = trl + 1;
+        
     end
     
 catch MException;
@@ -363,12 +359,18 @@ catch MException;
     
 end
 
+% delete the gui handles
+for i = 1:10
+    delete(uic(i));
+end
+axes(handles.EyePosition);cla;
+axes(handles.TaskSpecificPlot);cla;
+    
 if isDaq, krEndTrial(dio);end
 disp(fName)
 save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
 ShowCursor;
 Screen('CloseAll');
 
-keyboard
 
 end

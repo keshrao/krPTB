@@ -39,7 +39,7 @@ if viewingFigure
         hTargs(numtargsi) = rectangle('Position', [0, 0 10 10],'FaceColor','white'); %#ok
     end
      % this is for the easy ending of programs
-    uicontrol('Parent',fig,'Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
+    uic = uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
     drawnow
     
     set(gca, 'color', 'none')
@@ -114,7 +114,7 @@ try
     trl = 1;
     while trl <= ntrls && isRun
         
-        set(handles.TrialNumber,'String',num2str(trls));
+        set(handles.TrialNumber,'String',num2str(trl));
         
         % present fixation square
         Screen(window, 'FillRect', colorBlue, fixSq);
@@ -273,7 +273,7 @@ try
                 
                 % at this point, you know the number of spikes occured
                 % for this particular location
-                fprintf(', Num Trigs: %i \n', tottrltrigs)
+                %fprintf(', Num Trigs: %i \n', tottrltrigs)
                 
                 if ~isInWindow
                     storeSuccess(trl) = 0;
@@ -333,10 +333,13 @@ catch lasterr
     keyboard
 end
 
+delete(uic)
+axes(handles.EyePosition);cla;
+axes(handles.TaskSpecificPlot);cla;
+
 if isDaq, krEndTrial(dio); end
 save(fName, 'storeXlocs', 'storeYlocs','storeSizes','storeSuccess')
 Priority(0);
 disp(fName)
 
-keyboard
 end % function

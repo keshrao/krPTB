@@ -22,7 +22,7 @@ function varargout = jhParadigmGUI(varargin)
 
 % Edit the above text to modify the response to help jhParadigmGUI
 
-% Last Modified by GUIDE v2.5 14-Oct-2014 10:32:47
+% Last Modified by GUIDE v2.5 14-Oct-2014 15:32:40
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -50,6 +50,7 @@ function jhParadigmGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to jhParadigmGUI (see VARARGIN)
+clc
 
 % Choose default command line output for jhParadigmGUI
 handles.output = hObject;
@@ -295,3 +296,12 @@ function EyePosition_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to EyePosition (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in MonitorSaccades_PB.
+function MonitorSaccades_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to MonitorSaccades_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+krMonitorSaccades(handles)
+

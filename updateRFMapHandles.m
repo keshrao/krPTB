@@ -21,5 +21,5 @@ end
 
 
 axes(handles.TaskSpecificPlot);
-heatmap(rot90(frmat./frtrls)); colorbar()
+heatmap(rot90(frmat./frtrls)); 
 drawnow

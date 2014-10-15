@@ -21,5 +21,5 @@ end
 
 
 figure(3);
-heatmap(rot90(frmat./frtrls)); colorbar()
+heatmap(rot90(frmat./frtrls));
 drawnow
