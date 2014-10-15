@@ -1,8 +1,5 @@
 clear, clc
 
-xdiv = 100;
-ydiv = 100; % number of x/y divisions
-
 clustertouse = [1 2];
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
@@ -17,17 +14,27 @@ else
     numfiles = 1;
 end
 
+%%
 
+% screen resolution 1024x768
+xcent = 512;
+ycent = 384;
 
-hasprinted = false;
+% xrange = 100 - 1000
+% yrange = 50 - 700
+xrng = [-xcent/1.5 xcent/1.5];
+yrng = [-ycent/1.5 ycent/1.5];
 
-subpnum = 1;
-figure(1), clf,
+hbins = xrng(1):xrng(2);
+vbins = yrng(1):yrng(2);
 
-frmat = zeros(xdiv, ydiv,10);
-frtrls = zeros(xdiv, ydiv,10);
-frstd = zeros(xdiv, ydiv,10);
+frmat = zeros(length(hbins), length(vbins),10);
+frtrls = zeros(length(hbins), length(vbins),10);
+frstd = ones(length(hbins), length(vbins),10);
 nblocki = 1;
+
+
+%%
 
 totalplots = 9;
 predurs = [0.001:0.05:(totalplots*0.05) 0];
@@ -35,6 +42,14 @@ predurs(1) = 0.001;
 
 smalltimeforward = 0.05;
 largetimeforward = 0.300;
+
+
+ 
+hasprinted = false;
+
+subpnum = 1;
+figure(1), clf,
+
 
 for prei = 1:length(predurs)
     
@@ -62,6 +77,13 @@ for prei = 1:length(predurs)
             
             % first load the session file
             load(thisfilename) % this has the locs and successes
+            
+            if ~exist('storeSizes','var')
+                fprintf('This is probably not the right file. No MScaling Detected')
+                keyboard
+            end
+            
+            
             load(strcat(thisfilename(1:end-4), '_sp2.mat'))
             
             eval(['eyeh = ' rawname(1:end-4) '_Ch3.values;'])
@@ -142,60 +164,39 @@ for prei = 1:length(predurs)
             if ~hasprinted, fprintf('# SuccTrls: %i.\n# storeSuccesses %i.\n', length(succTrls), length(find(storeSuccess))); hasprinted = true; end
             %% Divide the space into smaller squares to collect firing rate data
             
-            % screen resolution 1024x768
-            xcent = 512;
-            ycent = 384;
-            
-            % xrange = 100 - 1000
-            % yrange = 50 - 700
-            xrng = [-xcent/1.5 xcent/1.5];
-            yrng = [-ycent/1.5 ycent/1.5];
             
             % center the axis
             storeXlocs = storeXlocs - xcent;
             storeYlocs = storeYlocs - ycent;
             
-            hbins = linspace(xrng(1), xrng(2), xdiv);
-            vbins = linspace(yrng(1), yrng(2), ydiv);
-            
             %    poststimdur = 0.150; % in seconds
             poststimdur = prestimdur + timeforward;
             
-            for col = 1:ydiv - 1
-                for row = 1:xdiv - 1
+            for numF = 1:length(timeFlashes) % iterate through all the flashes sequentially
+                
+                % find the number of spikes that occured in this window.
+                thisnumspks = sum(spktimes > timeFlashes(numF) + prestimdur & spktimes < timeFlashes(numF) + poststimdur);
+                
+                for nf = 1:size(storeXlocs,2) %number of stimuli per flash
                     
-                    totIndFlashes = [];
-                    for nf = 1:size(storeXlocs,2)
-                        indFlash = find(storeXlocs(:,nf) > hbins(row) & storeXlocs(:,nf) < hbins(row+1) & storeYlocs(:,nf) > vbins(col) & storeYlocs(:,nf) < vbins(col+1));
-                        totIndFlashes = [totIndFlashes; indFlash];
-                    end
+                    thisXloc = storeXlocs(numF,nf);
+                    thisYloc = storeYlocs(numF,nf);
+                    thisSize = storeSizes(numF,nf);
                     
-                    thisTimeFlash = timeFlashes(totIndFlashes);
+                    xlocmin = thisXloc - thisSize/2; xmini = find(hbins > xlocmin, 1, 'first');
+                    xlocmax = thisXloc + thisSize/2; xmaxi = find(hbins > xlocmax, 1, 'first');
+                    ylocmin = thisYloc - thisSize/2; ymini = find(vbins > ylocmin, 1, 'first');
+                    ylocmax = thisYloc + thisSize/2; ymaxi = find(vbins > ylocmax, 1, 'first');
                     
-                    if ~isempty(thisTimeFlash)
-                        frtrls(row,col,nblocki) = frtrls(row,col,nblocki) + length(thisTimeFlash);
-                    end
+                    frmat(xmini:xmaxi,ymini:ymaxi,nblocki) = frtrls(xmini:xmaxi,ymini:ymaxi,nblocki) + thisnumspks; 
+                    frtrls(xmini:xmaxi,ymini:ymaxi,nblocki) = frtrls(xmini:xmaxi,ymini:ymaxi,nblocki) + 1; 
                     
-                    % determine the number of spikes that occur in the 200ms after the
-                    % flashs in this location
-                    
-                    thisNeuSpks = zeros(1,length(thisTimeFlash));
-                    
-                    for numF = 1:length(thisTimeFlash)
-                        thisNeuSpks(numF) = sum(spktimes > thisTimeFlash(numF) + prestimdur & spktimes < thisTimeFlash(numF) + poststimdur);
-                    end % numF
-                    
-                    frmat(row,col,nblocki) = frmat(row,col,nblocki) + sum(thisNeuSpks);
-                    
-                    %if length(thisTimeFlash) > 3
-                    %    frstd(row,col) = std(thisNeuSpks);
-                    %else
-                    frstd(row,col,nblocki) = 1;
-                    %end
-                    
-                    
-                end %row
-            end% col
+                end% nf
+                
+            end% flashnum
+            
+            
+            
             
         end % files
         
@@ -205,7 +206,7 @@ for prei = 1:length(predurs)
     
     hold on
     heatmap(rot90(frmat(:,:,nblocki)./frtrls(:,:,nblocki)./frstd(:,:,nblocki))); % the x/y axis is flipped. So transpose
-    axis([0 xdiv 0 ydiv])
+    axis([0.5 length(hbins)-0.5 0.5 length(vbins)-0.5])
     
     ax = axis;
     line(ax(1:2),[mean(ax(3:4)) mean(ax(3:4))], 'LineStyle', '--','LineWidth', 2, 'Color', 'k')
@@ -219,22 +220,23 @@ end
 
 % set the top left corner value to the max value
 maxFRval = max(max(max(frmat(:,:,1:totalplots)./frtrls(:,:,1:totalplots)./frstd(:,:,1:totalplots))));
+
 for subpnum = 1:totalplots
     thismat = frmat(:,:,subpnum)./frtrls(:,:,subpnum)./frstd(:,:,subpnum);
-    thismat(1,1) = 1; maxFRval;
+    thismat(1,1) = maxFRval;
     figure(1)
     subplot(3,3,subpnum)
     
     hold on
     heatmap(rot90(thismat)); % the x/y axis is flipped. So transpose
-    axis([0.5 xdiv 0.5 ydiv])
+    axis([0.5 length(hbins)-0.5 0.5 length(vbins)-0.5])
     
     ax = axis;
     line(ax(1:2),[mean(ax(3:4)) mean(ax(3:4))], 'LineStyle', '--','LineWidth', 2, 'Color', 'k')
     line([mean(ax(1:2)) mean(ax(1:2))], ax(3:4), 'LineStyle', '--','LineWidth', 2, 'Color', 'k')
     title([num2str(predurs(subpnum)) 'ms : ' num2str(predurs(subpnum) + smalltimeforward) 'ms'])
     drawnow
-
+    
 end
 
 
