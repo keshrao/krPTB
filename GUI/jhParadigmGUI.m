@@ -103,7 +103,7 @@ guidata(hObject, handles);
 popup_sel_index = get(handles.ChooseParadigm, 'Value');
 switch popup_sel_index
     case 1
-        krDirRequestable(get(handles.SetTrialNumber,'Value'),handles);
+        krDirReqSingleSac(get(handles.SetTrialNumber,'Value'),handles);
     case 2
         krFwdCorr_OnlinePlot(get(handles.SetTrialNumber,'Value'),handles);
     case 3
@@ -113,6 +113,7 @@ switch popup_sel_index
     case 5
         krFwdCorr_SingleSaccade_MScaling(get(handles.SetTrialNumber,'Value'),handles);
     case 6
+        krCal(get(handles.SetTrialNumber,'Value'),handles);
         
         
 end
@@ -183,8 +184,8 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
      set(hObject,'BackgroundColor','white');
 end
 
-set(hObject, 'String', {'krDirRequestable','krFwdCorr_OnlinePlot','krFwdCorr_MScale', ... 
-                    'krFwdCorr_SingleSaccade','krFwdCorr_SingleSaccade_MScaling'});
+set(hObject, 'String', {'krDirReqSingleSac','krFwdCorr_OnlinePlot','krFwdCorr_MScale', ... 
+                    'krFwdCorr_SingleSaccade','krFwdCorr_SingleSaccade_MScaling','krCal'});
 
 
 % --- Executes on button press in krCalibrateEyePos.

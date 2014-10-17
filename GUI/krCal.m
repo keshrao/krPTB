@@ -5,13 +5,13 @@ if isempty(ntrls)
 end
 
 distvar = 10;
-fig=gcf;
+axes(handles.TaskSpecificPlot); cla;
 axis([-200 200 -200 200])
 axis off
-uicontrol('Parent',fig,'Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[200 200 60 20]);
-uicontrol('Parent',fig,'Style','pushbutton','String','Decrement','Callback',@cb_Decrement,'Position',[200 150 60 20]);
-edit = uicontrol('Parent',fig,'Style','edit','String', num2str(distvar),'Position',[200 250 60 20]);
-drawnow, pause(0.1)
+uic(1) = uicontrol('Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[600 200 60 20]);
+uic(2) = uicontrol('Style','pushbutton','String','Decrement','Callback',@cb_Decrement,'Position',[600 150 60 20]);
+uic(3) = uicontrol('Style','edit','String', num2str(distvar),'Position',[600 250 60 20]);
+drawnow,
 
     function cb_Increment(~,~)
         distvar = distvar + 1;
@@ -29,7 +29,7 @@ drawnow, pause(0.1)
         drawnow
     end
     function TextBox(~,~)
-        set(edit,'String',num2str(distvar));
+        set(uic(3),'String',num2str(distvar));
     end
 
 
@@ -106,28 +106,33 @@ winTol = 30;
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
-    gui = gcf;
+    axes(handles.EyePosition);cla 
     axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
     hFix = rectangle('Position', [0, 0 25 25],'FaceColor','blue'); %<- note, x,y,w,h as opposed to PTB's convention
     hEye = rectangle('Position', [0, 0 25 25],'FaceColor','red');
-    axis off    
+    axis off 
+    
+    % this is for the easy ending of programs
+    uic(4) = uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[400 350 60 20]);
+    drawnow
 end
 
     function updateViewingFigure()
         try
-            
             set(hFix, 'Position', [sq(3,indLoc)-centX -(sq(4, indLoc)-centY) 25 25]);
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
             drawnow
-            
-        catch
             % don't want the program to crash if something happens to a figure
         end
     end
 
+    function cb_EndTask(~,~)
+        isRun = false;
+    end
 
+isRun = true;
 % ---- PTB segment
 try
     
@@ -149,7 +154,7 @@ try
     
     trl = 1;
     
-    while trl <= ntrls 
+    while trl <= ntrls && isRun
         % wipe screen & fill back
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
         
@@ -264,14 +269,16 @@ catch MException;
     close all
     
     disp(MException.message)
+    delete(uic)
+    axes(handles.EyePosition);cla
     
 end
 
+axes(handles.EyePosition);cla
+delete(uic)
 if isDaq, krEndTrial(dio);end
 save(fName, 'storeGlobalTics', 'storeLocIDs','storeSuccesses')
 ShowCursor;
 Screen('CloseAll');
-
-
 
 end

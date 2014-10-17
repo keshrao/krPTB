@@ -16,10 +16,10 @@ ai.SamplesPerTrigger = dur * ai.SampleRate;
 
 axes(handles.EyePosition);cla;
 hold on
-hEx = plot(zeros(ai.SamplesPerTrigger,1),'b','LineWidth',3);
-hEy = plot(zeros(ai.SamplesPerTrigger,1),'g','LineWidth',3);
-hSp = plot(zeros(ai.SamplesPerTrigger,1),'k','LineWidth',3);
-ylim([-300 300])
+hEx = plot(zeros(ai.SamplesPerTrigger,1),'b','LineWidth',1.5);
+hEy = plot(zeros(ai.SamplesPerTrigger,1),'g','LineWidth',1.5);
+hSp = plot(zeros(ai.SamplesPerTrigger,1),'k','LineWidth',1.5);
+ylim([-400 400])
 xlim([0 ai.SamplesPerTrigger])
 %axis off
 
@@ -38,7 +38,6 @@ sacpre = 0.3;
 sacpost = 0.3;
 binwidth = 0.001;
 bins = -sacpre:binwidth:sacpost;
-binned = nan(1,length(bins)-1);	
 
 figure(2), clf
 for subp = 1:9
@@ -69,15 +68,15 @@ while isRun
     ey = movingmean(ey, 2000);
     
     % find when saccades happen
-    spdeye = sqrt(diff(ex) .^2 + diff(ey).^2) .* 1000;
+    spdeye = sqrt(diff(ex) .^2 + diff(ey).^2) .* 1000; % to secs & then to deg
     
     % plot the data onto the figure
     set(hEx, 'ydata', ex);
     set(hEy, 'ydata', ey);
-    set(hSp, 'ydata', spdeye);
+    set(hSp, 'ydata', spdeye * 5); % scaled just so it's easier to see 
     
     %arbitrary threshold
-    sacthresh = 10; %deg/sec
+    sacthresh = 20; %deg/sec
     [~, slocs] = findpeaks(spdeye, 'MINPEAKHEIGHT', sacthresh ,'MINPEAKDISTANCE',5000);
     
     trig = data(:,3); % triggered data
@@ -114,7 +113,7 @@ while isRun
         if ~isempty(timeTrig) && length(timeTrig) == 2
             plot([timeTrig'; timeTrig'], [prow(subpnum(saci))-0.9 prow(subpnum(saci))-0.1], 'k')
         elseif ~isempty(timeTrig)
-            plot([timeTrig timeTrig], [prow(subpnum(saci))-1 prow(subpnum(saci))], 'k', 'LineWidth', 3)
+            plot([timeTrig timeTrig], [prow(subpnum(saci))-0.9 prow(subpnum(saci))-0.1], 'k', 'LineWidth', 3)
         end
         xlim([-sacpre sacpost])
         
@@ -126,6 +125,7 @@ while isRun
 		
         prow(subpnum(saci)) = prow(subpnum(saci)) + 1;
     end
+    
     
 end %isRun
 % ---- end of while loop
@@ -184,23 +184,4 @@ subpnum = zeros(length(slocs),1);
 
 	end
 
-end
-
-function psth = buildpsth(prestimdur, poststimdur, RelSpks)
-
-    
-    % bin data into 5ms bins & determine firing rate
-    binwidth = 0.001;
-    bins = -prestimdur:binwidth:poststimdur;
-    binned = nan(1,length(bins)-1);
-    
-        
-    for bi = 1:length(bins)-1
-        thisDataIdx = RelSpks > bins(bi) & RelSpks < bins(bi+1);
-        binned(bi) = sum(thisDataIdx)./binwidth;
-    end
-    
-    gausKer = normpdf(-0.05:0.001:0.05, 0, 0.01);
-    psth = conv(binned, gausKer, 'same') ./ sum(gausKer);
-	
-end % function	
+end	

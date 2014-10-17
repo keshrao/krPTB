@@ -5,9 +5,9 @@ distvar = 10;
 axes(handles.TaskSpecificPlot); cla;
 axis([-200 200 -200 200])
 axis off
-uicontrol('Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[600 200 60 20]);
-uicontrol('Style','pushbutton','String','Decrement','Callback',@cb_Decrement,'Position',[600 150 60 20]);
-edit = uicontrol('Style','edit','String', num2str(distvar),'Position',[600 250 60 20]);
+uic(1) = uicontrol('Style','pushbutton','String','Increment','Callback',@cb_Increment,'Position',[600 200 60 20]);
+uic(2) = uicontrol('Style','pushbutton','String','Decrement','Callback',@cb_Decrement,'Position',[600 150 60 20]);
+uic(3) = uicontrol('Style','edit','String', num2str(distvar),'Position',[600 250 60 20]);
 drawnow,
 
 
@@ -27,7 +27,7 @@ drawnow,
         drawnow
     end
     function TextBox(~,~)
-        set(edit,'String',num2str(distvar));
+        set(uic(3),'String',num2str(distvar));
     end
 
 
@@ -93,7 +93,7 @@ try
     black = BlackIndex(window); % pixel value for black
     
     
-    ntrls = 2;
+    ntrls = 10;
     
     storeGlobalTics = nan(ntrls, 1);
     storeLocIDs = nan(ntrls,1); % save the location of stimuli
@@ -171,10 +171,11 @@ catch MException;
     ShowCursor;
     Screen('CloseAll');
     disp(MException.message)
+    delete(uic)
     keyboard
 end
 
-
+delete(uic)
 
 ShowCursor;
 Screen('CloseAll');

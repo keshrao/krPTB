@@ -1,17 +1,15 @@
-function krDir()
+function krDirRequestable(ntrls,handles)
 
+if isempty(ntrls)
+    ntrls = 300;
+end
 distvar = 10;
 warning off
 
-try
-    [ai, dio] = krConnectDAQTrigger();
-    isDaq = true;
-catch MException;
-    disp('no daq')
-    isDaq = false;
-end
-
-
+ai = handles.ai;
+dio = handles.dio;
+isDaq = true;
+%%
 Priority(2); % realtime priority
 
 % remember to clear this out for real experiments
@@ -69,13 +67,10 @@ photocell = [0; 0; 50; 50;];
 c = clock;
 fName = ['dir_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
-winTol = 30;
-
-
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
-    fig = figure(2); clf
+    axes(handles.EyePosition);cla;
     axis([-res.width/2 res.width/2 -res.height/2 res.height/2]);
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
@@ -85,20 +80,42 @@ if viewingFigure
     
     
     % this is for the easy ending of programs
-    uicontrol('Parent',fig,'Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
+    uic(1) = uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[400 350 60 20]);
     drawnow
     
-    
-    figure(3); clf;
+    axes(handles.TaskSpecificPlot);cla;
     hTune = plot(zeros(9,1), 'o','MarkerSize',3);
     set(gca, 'XTick', 1:9, 'XTickLabel',{'UL', 'U','UR','L','M','R','DL','D','DR'})
     xlim([0 10])
     ylim([-1 10])
+    
+    uic(2) = uicontrol('Style','pushbutton','String','UL','Callback',@cb_UL,'Position',[550 300 20 20]);
+    uic(3) = uicontrol('Style','pushbutton','String','U','Callback',@cb_U,'Position',  [600 300 20 20]);
+    uic(4) = uicontrol('Style','pushbutton','String','UR','Callback',@cb_UR,'Position',[650 300 20 20]);
+    uic(5) = uicontrol('Style','pushbutton','String','L','Callback',@cb_L,'Position',  [690 300 20 20]);
+    uic(6) = uicontrol('Style','pushbutton','String','M','Callback',@cb_M,'Position',  [730 300 20 20]);
+    uic(7) = uicontrol('Style','pushbutton','String','R','Callback',@cb_R,'Position',  [770 300 20 20]);
+    uic(8) = uicontrol('Style','pushbutton','String','DL','Callback',@cb_DL,'Position',[810 300 20 20]);
+    uic(9) = uicontrol('Style','pushbutton','String','D','Callback',@cb_D,'Position',  [850 300 20 20]);
+    uic(10) = uicontrol('Style','pushbutton','String','DR','Callback',@cb_DR,'Position',[890 300 20 20]);
+    
+    drawnow
+    
 end
+
+    function cb_UL (~,~), isRequested = true; indLoc = 1; prevLoc = indLoc; end
+    function cb_U (~,~), isRequested = true; indLoc = 2; prevLoc = indLoc; end
+    function cb_UR (~,~), isRequested = true; indLoc = 3; prevLoc = indLoc; end
+    function cb_L (~,~), isRequested = true; indLoc = 4; prevLoc = indLoc; end
+    function cb_M (~,~), isRequested = true; indLoc = 5; prevLoc = indLoc; end
+    function cb_R (~,~), isRequested = true; indLoc = 6; prevLoc = indLoc; end
+    function cb_DL (~,~), isRequested = true; indLoc = 7; prevLoc = indLoc; end
+    function cb_D (~,~), isRequested = true; indLoc = 8; prevLoc = indLoc; end
+    function cb_DR (~,~), isRequested = true; indLoc = 9; prevLoc = indLoc; end
+    
 
     function updateViewingFigure()
         try
-            
             set(hFix, 'Position', [sq(3,indLoc)-centX -(sq(4, indLoc)-centY) 25 25]);
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
             drawnow
@@ -113,6 +130,7 @@ end
     end
 
 isRun = true;
+isRequested = false;
 
 % ---- PTB segment
 try
@@ -121,7 +139,6 @@ try
     
     black = BlackIndex(window); % pixel value for black
     
-    ntrls = 80;
     
     prevLoc = 0;
     indLoc = 1;
@@ -139,14 +156,13 @@ try
     
     disp(fName)
 
-    
-    trls = 1;
-    while trls <= ntrls && isRun
+    trl = 1;
+    while trl <= ntrls && isRun
         
-        distvar = randi([5 15],1,1);
+        distvar = randi([6 12],1,1);
         generateTableSquares(distvar)
         
-        if distvar <= 7
+        if distvar <= 8
             winTol = 50;
         else
             winTol = 30;
@@ -156,11 +172,15 @@ try
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
         
         % select random location
-        while indLoc == prevLoc % because that's the center square
-            indLoc = randi(9);
+        if ~isRequested 
+            while indLoc == prevLoc % because that's the center square
+                indLoc = randi(9);
+            end
+            prevLoc = indLoc;
+        else
+            isRequested = false;
         end
-        prevLoc = indLoc;
-        
+            
         % deal with scaling difference
         thisPos = allLocsPos(indLoc,:); % x/y position of target
         % subtract out the screen offset bias & scaling
@@ -169,7 +189,7 @@ try
         
         % ----------------- start --------------------------- %
         
-        disp(['Trl Number: ' num2str(trls)])
+        set(handles.TrialNumber,'String',num2str(trl));
         % present fixation square
         Screen(window, 'FillRect', colorBlue, sq(:,5));
         Screen(window, 'Flip');
@@ -186,7 +206,7 @@ try
                 try
                     [eyePosX eyePosY] = krGetEyePos(ai);
                 catch
-                    disp(['Missed Eye Pos Acquisition: ' num2str(trls)])
+                    disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                 end
             else
                 [eyePosX,eyePosY] = GetMouse(window);
@@ -208,7 +228,7 @@ try
         if ~isInWindow
             Screen(window, 'FillRect', black);
             Screen(window, 'Flip');
-            storeSuccess(trls) = 0;
+            storeSuccess(trl) = 0;
             if isDaq, krEndTrial(dio); end
             WaitSecs(2);
             
@@ -217,7 +237,7 @@ try
             % continue the trial now that fixation is acquired
             if isDaq, krStartTrial(dio); end
 
-            storeLocs(trls,:) = [thisPos(1), thisPos(2)]; % these two to be saved later
+            storeLocs(trl,:) = [thisPos(1), thisPos(2)]; % these two to be saved later
             
             % once fixation is acquired, hold fixation for 300 ms
             temptic = tic;
@@ -238,21 +258,22 @@ try
             numPeaks = 0;
             
             temptic = tic;
-            while toc(temptic) < 0.3
+            while toc(temptic) < 0.2
                 if ~getspikesonce 
                     try
                         trigtic = tic;
-                        numPeaks = krTriggers(ai, 0.2); % capture 200ms after onset of stimulus
+                        numPeaks = krTriggers(ai, 0.15); % capture 200ms after onset of stimulus
                         trigtime = toc(trigtic);
                     end
                     getspikesonce = true;
+                    %fprintf('Trig Time: %d\n',trigtime);
                 end
                 
                 try
                     [eyePosX eyePosY] = krGetEyePos(ai);
                 end
                 if viewingFigure, updateViewingFigure(); end
-                
+               
                 
             end
             
@@ -266,7 +287,7 @@ try
                     try
                         [eyePosX eyePosY] = krGetEyePos(ai);
                     catch
-                        disp(['Missed Eye Pos Acquisition: ' num2str(trls)])
+                        disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                     end
                 end
                 
@@ -307,21 +328,23 @@ try
             
             %fprintf('Time Spent in Trigger: %f. \n', trigtime)
             
-            storeSuccesses(trls) = trls;
-            storeDistVar(trls) = distvar;
+            storeSuccesses(trl) = trl;
+            storeDistVar(trl) = distvar;
             successCount = successCount+1;
+            set(handles.SuccessCount,'String',num2str(successCount));
             WaitSecs(1);
 
         end
         
         
-        if mod(trls,20) == 0
+        if mod(trl,20) == 0
             save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
         end
         
         if isDaq, krEndTrial(dio); end
         
-        trls = trls + 1;
+        trl = trl + 1;
+        
     end
     
 catch MException;
@@ -336,11 +359,18 @@ catch MException;
     
 end
 
+% delete the gui handles
+for i = 1:10
+    delete(uic(i));
+end
+axes(handles.EyePosition);cla;
+axes(handles.TaskSpecificPlot);cla;
+    
 if isDaq, krEndTrial(dio);end
+disp(fName)
 save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
 ShowCursor;
 Screen('CloseAll');
 
-keyboard
 
 end

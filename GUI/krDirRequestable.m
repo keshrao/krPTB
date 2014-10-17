@@ -307,6 +307,7 @@ try
         
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
         set(hFix, 'visible', 'off')
+        drawnow 
         
         % check if fixation failed
         if ~isInWindow

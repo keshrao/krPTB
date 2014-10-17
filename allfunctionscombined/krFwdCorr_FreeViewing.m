@@ -65,7 +65,7 @@ try
     Screen(window, 'Flip');
     
     
-    ntrls = 100;
+    ntrls = 300;
     
     % --- variables and declarations common to all trials
         
