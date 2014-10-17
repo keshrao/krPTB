@@ -2,7 +2,7 @@ function [ai, dio] = krConnectDAQTrigger()
 
 % connection to daq
 ai = analoginput('mcc');
-ai.SampleRate = 200000;
+ai.SampleRate = 1000000;
 addchannel(ai,0); % eyeh
 addchannel(ai,1); % eyev
 addchannel(ai,2); % spike triggers

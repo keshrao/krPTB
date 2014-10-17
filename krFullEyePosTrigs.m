@@ -3,7 +3,7 @@ function [data,time, saclocs] = krFullEyePosTrigs(ai, dur)
 %% Initiate
 preSampleRate = ai.SampleRate;
 
-ai.SampleRate = 100000;
+ai.SampleRate = 1000000;
 ai.SamplesPerTrigger = dur*ai.SampleRate;
 
 %% Acquire Data
