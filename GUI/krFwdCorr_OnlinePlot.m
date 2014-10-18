@@ -104,6 +104,12 @@ try
     % ---- starting trial loop
     
     % this will be used to store all flash locations
+    storeEveryXloc = [];
+    storeEveryYloc = [];
+    storeEveryTic = [];
+    
+    globeTic = tic;
+    
     storeXlocs = [];
     storeYlocs = [];
     storeSuccess = 0;
@@ -166,7 +172,8 @@ try
                 
                 xFlashesIter = nan(numflashes,numstimthistrl);
                 yFlashesIter = nan(numflashes,numstimthistrl);
-                    
+                tocFlashIter = nan(numflashes,1);
+                
                 tottrltrigs = 0;
                 
                 for nf = 1:numflashes
@@ -220,6 +227,7 @@ try
                     end
                     
                     
+                    tocFlashIter(nf) = toc(globeTic);
                     
                     % draw stimuli
                     Screen(window, 'FillRect', stimcolors , stims);
@@ -256,7 +264,6 @@ try
                     end
                     
                     
-                    
                     if viewingFigure, [frmat, frtrls] = updateRFMapHandles(handles, frmat, frtrls, randXpos, randYpos, numtrigs); end
                     
                     tottrltrigs = tottrltrigs + numtrigs;
@@ -266,6 +273,13 @@ try
                 % at this point, you know the number of spikes occured
                 % for this particular location
                 % fprintf(', Num Trigs: %i \n', tottrltrigs)
+                
+                % regardless of if all ten flashes occured or not, just
+                % save the flashes that did in fact occur and when they
+                % happened. This gets successful and failed trials.
+                storeEveryXloc = [storeEveryXloc; xFlashesIter];
+                storeEveryYloc = [storeEveryYloc; yFlashesIter];
+                storeEveryTic = [storeEveryTic; tocFlashIter];
                 
                 if ~isInWindow
                     storeSuccess(trl) = 0;
@@ -305,7 +319,7 @@ try
         if isDaq, krEndTrial(dio); end
         
         if mod(trl,10) == 0
-            save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+            save(fName, 'storeXlocs', 'storeYlocs','storeSuccess', 'storeEveryTic', 'storeEveryYloc', 'storeEveryXloc')
         end
         
         trl = trl + 1;
@@ -319,7 +333,7 @@ catch lasterr
     ShowCursor
     Screen('CloseAll');
     if isDaq, krEndTrial(dio); end
-    save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+    save(fName, 'storeXlocs', 'storeYlocs','storeSuccess', 'storeEveryTic', 'storeEveryYloc', 'storeEveryXloc')
     disp(fName)
     keyboard
 end
@@ -329,7 +343,7 @@ axes(handles.EyePosition);cla;
 axes(handles.TaskSpecificPlot);cla;
 
 if isDaq, krEndTrial(dio); end
-save(fName, 'storeXlocs', 'storeYlocs','storeSuccess')
+save(fName, 'storeXlocs', 'storeYlocs','storeSuccess', 'storeEveryTic', 'storeEveryYloc', 'storeEveryXloc')
 Priority(0);
 
 end % function

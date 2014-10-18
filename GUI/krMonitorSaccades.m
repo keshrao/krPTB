@@ -111,9 +111,9 @@ while isRun
         
         figure(2),subplot(3,3,subpnum(saci))
         if ~isempty(timeTrig) && length(timeTrig) == 2
-            plot([timeTrig'; timeTrig'], [prow(subpnum(saci))-0.9 prow(subpnum(saci))-0.1], 'k')
+            plot([timeTrig'; timeTrig'], [prow(subpnum(saci))-0.9 prow(subpnum(saci))-0.1], 'k', 'LineWidth', 2)
         elseif ~isempty(timeTrig)
-            plot([timeTrig timeTrig], [prow(subpnum(saci))-0.9 prow(subpnum(saci))-0.1], 'k', 'LineWidth', 3)
+            plot([timeTrig timeTrig], [prow(subpnum(saci))-0.9 prow(subpnum(saci))-0.1], 'k', 'LineWidth', 2)
         end
         xlim([-sacpre sacpost])
         

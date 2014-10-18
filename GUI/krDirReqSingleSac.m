@@ -75,6 +75,7 @@ if viewingFigure
     hold on
     rectangle('Position', [0 0 10 10], 'FaceColor', 'black'); % center of the screen
     hFix = rectangle('Position', [0, 0 25 25],'FaceColor','blue'); %<- note, x,y,w,h as opposed to PTB's convention
+    hTarg = rectangle('Position', [0, 0 25 25],'FaceColor','cyan');
     hEye = rectangle('Position', [0, 0 25 25],'FaceColor','red');
     axis off    
     
@@ -141,6 +142,7 @@ for ti = 1:9, totRelSpks{ti} = []; end
     function updateViewingFigure()
         try
             set(hFix, 'Position', [sq(3,indLoc)-centX -(sq(4, indLoc)-centY) 25 25]);
+            set(hTarg, 'Position', [sq(3,indLoc)-centX -(sq(4, indLoc)-centY) 25 25]);
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
             drawnow
         catch
@@ -183,7 +185,9 @@ try
     trl = 1;
     while trl <= ntrls && isRun
         
-        distvar = randi([6 12],1,1);
+        fprintf('\n')
+        
+        distvar = randi([6 15],1,1);
         generateTableSquares(distvar)
         
         if distvar <= 8
@@ -223,7 +227,8 @@ try
         fixtic = tic;
         
         set(hFix, 'visible', 'off')
-        
+        set(hTarg, 'visible', 'off')
+                
         while toc(fixtic) < 3 % wait three seconds to enter fixation
             
             if isDaq
@@ -247,7 +252,7 @@ try
             end
             
         end
-        
+                
         % check if fixation failed
         if ~isInWindow
             Screen(window, 'FillRect', black);
@@ -257,7 +262,7 @@ try
             WaitSecs(2);
             
         else
-            
+            set(hFix, 'visible', 'on')
             % continue the trial now that fixation is acquired
             if isDaq, krStartTrial(dio); end
 
@@ -265,46 +270,61 @@ try
             
             % once fixation is acquired, hold fixation for random period ms
             % 300 - 500 ms
-            temptic = tic;
-            while toc(temptic) < 0.4 + (rand/5 - 0.1) 
+            
+            prefixtic = tic;
+            while toc(prefixtic) < 0.4 + (rand/5 - 0.1) && isInWindow
                 try
                     [eyePosX eyePosY] = krGetEyePos(ai);
                 end
                 if viewingFigure, updateViewingFigure(); end
-            end
-                        
-            % draw target and photocell
-            Screen(window, 'FillRect', [colorwhite colorwhite], [sq(:,indLoc) photocell]);
-            Screen(window, 'Flip');
-            set(hFix, 'visible', 'on')
-            
-            % give it another .300 seconds to get into target zone
-            getspikesonce = false;
-            
-            temptic = tic;
-            while toc(temptic) < 0.3
-                if ~getspikesonce 
-                    try
-                        trigtic = tic;
-                        [data, time, saclocs] = krFullEyePosTrigs(ai, 0.25); 
-                        trigtime = toc(trigtic);
-                    end
-                    getspikesonce = true;
-                    %fprintf('Trig Time: %d\n',trigtime);
+                
+                if abs(eyePosX) < winTol && abs(eyePosY) < winTol
+                    isInWindow = true; % cue to begin wait period
+                else
+                    isInWindow = false;
                 end
             end
             
-           
-            if length(saclocs) > 1
-                % multiple saccades made 
-                isInWindow = false;
+            if isInWindow
+                % draw target and photocell
+                
+                Screen(window, 'FillRect', [colorwhite colorwhite], [sq(:,indLoc) photocell]);
+                Screen(window, 'Flip');
+                fprintf('End Fix: %0.3f \n', toc(prefixtic)),
+                
+                set(hTarg, 'visible', 'on')
+                set(hFix, 'visible', 'off')
             end
-              
+            
+            
+            if isInWindow % but no checking of window during the saccade
+                % give it another .300 seconds to get into target zone
+                getspikesonce = false;
+
+                sactic = tic;
+                while toc(sactic) < 0.3
+                    if ~getspikesonce 
+                        try
+                            trigtic = tic;
+                            [data, time, saclocs] = krFullEyePosTrigs(ai, 0.25); 
+                            trigtime = toc(trigtic);
+                        end
+                        getspikesonce = true;
+                        %fprintf('Trig Time: %d\n',trigtime);
+                    end
+                end
+
+
+                if length(saclocs) > 1
+                    % multiple saccades made 
+                    isInWindow = false;
+                end
+                fprintf('End Saccade: %0.3f \n', toc(sactic))
+            end
             
             % successful fixation
-            temptic = tic;
-            
-            while toc(temptic) < 0.3 && isInWindow % maintin fix for 0.5 sec
+            postfixtic = tic;
+            while toc(postfixtic) < 0.15 && isInWindow % maintin fix for 0.5 sec
                 
                 if isDaq
                     try
@@ -321,21 +341,22 @@ try
                 else
                     isInWindow = false;
                 end
-                
+                fprintf('End Post Fix: %0.3f \n', toc(postfixtic))
             end %while fixating on target
-            
+           if isInWindow, fprintf('End Post Fix: %0.3f \n', toc(postfixtic)), end
             
             
         end % presentation of trial 
         
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
         set(hFix, 'visible', 'off')
+        set(hTarg, 'visible', 'off')
         drawnow 
         
         % check if fixation failed
         if ~isInWindow
             if isDaq, krEndTrial(dio);end
-            WaitSecs(1);
+            WaitSecs(2);
         else
             WaitSecs(0.5);
             if isDaq, krEndTrial(dio);end
@@ -360,15 +381,16 @@ try
             else
                 timeSac = time(saclocs);
             end
+            
             timeTrig = time(tlocs) - timeSac;
             % you know the subplot bc of prevLoc
             subpnum = subpcorr(prevLoc);
             figure(2), subplot(3,3,subpnum);
             
             if ~isempty(timeTrig) && length(timeTrig) == 2
-                plot([timeTrig'; timeTrig'], [prow(subpnum)-0.9 prow(subpnum)-0.1], 'k')
+                plot([timeTrig'; timeTrig'], [prow(subpnum)-0.9 prow(subpnum)-0.1], 'k', 'LineWidth', 2)
             elseif ~isempty(timeTrig)
-                plot([timeTrig timeTrig], [prow(subpnum)-0.9 prow(subpnum)-0.1], 'k', 'LineWidth', 3)
+                plot([timeTrig timeTrig], [prow(subpnum)-0.9 prow(subpnum)-0.1], 'k', 'LineWidth', 2)
             end
             totRelSpks{subpnum} = [totRelSpks{subpnum}; timeTrig];
             thispsth = buildpsth(sacpre, sacpost, totRelSpks{subpnum});
