@@ -7,14 +7,9 @@ end
 clc, pause(0.01);
 warning off
 
-try
-    [ai, dio] = krConnectDAQTrigger();
-    isDaq = true;
-catch
-    disp('no daq')
-    isDaq = false;
-end
-
+ai = handles.ai;
+dio = handles.dio;
+isDaq = true;
 
 % remember to clear this out for real experiments
 Screen('Preference', 'SkipSyncTests', 0);
