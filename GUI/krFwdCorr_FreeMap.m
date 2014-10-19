@@ -4,6 +4,8 @@ if isempty(ntrls)
     ntrls = 300;
 end
 
+warning off
+
 ai = handles.ai;
 dio = handles.dio;
 isDaq = true;
@@ -31,7 +33,7 @@ if viewingFigure
         hTargs(numtargsi) = rectangle('Position', [0, 0 10 10],'FaceColor','white'); %#ok
     end
      % this is for the easy ending of programs
-    uic = uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[450 350 60 20]);
+    uic = uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[350 350 60 20]);
     drawnow
     
     set(gca, 'color', 'none')
@@ -55,12 +57,31 @@ end
 
 isRun = true;
 
+% bin data into 5ms bins & determine firing rate
+sacpre = 0.3;
+sacpost = 0.3;
+binwidth = 0.001;
+bins = -sacpre:binwidth:sacpost;
+
+figure(2), clf
+for subp = 1:9
+    subplot(3,3,subp), hold on
+    plot([0 0], [0 150], 'b', 'LineWidth', 1.5)
+	hPSTH(subp) = plot(bins(1:end-1)+(binwidth/2), ones(length(bins)-1,1), 'r', 'LineWidth', 1.5);
+end
+
+% store all the spikes for psth construction
+for i = 1:9, totRelSpks{i} = []; end
+prow = ones(9,1); % number of saccades in 8 cardinal directions
+% number 5 = center and will never be used
+
+
 % data to be stored into this filename
 c = clock;
 fName = ['FreeMap_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
 Priority(2);
-
+%%
 try
     window = Screen(whichScreen, 'OpenWindow');
     
@@ -85,8 +106,10 @@ try
     % this will be used to store ALL flash locations
     storeXlocs = [];
     storeYlocs = [];
+    globeTic = [];
     
-    storeSuccess = 0;
+    gt = tic;
+    
     trl = 1;
     while trl <= ntrls && isRun
         
@@ -96,11 +119,13 @@ try
         if isDaq, krStartTrial(dio); end
         
         % begin series of stimuli flashes
-        numflashes = 25;
+        numflashes = 10;
         
         xFlashesIter = nan(numflashes,numstimthistrl);
         yFlashesIter = nan(numflashes,numstimthistrl);
+        ticIter = nan(numflashes, 1);
         
+        %%
         for nf = 1:numflashes
             
             try
@@ -151,6 +176,7 @@ try
             
             xFlashesIter(nf,:) = randXpos;
             yFlashesIter(nf,:) = randYpos;
+            ticIter(nf) = toc(gt);
             
             stims = [photoSq];
             stimcolors = [colorWhite];
@@ -160,22 +186,29 @@ try
                 stims = [stims thisSq];
                 stimcolors = [stimcolors colorWhite];
             end
-            
+            if viewingFigure, updateViewingFigure(); end
             
             % draw fixation dot
             Screen(window, 'FillRect', stimcolors , stims);
             Screen(window, 'Flip');
             
+            
+            
             % leave stimulus on for short priod of time
-            stimwaitdur = 0.05; % always 50ms
+            stimwaitdur = 0.3; % always 300ms
+            
+            getspikesonce = false; 
             
             thisdur = tic;
             while toc(thisdur) < stimwaitdur
-                if viewingFigure, updateViewingFigure(); end
+                if ~getspikesonce 
+                    [data, time, slocs, ex, ey] = krFullEyePosTrigs(ai, 0.25);
+                end
+                getspikesonce = true; 
             end
             
             
-            blankDur = 0.1; 
+            blankDur = 0.3; 
             % after stim duration, then blank screen (leave fixation) for 100ms
             Screen(window, 'FillRect', black);
             Screen(window, 'Flip');
@@ -186,11 +219,63 @@ try
             end
             
             
+            % during the "blank phase", plot out the data
+            [~, tlocs] = findpeaks(diff(data(:,3)),'MINPEAKHEIGHT',1);
+            % a vector the length of the number of saccades that give the proper subplot
+            if isempty(slocs), slocs = 1; end
+            subpnum = computedirsacs(ex, ey, slocs);
+            
+            % now plot the raster
+            if isempty(slocs)
+                timeSac = 0; % note there's a condition of no saccade
+            else
+                for saci = 1:length(slocs)
+                    
+                    if time(slocs(saci)) - sacpre < 0
+                        % if the saccade happens within 300ms of acquisition
+                        % then just take the first data point
+                        tlow = 1;
+                    else
+                        tlow = find(time > time(slocs(saci)) - sacpre, 1, 'first');
+                    end
+                    
+                    if time(slocs(saci)) + sacpre > time(end)
+                        % if the saccade happens within 300ms of acquisition
+                        % then just take the first data point
+                        thigh = length(time);
+                    else
+                        thigh = find(time > time(slocs(saci)) + sacpost, 1, 'first');
+                    end
+                    
+                    % tlow and thigh are indexes corresponding to when to look for triggers
+                    indTrig = tlocs(tlocs > tlow & tlocs < thigh);
+                    timeTrig = time(indTrig) - time(slocs(saci));
+                    
+                    figure(2),subplot(3,3,subpnum(saci))
+                    if ~isempty(timeTrig) && length(timeTrig) == 2
+                        plot([timeTrig'; timeTrig'], [prow(subpnum(saci))-0.9 prow(subpnum(saci))-0.1], 'k', 'LineWidth', 2)
+                    elseif ~isempty(timeTrig)
+                        plot([timeTrig timeTrig], [prow(subpnum(saci))-0.9 prow(subpnum(saci))-0.1], 'k', 'LineWidth', 2)
+                    end
+                    xlim([-sacpre sacpost])
+                    
+                    totRelSpks{subpnum(saci)} = [totRelSpks{subpnum(saci)}; timeTrig];
+                    thispsth = buildpsth(sacpre, sacpost, totRelSpks{subpnum(saci)});
+                    set(hPSTH(subpnum(saci)), 'ydata', thispsth./40);
+                    drawnow
+                    
+                    
+                    prow(subpnum(saci)) = prow(subpnum(saci)) + 1;
+                end
+            end
+            
+            
         end %nflahses
-        
+        %%
         % collect flashes
         storeXlocs = [storeXlocs; xFlashesIter]; %#ok
         storeYlocs = [storeYlocs; yFlashesIter]; %#ok
+        globeTic = [globeTic; ticIter]; %#ok
         
         % wipe screen & fill bac
         Screen(window, 'FillRect', black);
@@ -203,19 +288,24 @@ try
         WaitSecs(2);
         
         if mod(trl,10) == 0
-            save(fName, 'storeXlocs', 'storeYlocs')
+            save(fName, 'storeXlocs', 'storeYlocs','globeTic')
         end
         
         trl = trl + 1;
     end % ntrials
     
     
-catch 
+catch lasterr
     
     ShowCursor
     Screen('CloseAll');
     if isDaq, krEndTrial(dio); end
-    save(fName, 'storeXlocs', 'storeYlocs')
+    save(fName, 'storeXlocs', 'storeYlocs','globeTic')
+    
+    delete(uic)
+    axes(handles.EyePosition);cla;
+    axes(handles.TaskSpecificPlot);cla;
+    
     keyboard
 end
 
@@ -225,7 +315,7 @@ end
 
 if isDaq, krEndTrial(dio); end
 Screen('CloseAll');
-save(fName, 'storeXlocs', 'storeYlocs')
+save(fName, 'storeXlocs', 'storeYlocs','globeTic')
 Priority(0);
 
 delete(uic)

@@ -1,4 +1,4 @@
-function [data,time, saclocs] = krFullEyePosTrigs(ai, dur)
+function [data,time, saclocs, ex, ey] = krFullEyePosTrigs(ai, dur)
 
 %% Initiate
 preSampleRate = ai.SampleRate;
@@ -21,7 +21,7 @@ ey = movingmean(data(:,2)*100, 2000);
 spdeye = sqrt(diff(ex) .^2 + diff(ey).^2) .* 1000 .* 10; % to secs & then to deg
 
 %arbitrary threshold
-sacthresh = 30; %deg/sec
+sacthresh = 60; %deg/sec
 [~, saclocs] = findpeaks(spdeye, 'MINPEAKHEIGHT', sacthresh ,'MINPEAKDISTANCE',5000);
 
 %% reset to old settings

@@ -114,6 +114,8 @@ switch popup_sel_index
         krFwdCorr_SingleSaccade_MScaling(get(handles.SetTrialNumber,'Value'),handles);
     case 6
         krCal(get(handles.SetTrialNumber,'Value'),handles);
+    case 7 
+        krFwdCorr_FreeMap(get(handles.SetTrialNumber,'Value'),handles);
         
         
 end
@@ -168,7 +170,7 @@ function ChooseParadigm_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from ChooseParadigm
 %choice = get(hObject,'String');
 set(handles.ChooseParadigm, 'Value', get(hObject,'Value'));
-
+ 
 
 
 
@@ -185,7 +187,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 set(hObject, 'String', {'krDirReqSingleSac','krFwdCorr_OnlinePlot','krFwdCorr_MScale', ... 
-                    'krFwdCorr_SingleSaccade','krFwdCorr_SingleSaccade_MScaling','krCal'});
+                    'krFwdCorr_SingleSaccade','krFwdCorr_SingleSaccade_MScaling','krCal','FreeMap'});
 
 
 % --- Executes on button press in krCalibrateEyePos.

@@ -186,7 +186,7 @@ try
     while trl <= ntrls && isRun
         
         fprintf('\n')
-        
+
         distvar = randi([6 15],1,1);
         generateTableSquares(distvar)
         
@@ -207,6 +207,7 @@ try
             prevLoc = indLoc;
         else
             isRequested = false;
+            prevLoc = indLoc; 
         end
             
         % deal with scaling difference
@@ -320,6 +321,7 @@ try
                     isInWindow = false;
                 end
                 fprintf('End Saccade: %0.3f \n', toc(sactic))
+                fprintf('Num saccades: %i \n', length(saclocs))
             end
             
             % successful fixation
@@ -344,6 +346,7 @@ try
                 fprintf('End Post Fix: %0.3f \n', toc(postfixtic))
             end %while fixating on target
            if isInWindow, fprintf('End Post Fix: %0.3f \n', toc(postfixtic)), end
+            
             
             
         end % presentation of trial 
