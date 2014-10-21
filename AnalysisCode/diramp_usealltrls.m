@@ -1,4 +1,4 @@
-function diramp()
+%function diramp_usealltrls()
 % this program will help analyze the dir
 clear, clc
 
@@ -25,7 +25,7 @@ else
     numfiles = 1;
 end
 
-for clus = 1
+for clus = 1:2
     for dt = 1:numfiles
         
         if iscell(fullpathname)
@@ -106,6 +106,8 @@ for clus = 1
         %% determine when stimuli were flashes during the successful trials
         
         timeFlashes = [];
+        trltouse = [];
+        
         nonzerotrls = find(storeSuccesses);
         
         if length(idxTstart) ~= max(nonzerotrls)
@@ -113,11 +115,10 @@ for clus = 1
             nonzerotrls(end) = [];
         end
         
-        numsucctrls = length(nonzerotrls);
         
-        for ti = 1:numsucctrls
+        for ti = 1:length(idxTstart)
             
-            trl = storeSuccesses(nonzerotrls(ti));
+            trl = ti;
             
             % note that time stamps don't matter here bc all this is comapring indexes
             thisIndFlashes = find(idxOn > idxTstart(trl) & idxOn < idxTstop(trl));
@@ -125,6 +126,7 @@ for clus = 1
             
             if thisNumFlashes == 1
                 timeFlashes(end+1) = photoTS(idxOn(thisIndFlashes));
+                trltouse(end+1) = trl;
             else
                 fprintf('Something wrong with trial: %i.\n', trl);
                 storeSuccesses(trl) = 0;
@@ -142,9 +144,9 @@ for clus = 1
         dirsac = nan(length(nonzerotrls),1); % direction the saccade was made to
         sactimes = nan(length(nonzerotrls),1);
         
-        for ti = 1:numsucctrls
+        for ti = 1:length(trltouse)
             
-            trl = storeSuccesses(nonzerotrls(ti));
+            trl = trltouse(ti);
             
             %time stamps matter here bc comaping different times and metrics
             idxThisTrl = find(eyeTS > timeFlashes(ti) & eyeTS < trigTS(idxTstop(trl)));
@@ -203,7 +205,7 @@ for clus = 1
             end
             
             % first align to flash times
-            for ti = 1:numsucctrls
+            for ti = 1:length(trltouse)
                 
                 thisspkidx = spktimes > aligntimes(ti)-prestimdur & spktimes < aligntimes(ti)+poststimdur;
                 thisspktimes = spktimes(thisspkidx);

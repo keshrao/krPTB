@@ -90,7 +90,7 @@ for prei = 1:length(predurs)
             
             % smooth out the photocell
             idxPhoto = photo > 0.02;
-            photo(idxPhoto) = 0.3;
+            photo(idxPhoto) = 0.2;
             photo(~idxPhoto) = 0;
             
             dphoto = diff(photo);
