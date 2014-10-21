@@ -132,7 +132,6 @@ end %isRun
 
 delete(endtaskui);
 axes(handles.EyePosition); cla;
-close(2);
 
 % reset to old parameters
 ai.SampleRate = preSampleRate;

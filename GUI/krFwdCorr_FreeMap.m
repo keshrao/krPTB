@@ -66,7 +66,7 @@ bins = -sacpre:binwidth:sacpost;
 figure(2), clf
 for subp = 1:9
     subplot(3,3,subp), hold on
-    plot([0 0], [0 150], 'b', 'LineWidth', 1.5)
+    plot([0 0], [0 100], 'b', 'LineWidth', 1.5)
 	hPSTH(subp) = plot(bins(1:end-1)+(binwidth/2), ones(length(bins)-1,1), 'r', 'LineWidth', 1.5);
 end
 
@@ -202,7 +202,11 @@ try
             thisdur = tic;
             while toc(thisdur) < stimwaitdur
                 if ~getspikesonce 
-                    [data, time, slocs, ex, ey] = krFullEyePosTrigs(ai, 0.25);
+                    try
+                        [data, time, slocs, ex, ey] = krFullEyePosTrigs(ai, 0.25);
+                    catch
+                    end
+                    
                 end
                 getspikesonce = true; 
             end

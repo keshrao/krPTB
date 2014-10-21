@@ -303,7 +303,7 @@ try
                 getspikesonce = false;
 
                 sactic = tic;
-                while toc(sactic) < 0.3
+                while toc(sactic) < 0.35
                     if ~getspikesonce 
                         try
                             trigtic = tic;
@@ -316,7 +316,7 @@ try
                 end
 
 
-                if length(saclocs) > 1
+                if length(saclocs) > 2 % there usually is a catch up saccade also
                     % multiple saccades made 
                     isInWindow = false;
                 end
@@ -382,7 +382,7 @@ try
             if isempty(saclocs)
                 timeSac = 0; % note there's a condition of no saccade
             else
-                timeSac = time(saclocs);
+                timeSac = time(saclocs(1));
             end
             
             timeTrig = time(tlocs) - timeSac;
