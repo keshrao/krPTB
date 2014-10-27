@@ -2,20 +2,17 @@ function krFwdCorr_OnlinePlot(ntrls, handles)
 
 % testing psychtoolbox screen command
 
-clc; pause(0.01);
+clc; 
 warning off
 
 if isempty(ntrls)
     ntrls = 300;
 end
 
-try
-    [ai, dio] = krConnectDAQTrigger();
-    isDaq = true;
-catch
-    disp('no daq')
-    isDaq = false;
-end
+ai = handles.ai;
+dio = handles.ai;
+isDaq = true;
+
 
 
 % remember to clear this out for real experiments

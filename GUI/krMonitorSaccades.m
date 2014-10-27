@@ -4,7 +4,6 @@ warning off
 
 % get the daq
 ai = handles.ai;
-%[ai, dio] = krConnectDAQTrigger();
 
 % save old information
 preSampleRate = ai.SampleRate;

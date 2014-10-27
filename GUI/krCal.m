@@ -34,13 +34,9 @@ drawnow,
 
 
 
-try
-    [ai, dio] = krConnectDAQ();
-    isDaq = true;
-catch MException;
-    disp('no daq')
-    isDaq = false;
-end
+ai = handles.ai;
+dio = handles.ai;
+isDaq = true;
 
 
 Priority(2); % realtime priority

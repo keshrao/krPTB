@@ -4,17 +4,13 @@ if isempty(ntrls)
     ntrls = 300;
 end
 
-clc, pause(0.01);
+clc,
 warning off
 
-try
-    [ai, dio] = krConnectDAQ();
-    isDaq = true;
-catch
-    disp('no daq')
-    isDaq = false;
-end
 
+ai = handles.ai;
+dio = handles.ai;
+isDaq = true;
 
 % remember to clear this out for real experiments
 Screen('Preference', 'SkipSyncTests', 0);

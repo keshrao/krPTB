@@ -1,19 +1,16 @@
 function krFwdCorr_SingleSaccade_MScaling(ntrls,handles)
 
-clc, pause(0.01);
+clc
 
 
 if isempty(ntrls)
     ntrls = 300;
 end
 
-try
-    [ai, dio] = krConnectDAQ();
-    isDaq = true;
-catch
-    disp('no daq')
-    isDaq = false;
-end
+
+ai = handles.ai;
+dio = handles.dio;
+isDaq = true;
 
 
 % remember to clear this out for real experiments

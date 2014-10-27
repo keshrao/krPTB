@@ -115,8 +115,7 @@ switch popup_sel_index
     case 6
         krCal(get(handles.SetTrialNumber,'Value'),handles);
     case 7 
-        krFwdCorr_FreeMap(get(handles.SetTrialNumber,'Value'),handles);
-        
+        krFwdCorr_FreeMap(get(handles.SetTrialNumber,'Value'),handles);      
         
 end
 
