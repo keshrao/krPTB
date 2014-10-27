@@ -2,24 +2,19 @@ function krMonitorSaccades(handles)
 
 warning off
 
+% duration to collect data 
+dur = 0.3;
+
 % get the daq
 ai = handles.ai;
 
-% save old information
-preSampleRate = ai.SampleRate;
-
-% put in new daq acquisition parameters
-dur = 1;
-ai.SampleRate = 100000;
-ai.SamplesPerTrigger = dur * ai.SampleRate;
-
 axes(handles.EyePosition);cla;
 hold on
-hEx = plot(zeros(ai.SamplesPerTrigger,1),'b','LineWidth',1.5);
-hEy = plot(zeros(ai.SamplesPerTrigger,1),'g','LineWidth',1.5);
-hSp = plot(zeros(ai.SamplesPerTrigger,1),'k','LineWidth',1.5);
+hEx = plot(zeros(ai.SampleRate*dur,1),'b','LineWidth',1.5);
+hEy = plot(zeros(ai.SampleRate*dur,1),'g','LineWidth',1.5);
+hSp = plot(zeros(ai.SampleRate*dur,1),'k','LineWidth',1.5);
 ylim([-400 400])
-xlim([0 ai.SamplesPerTrigger])
+xlim([0 ai.SampleRate*dur])
 %axis off
 
 endtaskui = uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[400 350 60 20]);
@@ -44,6 +39,7 @@ for subp = 1:9
     plot([0 0], [0 30], 'b', 'LineWidth', 1.5)
 	hPSTH(subp) = plot(bins(1:end-1)+(binwidth/2), ones(length(bins)-1,1), 'r', 'LineWidth', 1.5);
 end
+drawnow, pause(0.00001)
 
 % store all the spikes for psth construction
 for i = 1:9, totRelSpks{i} = []; end
@@ -55,28 +51,14 @@ prow = ones(9,1); % number of saccades in 8 cardinal directions
 % while loop will begin here ---------
 while isRun
     % acquire data
-    start(ai);
-    [data, time] = getdata(ai, ai.SampleRate*dur);
-    flushdata(ai);
-    stop(ai);
+    [data,time, slocs, ex, ey, spdeye] = krPeekFullEyePosTrigs(ai, dur);
     
-    ex = data(:,1)*100; % scaling from volts to deg
-    ey = data(:,2)*100; % scaling from volts to deg
-    
-    ex = movingmean(ex, 2000); % this process can be slow
-    ey = movingmean(ey, 2000);
-    
-    % find when saccades happen
-    spdeye = sqrt(diff(ex) .^2 + diff(ey).^2) .* 1000; % to secs & then to deg
-    
+   
     % plot the data onto the figure
     set(hEx, 'ydata', ex);
     set(hEy, 'ydata', ey);
-    set(hSp, 'ydata', spdeye * 5); % scaled just so it's easier to see 
-    
-    %arbitrary threshold
-    sacthresh = 20; %deg/sec
-    [~, slocs] = findpeaks(spdeye, 'MINPEAKHEIGHT', sacthresh ,'MINPEAKDISTANCE',5000);
+    set(hSp, 'ydata', spdeye); % scaled just so it's easier to see 
+    drawnow, pause(0.00001)
     
     trig = data(:,3); % triggered data
     % get location of the peaks of triggers
@@ -119,7 +101,7 @@ while isRun
 		totRelSpks{subpnum(saci)} = [totRelSpks{subpnum(saci)}; timeTrig];
 		thispsth = buildpsth(sacpre, sacpost, totRelSpks{subpnum(saci)});
 		set(hPSTH(subpnum(saci)), 'ydata', thispsth./40);
-		drawnow
+		drawnow, pause(0.00001)
 		
 		
         prow(subpnum(saci)) = prow(subpnum(saci)) + 1;
@@ -132,8 +114,5 @@ end %isRun
 delete(endtaskui);
 axes(handles.EyePosition); cla;
 
-% reset to old parameters
-ai.SampleRate = preSampleRate;
-ai.SamplesPerTrigger = 1;
 
 end % main

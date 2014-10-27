@@ -23,7 +23,6 @@ catch
 end
     
     
-%start(ai);
 trigger(ai); % begin running and logging
 
 % output connections

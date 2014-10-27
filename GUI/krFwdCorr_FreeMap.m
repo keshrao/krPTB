@@ -129,7 +129,8 @@ try
         for nf = 1:numflashes
             
             try
-                [eyePosX eyePosY] = krGetEyePos(ai);
+%                 [eyePosX eyePosY] = krGetEyePos(ai);
+                  [eyePosX eyePosY] = krPeekEyePos(ai);
             catch
                 disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
             end
@@ -203,7 +204,8 @@ try
             while toc(thisdur) < stimwaitdur
                 if ~getspikesonce 
                     try
-                        [data, time, slocs, ex, ey] = krFullEyePosTrigs(ai, stimwaitdur-0.05);
+%                         [data, time, slocs, ex, ey] = krFullEyePosTrigs(ai, stimwaitdur-0.05);
+                          [data, time, slocs, ex, ey] = krPeekFullEyePosTrigs(ai, stimwaitdur-0.05);
                     catch
                     end
                     

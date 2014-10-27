@@ -57,7 +57,7 @@ handles.output = hObject;
 
 
 % Connect the daq card
-[ai, dio] = krConnectDAQTrigger();
+[ai, dio] = krConnectDAQInf();
 handles.ai = ai;
 handles.dio = dio;
 
@@ -97,9 +97,6 @@ end
 % Update handles structure
 guidata(hObject, handles);
 
-% {'krDirRequestable','krFwdCorr_OnlinePlot','krFwdCorr_MScale', ... 
-%                    'krFwdCorr_SingleSaccade','krFwdCorr_SingleSaccade_MScaling'}
-
 popup_sel_index = get(handles.ChooseParadigm, 'Value');
 switch popup_sel_index
     case 1
@@ -115,7 +112,9 @@ switch popup_sel_index
     case 6
         krCal(get(handles.SetTrialNumber,'Value'),handles);
     case 7 
-        krFwdCorr_FreeMap(get(handles.SetTrialNumber,'Value'),handles);      
+        krFwdCorr_FreeMap(get(handles.SetTrialNumber,'Value'),handles);
+    case 8
+        krPlotEyePosition(handles);
         
 end
 
@@ -137,7 +136,7 @@ if ~isequal(file, 0)
     open(file);
 end
 
-% --------------------------------------------------------------------
+% ----6----------------------------------------------------------------
 function PrintMenuItem_Callback(hObject, eventdata, handles)
 % hObject    handle to PrintMenuItem (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -186,7 +185,8 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 set(hObject, 'String', {'krDirReqSingleSac','krFwdCorr_OnlinePlot','krFwdCorr_MScale', ... 
-                    'krFwdCorr_SingleSaccade','krFwdCorr_SingleSaccade_MScaling','krCal','FreeMap'});
+                    'krFwdCorr_SingleSaccade','krFwdCorr_SingleSaccade_MScaling','krCal','FreeMap',...
+                     'PlotEyePos'});
 
 
 % --- Executes on button press in krCalibrateEyePos.

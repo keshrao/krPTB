@@ -232,16 +232,11 @@ try
                 
         while toc(fixtic) < 3 % wait three seconds to enter fixation
             
-            if isDaq
-                try
-                    [eyePosX eyePosY] = krGetEyePos(ai);
-                catch
-                    disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
-                end
-            else
-                [eyePosX,eyePosY] = GetMouse(window);
-                eyePosX = eyePosX - centX;
-                eyePosY = eyePosY - centY;
+            
+            try
+                [eyePosX eyePosY] = krPeekEyePos(ai);
+            catch
+                disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
             end
             
             if viewingFigure, updateViewingFigure(); end
@@ -275,7 +270,7 @@ try
             prefixtic = tic;
             while toc(prefixtic) < 0.4 + (rand/5 - 0.1) && isInWindow
                 try
-                    [eyePosX eyePosY] = krGetEyePos(ai);
+                    [eyePosX eyePosY] = krPeekEyePos(ai);
                 end
                 if viewingFigure, updateViewingFigure(); end
                 
@@ -307,7 +302,7 @@ try
                     if ~getspikesonce 
                         try
                             trigtic = tic;
-                            [data, time, saclocs] = krFullEyePosTrigs(ai, 0.25); 
+                            [data, time, saclocs] = krPeekFullEyePosTrigs(ai, 0.25); 
                             trigtime = toc(trigtic);
                         end
                         getspikesonce = true;
@@ -328,13 +323,13 @@ try
             postfixtic = tic;
             while toc(postfixtic) < 0.15 && isInWindow % maintin fix for 0.5 sec
                 
-                if isDaq
-                    try
-                        [eyePosX eyePosY] = krGetEyePos(ai);
-                    catch
-                        disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
-                    end
+
+                try
+                    [eyePosX eyePosY] = krPeekEyePos(ai);
+                catch
+                    disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                 end
+                
                 
                 if viewingFigure, updateViewingFigure(); end
                 
