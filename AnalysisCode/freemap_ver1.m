@@ -7,7 +7,7 @@ clustertouse = 1;
 %% pick a file
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename, pathname] = uigetfile([targetdir 'S41*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename, pathname] = uigetfile([targetdir 'S42*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 if iscell(fullpathname)
@@ -68,7 +68,6 @@ for clus = clustertouse
         eval(['Allspktimes = ' rawname(1:end-4) '_Ch7.times;'])
         eval(['spkcodes = ' rawname(1:end-4) '_Ch7.codes;'])
         
-        
         eval(['eyeSamplingRate = ' rawname(1:end-4) '_Ch3.interval;'])
         eval(['eyeTS = ' rawname(1:end-4) '_Ch3.times;'])
         
@@ -80,7 +79,7 @@ for clus = clustertouse
         
         %% data bookkeeping
         % smooth out the photocell
-        idxPhoto = photo > 0.25;
+        idxPhoto = photo > 0.2;
         photo(idxPhoto) = 0.3;
         photo(~idxPhoto) = 0;
         
@@ -116,16 +115,24 @@ for clus = clustertouse
         
         timeFlashesOn = [];
         timeFlashesOff = [];
-        
+                
         % look in every start/stop sequence & count total flashes
         for trl = 1:length(idxTstart)
             thisIndFlashes = find(idxOn > idxTstart(trl) & idxOn < idxTstop(trl));
+            
+            if length(thisIndFlashes) ~= 10
+                fprintf('Removed Trial: %i\n', trl)
+                storeXlocs(trl*10-9:trl*10,:) = [];
+                storeYlocs(trl*10-9:trl*10,:) = [];
+                continue
+            end
+            
             timeFlashesOn = [timeFlashesOn; photoTS(idxOn(thisIndFlashes))];
             timeFlashesOff = [timeFlashesOff; photoTS(idxOff(thisIndFlashes))];
         end
         
         if size(storeXlocs,1) ~= length(timeFlashesOn)
-            keyboard
+            fprintf('different sizes');
         end
         fprintf('Num Locs/ Num Flashes: %i/%i\n', size(storeXlocs,1), length(timeFlashesOn))
         
@@ -135,10 +142,10 @@ for clus = clustertouse
         
         for nf = 1:length(storeXlocs)
             
-            % what is the eye doing during the flash window
-            idxThisEyeDur = find(eyeTS > timeFlashesOn(nf) & eyeTS < timeFlashesOff(nf));
+            % what is the eye doing during the flash window + plus a litte bit more after the stimulus turned off
+            idxThisEyeDur = find(eyeTS > timeFlashesOn(nf) & eyeTS < timeFlashesOff(nf)+0.150);
             % what is the eye doing during the subsequent blank window
-            idxThisBlankDur = find(eyeTS > timeFlashesOff(nf) & eyeTS < timeFlashesOff(nf)+ .150);
+            %idxThisBlankDur = find(eyeTS > timeFlashesOff(nf) & eyeTS < timeFlashesOff(nf)+ .150);
             
             ex = eyeh(idxThisEyeDur).*100;
             ey = -eyev(idxThisEyeDur).*100;
@@ -216,7 +223,7 @@ for clus = clustertouse
                 
                 
                 for spi = 1:length(thisspkreltimes)
-                    plot([thisspkreltimes(spi) thisspkreltimes(spi)], [0.1+trly(subpnum) 1+trly(subpnum)], 'k')
+                    plot([thisspkreltimes(spi) thisspkreltimes(spi)], [0.1+trly(subpnum) 1+trly(subpnum)], 'k','LineWidth',1.5)
                     xlim([-presacdur postsacdur])
                 end
                 
@@ -280,7 +287,7 @@ for clus = clustertouse
                 figure(3),subplot(3,3,subpnum), hold on
                 
                 for spi = 1:length(thisspkreltimes)
-                    plot([thisspkreltimes(spi) thisspkreltimes(spi)], [0.1+trly(subpnum) 1+trly(subpnum)], 'k')
+                    plot([thisspkreltimes(spi) thisspkreltimes(spi)], [0.1+trly(subpnum) 1+trly(subpnum)], 'k', 'LineWidth', 1.5)
                     xlim([-presacdur postsacdur])
                 end
                 
@@ -312,6 +319,10 @@ for T_NT = 1:3
     
     for subpnum = 1:9
         
+        if subpnum == 5
+            continue
+        end
+        
         figure(T_NT)
         subplot(3,3,subpnum)
         
@@ -319,8 +330,8 @@ for T_NT = 1:3
         [bins, binwidth, psth] = buildpsth(presacdur, postsacdur, totRelSpks{subpnum});
         
         plot(bins(1:end-1)+(binwidth/2), psth./40, 'r', 'LineWidth', 2)
-        
-        ax = axis; plot([0 0], [0 ax(4)], 'b', 'LineWidth', 2)
+        plot([0 0], [0 trly(subpnum)], 'b', 'LineWidth', 2)
+        ylim([0 trly(subpnum)])
         
         if subpnum == 2 && T_NT == 1
             title('Saccade to Location with Stimulus')
@@ -335,7 +346,7 @@ for T_NT = 1:3
         subplot(3,3,subpnum), hold on
         plot([0 0], [0 1], 'b', 'LineWidth', 2)
         plot(bins(1:end-1)+(binwidth/2), psth./40./trly(subpnum), compcolor{1}, 'LineWidth', 2)
-        ax = axis; plot([0 0], [0 ax(4)], 'b', 'LineWidth', 2)
+        ax = axis; plot([0 0], [0 ax(4)], 'k', 'LineWidth', 2)
         
         drawnow
     end %subplot titles

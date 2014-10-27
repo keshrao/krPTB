@@ -2,6 +2,7 @@
 % this program will help analyze the dir
 clear, clc
 
+clustouse = [1 2];
 
 figure(1), clf
 figure(2), clf
@@ -14,7 +15,7 @@ trlyS = zeros(9,1);
 
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S41*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename pathname] = uigetfile([targetdir 'S40*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -25,7 +26,7 @@ else
     numfiles = 1;
 end
 
-for clus = 1:2
+for clus = clustouse
     for dt = 1:numfiles
         
         if iscell(fullpathname)

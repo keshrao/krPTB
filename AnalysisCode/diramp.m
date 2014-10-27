@@ -1,7 +1,8 @@
-function diramp()
+%function diramp()
 % this program will help analyze the dir
 clear, clc
 
+clustouse = [1 2];
 
 figure(1), clf
 figure(2), clf
@@ -14,7 +15,7 @@ trlyS = zeros(9,1);
 
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S41*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename pathname] = uigetfile([targetdir 'S42*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -25,7 +26,7 @@ else
     numfiles = 1;
 end
 
-for clus = 1
+for clus = clustouse
     for dt = 1:numfiles
         
         if iscell(fullpathname)
@@ -59,6 +60,9 @@ for clus = 1
         
         
         spktimes = Allspktimes(spkcodes(:,1) == clus);
+        if isempty(spktimes)
+            continue
+        end
         %spktimes = Allspktimes;
         
         fprintf('Num Clusters: %i, Cluster Plotted: %i \n', length(unique(spkcodes(:,1))), clus)
@@ -222,7 +226,7 @@ for clus = 1
                 
                 subplot(3,3,subpnum), hold on
                 for spi = 1:length(thisspkreltimes)
-                    plot([thisspkreltimes(spi) thisspkreltimes(spi)], [0.1+trly(subpnum) 1+trly(subpnum)], 'k')
+                    plot([thisspkreltimes(spi) thisspkreltimes(spi)], [0.1+trly(subpnum) 1+trly(subpnum)], 'k', 'LineWidth', 1.5)
                     xlim([-prestimdur poststimdur])
                 end
                 
@@ -241,14 +245,16 @@ for clus = 1
     end %files
     
 end
-
+%%
 for TorS = 1:2
     
     figure(TorS)
     if TorS == 1
         totRelSpks = totRelSpksT;
+        trly = trlyT;
     else
         totRelSpks = totRelSpksS;
+        trly = trlyS;
     end
     
     for subpnum = 1:9
@@ -257,10 +263,9 @@ for TorS = 1:2
         
         plot([0 0], [0 ax(4)], 'b', 'LineWidth', 2)
         
-        
         [bins, binwidth, psth] = buildpsth(prestimdur, poststimdur, totRelSpks{subpnum});
         
-        plot(bins(1:end-1)+(binwidth/2), psth./40, 'r', 'LineWidth', 1)
+        plot(bins(1:end-1)+(binwidth/2), psth./40, 'r', 'LineWidth', 2)
         
         if subpnum == 2 && TorS == 1
             title('Aligned to Target Onset')
