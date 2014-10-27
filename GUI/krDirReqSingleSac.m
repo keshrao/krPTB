@@ -291,7 +291,7 @@ try
                 
                 Screen(window, 'FillRect', [colorwhite colorwhite], [sq(:,indLoc) photocell]);
                 Screen(window, 'Flip');
-                fprintf('End Fix: %0.3f \n', toc(prefixtic)),
+                %fprintf('End Fix: %0.3f \n', toc(prefixtic)),
                 
                 set(hTarg, 'visible', 'on')
                 set(hFix, 'visible', 'off')
@@ -316,11 +316,11 @@ try
                 end
 
 
-                if length(saclocs) > 2 % there usually is a catch up saccade also
+                if length(saclocs) > 3 % there usually is a catch up saccade also
                     % multiple saccades made 
                     isInWindow = false;
                 end
-                fprintf('End Saccade: %0.3f \n', toc(sactic))
+                %fprintf('End Saccade: %0.3f \n', toc(sactic))
                 fprintf('Num saccades: %i \n', length(saclocs))
             end
             
@@ -343,9 +343,9 @@ try
                 else
                     isInWindow = false;
                 end
-                fprintf('End Post Fix: %0.3f \n', toc(postfixtic))
+                %fprintf('End Post Fix: %0.3f \n', toc(postfixtic))
             end %while fixating on target
-           if isInWindow, fprintf('End Post Fix: %0.3f \n', toc(postfixtic)), end
+           %if isInWindow, fprintf('End Post Fix: %0.3f \n', toc(postfixtic)), end
             
             
             
@@ -365,7 +365,9 @@ try
             if isDaq, krEndTrial(dio);end
             WaitSecs(0.5);
             if isDaq, krDeliverReward(dio,2);end
-            
+            if distvar <= 8
+                if isDaq, krDeliverReward(dio,1);end
+            end
             
             % at this point, calculate where the triggers happened and the number of peaks
             [~, tlocs] = findpeaks(diff(data(:,3)),'MINPEAKHEIGHT',1);

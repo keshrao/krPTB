@@ -195,7 +195,7 @@ try
             
             
             % leave stimulus on for short priod of time
-            stimwaitdur = 0.3; % always 300ms
+            stimwaitdur = 0.2; % always 300ms
             
             getspikesonce = false; 
             
@@ -203,7 +203,7 @@ try
             while toc(thisdur) < stimwaitdur
                 if ~getspikesonce 
                     try
-                        [data, time, slocs, ex, ey] = krFullEyePosTrigs(ai, 0.25);
+                        [data, time, slocs, ex, ey] = krFullEyePosTrigs(ai, stimwaitdur-0.05);
                     catch
                     end
                     
