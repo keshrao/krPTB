@@ -19,7 +19,7 @@ res = Screen('Resolution',whichScreen);
 centX = res.width/2;
 centY = res.height/2;
 
-numstimthistrl = 3;
+numstimthistrl = 2;
 
 viewingFigure = true;
 if viewingFigure
@@ -119,7 +119,7 @@ try
         if isDaq, krStartTrial(dio); end
         
         % begin series of stimuli flashes
-        numflashes = 10;
+        numflashes = 5;
         
         xFlashesIter = nan(numflashes,numstimthistrl);
         yFlashesIter = nan(numflashes,numstimthistrl);
@@ -129,7 +129,6 @@ try
         for nf = 1:numflashes
             
             try
-%                 [eyePosX eyePosY] = krGetEyePos(ai);
                   [eyePosX eyePosY] = krPeekEyePos(ai);
             catch
                 disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
@@ -196,7 +195,7 @@ try
             
             
             % leave stimulus on for short priod of time
-            stimwaitdur = 0.2; % always 300ms
+            stimwaitdur = 0.3; % always 300ms
             
             getspikesonce = false; 
             
@@ -205,7 +204,7 @@ try
                 if ~getspikesonce 
                     try
 %                         [data, time, slocs, ex, ey] = krFullEyePosTrigs(ai, stimwaitdur-0.05);
-                          [data, time, slocs, ex, ey] = krPeekFullEyePosTrigs(ai, stimwaitdur-0.05);
+                          [data, time, slocs, ex, ey, filtspdeye] = krPeekFullEyePosTrigs(ai, stimwaitdur-0.05);
                     catch
                     end
                     

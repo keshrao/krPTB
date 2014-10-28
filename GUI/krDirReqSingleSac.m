@@ -184,8 +184,6 @@ try
 
     trl = 1;
     while trl <= ntrls && isRun
-        
-        fprintf('\n')
 
         distvar = randi([6 15],1,1);
         generateTableSquares(distvar)
@@ -316,7 +314,7 @@ try
                     isInWindow = false;
                 end
                 %fprintf('End Saccade: %0.3f \n', toc(sactic))
-                fprintf('Num saccades: %i \n', length(saclocs))
+                %fprintf('Num saccades: %i \n', length(saclocs))
             end
             
             % successful fixation

@@ -20,7 +20,6 @@ ex = movingmean(data(:,1)*100,filtdur); % this process can be slow
 ey = movingmean(data(:,2)*100,filtdur);
 
 
-
 % find when saccades happen
 spdeye = sqrt(diff(ex) .^2 + diff(ey).^2) .* 1000 .* 100; % to secs & then to deg
 spdeye = movingmean(spdeye, filtdur);
@@ -31,6 +30,3 @@ spdeye(end-(filtdur*1.5):end) = 0; % around 2ms
 sacthresh = 150; %deg/sec
 [~, saclocs] = findpeaks(spdeye, 'MINPEAKHEIGHT', sacthresh ,'MINPEAKDISTANCE',100000);
 
-length(saclocs)
-
-%% reset to old settings

@@ -3,7 +3,7 @@ function krMonitorSaccades(handles)
 warning off
 
 % duration to collect data 
-dur = 0.3;
+dur = 0.9;
 
 % get the daq
 ai = handles.ai;
@@ -57,8 +57,8 @@ while isRun
     % plot the data onto the figure
     set(hEx, 'ydata', ex);
     set(hEy, 'ydata', ey);
-    set(hSp, 'ydata', spdeye); % scaled just so it's easier to see 
-    drawnow, pause(0.00001)
+    set(hSp, 'ydata', spdeye./2); % scaled just so it's easier to see 
+    drawnow; pause(0.00001);
     
     trig = data(:,3); % triggered data
     % get location of the peaks of triggers

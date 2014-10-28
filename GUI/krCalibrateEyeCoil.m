@@ -129,19 +129,14 @@ try
         while toc(ticTrl) < 2
             % draw fixation dot & add the mouse/eye position dot
             
-            if isDaq 
                 
                 try
-                    [eyePosX eyePosY] = krGetEyePos(ai);
+                    [eyePosX eyePosY] = krPeekEyePos(ai);
                 catch
                     disp('Missed Get Data')
                 end
                 
-            else
-                [eyePosX,eyePosY] = GetMouse(window);
-                eyePosX = eyePosX - centX;
-                eyePosY = eyePosY - centY;
-            end
+            
             
             set(hFix, 'Position', [sq(3,indLoc)-centX -(sq(4, indLoc)-centY) 25 25]);
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
