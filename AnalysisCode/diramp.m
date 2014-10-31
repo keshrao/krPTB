@@ -2,7 +2,7 @@
 % this program will help analyze the dir
 clear, clc
 
-clustouse = [1 2];
+clustouse = [1];
 
 figure(1), clf
 figure(2), clf
@@ -15,7 +15,7 @@ trlyS = zeros(9,1);
 
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S42*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename pathname] = uigetfile([targetdir 'S43*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -70,7 +70,7 @@ for clus = clustouse
         %% Get data (bookkeeping)
         
         % smooth out the photocell
-        idxPhoto = photo > 0.02;
+        idxPhoto = photo > 0.1;
         photo(idxPhoto) = 0.5;
         photo(~idxPhoto) = 0;
         
@@ -113,8 +113,8 @@ for clus = clustouse
         nonzerotrls = find(storeSuccesses);
         
         if length(idxTstart) ~= max(nonzerotrls)
-            fprintf('Deleting Last Trial\n')
-            nonzerotrls(end) = [];
+            fprintf('Recommend Deleting Last Trial\n')
+            %nonzerotrls(end) = [];
         end
         
         numsucctrls = length(nonzerotrls);
@@ -137,6 +137,10 @@ for clus = clustouse
         end
         
         fprintf('Number of successful trials: %i. \nNumber of flashes: %i.\n', length(nonzerotrls), length(timeFlashes))
+        
+        %% still determining why the above sometimes bugs out - it sometimes skips and misaligns
+        
+        
         
         %% if the distvar variable didn't get saved, then generate it here
         % but may also be good to run this anyway and determine when the saccade happens

@@ -7,7 +7,7 @@ clustertouse = 1;
 %% pick a file
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename, pathname] = uigetfile([targetdir 'S42*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename, pathname] = uigetfile([targetdir 'S43*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 if iscell(fullpathname)
@@ -145,7 +145,7 @@ for clus = clustertouse
             % what is the eye doing during the flash window + plus a litte bit more after the stimulus turned off
             idxThisEyeDur = find(eyeTS > timeFlashesOn(nf) & eyeTS < timeFlashesOff(nf)+0.150);
             % what is the eye doing during the subsequent blank window
-            %idxThisBlankDur = find(eyeTS > timeFlashesOff(nf) & eyeTS < timeFlashesOff(nf)+ .150);
+            idxThisBlankDur = find(eyeTS > timeFlashesOff(nf) & eyeTS < timeFlashesOff(nf)+.150);
             
             ex = eyeh(idxThisEyeDur).*100;
             ey = -eyev(idxThisEyeDur).*100;
@@ -161,19 +161,19 @@ for clus = clustertouse
             sacthresh = 2; %deg/sec
             [pks, saclocs] = findpeaks(spdeye, 'MINPEAKHEIGHT', sacthresh ,'MINPEAKDISTANCE',50);
             
-            %         figure(3)
-            %         clf, subplot(2,2,1), hold on,
-            %         plot(ex,ey,'.r'), plot(cXlocs(nf,:),cYlocs(nf,:),'ks');
-            %         plot(eyeh(idxThisBlankDur).*100, -eyev(idxThisBlankDur).*100,'.b'),
-            %         axis([-400 400 -400 400])
-            %         subplot(2,2,3:4), hold on, plot(eyeTS(idxThisEyeDur(1:end-1)),spdeye)
-            %         plot(eyeTS(idxThisEyeDur(saclocs)), pks, 'ro'), ylim([0 10])
-            %         try
-            %             for si = 1:length(saclocs)
-            %                 plot(eyeTS(idxThisEyeDur(saclocs(si)-20:saclocs(si)+20)), ones(length(eyeTS(idxThisEyeDur(saclocs(si)-20:saclocs(si)+20))),1), 'k', 'LineWidth', 2)
-            %             end
-            %         end
-            
+%                     figure(5)
+%                     clf, subplot(2,2,1), hold on,
+%                     plot(ex,ey,'.r'), plot(cXlocs(nf,:),cYlocs(nf,:),'ks');
+%                     plot(eyeh(idxThisBlankDur).*100, -eyev(idxThisBlankDur).*100,'.b'),
+%                     axis([-400 400 -400 400])
+%                     subplot(2,2,3:4), hold on, plot(eyeTS(idxThisEyeDur(1:end-1)),spdeye)
+%                     plot(eyeTS(idxThisEyeDur(saclocs)), pks, 'ro'), ylim([0 10])
+%                     try
+%                         for si = 1:length(saclocs)
+%                             plot(eyeTS(idxThisEyeDur(saclocs(si)-20:saclocs(si)+20)), ones(length(eyeTS(idxThisEyeDur(saclocs(si)-20:saclocs(si)+20))),1), 'k', 'LineWidth', 2)
+%                         end
+%                     end
+%             
             
             % for each saccade, determine
             % 1) the direction of motion
@@ -199,8 +199,8 @@ for clus = clustertouse
                 
                 
                 %% lands on target?
-                logicXloc = abs(expost - cXlocs(nf,:)) < 30;
-                logicYloc = abs(eypost - cYlocs(nf,:)) < 30;
+                logicXloc = abs(expost - cXlocs(nf,:)) < 60;
+                logicYloc = abs(eypost - cYlocs(nf,:)) < 60;
                 logictarg = find(logicXloc & logicYloc);
                 
                 
