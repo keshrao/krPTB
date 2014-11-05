@@ -1,130 +1,122 @@
-%
-load('SixxL3P1')
+%% align to all saccades
+clear, clc, figure(1), clf
 
-%raw_signal = S20_1p5.values;
-%filteredSignal = S10L3P0_510_Ch401.values;
+targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
+[filename, pathname] = uigetfile([targetdir 'S43*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+fullpathname = strcat(pathname, filename); % all the files in pathname
 
-spk_waveforms = S20_1p5_Ch6.values; % includes spk times & 76 idx of data per waveform
-spk_codes = S20_1p5_Ch6.codes; % all neuron units recorded. Find uniques
-spk_times = S20_1p5_Ch6.times; % in sec 
+%% setting general variables
 
-eyeH = S20_1p5_Ch3.values;
-eyeV = S20_1p5_Ch4.values;
+for i = 1:9, totRelSpks{i} = []; end
+trly = zeros(9,1);
+pretime = 0.3; % look 200ms prior to the saccade
+posttime = 0.3; % time after saccade
 
-trigTimes = S20_1p5_Ch5.times;
-%
+for i = 1:9, totRelSpks{i} = []; end
+trly = zeros(9,1);
+
+%% load file and data
+
+if iscell(fullpathname)
+    thisfilename = fullpathname{dt};
+    rawname = filename{dt};
+else
+    thisfilename = fullpathname;
+    rawname = filename;
+end
+
+load(strcat(thisfilename(1:end-4)))
+
+eval(['eyeh = ' rawname(1:end-8) '_Ch3.values;'])
+eval(['eyeTS = ' rawname(1:end-8) '_Ch3.times;'])
+eval(['eyev = ' rawname(1:end-8) '_Ch4.values;'])
+eval(['trig = ' rawname(1:end-8) '_Ch5.values;'])
+eval(['trigTS = ' rawname(1:end-8) '_Ch5.times;'])
+eval(['photo = ' rawname(1:end-8) '_Ch6.values;'])
+eval(['photoTS = ' rawname(1:end-8) '_Ch6.times;'])
+
+eval(['Allspktimes = ' rawname(1:end-8) '_Ch7.times;'])
+eval(['spkcodes = ' rawname(1:end-8) '_Ch7.codes;'])
+
+eval(['eyeSamplingRate = ' rawname(1:end-8) '_Ch3.interval;'])
+eval(['eyeTS = ' rawname(1:end-8) '_Ch3.times;'])
 
 %% detect saccades
 
-durSesh = length(eyeH);
-
-eyeSpd = sqrt(diff(eyeH).^2 + diff(eyeV).^2); 
+eyeSpd = sqrt(diff(eyeh).^2 + diff(eyev).^2); 
 
 %arbit threshold of 0.03
 [pks, locs] = findpeaks(eyeSpd, 'minpeakheight', 0.03, 'minpeakdistance', 200);
 
 % clf
-% plot([locs locs], [-4 4]', '-r'); hold all
-% plot(1:durSesh, eyeH, 'b', 'LineWidth', 2) 
-% plot(1:durSesh, eyeV, 'g', 'LineWidth', 2)
-% plot(1:durSesh-1, eyeSpd, 'b', locs, pks, 'r^')
+% plot([eyeTS(locs) eyeTS(locs)], [-4 4]', '-r'); hold all
+% plot(eyeTS, eyeh, 'b', 'LineWidth', 2) 
+% plot(eyeTS, eyev, 'g', 'LineWidth', 2)
+% plot(eyeTS(1:end-1), eyeSpd, 'b', eyeTS(locs), pks, 'r^')
 
 %look 25 index before and after the peak saccade velocity to determine dir
 locsPre = locs - 25;
 locsPost = locs + 25;
 
-deltaH = eyeH(locsPost) - eyeH(locsPre);
-deltaV = eyeV(locsPost) - eyeH(locsPre);
+deltaH = eyeh(locsPost) - eyeh(locsPre);
+deltaV = eyev(locsPost) - eyev(locsPre);
+
 dirVec = nan(length(deltaH),1);
+subpsac = nan(length(deltaH),1);
 
+% compute the direction of saccade and the appropriate subplot to put it in
 for row = 1:length(deltaH)
-   
-    if deltaH(row) < 0 && deltaV(row) > 0 
-        %top left
-        dirVec(row) = 1;
-    elseif deltaH(row) > 0 && deltaV(row) > 0 
-        %top right
-        dirVec(row) = 2;
-    elseif deltaH(row) > 0 && deltaV(row) < 0
-        %bottom right
-        dirVec(row) = 3;
-    elseif deltaH(row) < 0 && deltaV(row) < 0 
-        %bottom left
-        dirVec(row) = 4;
-    end    
+    
+    dirVec(row) = atan2d(deltaV(row), deltaH(row));
+    subpsac(row) = computesubpnum(dirVec(row));
     
 end
 
 
-%%
-
-%thisNeu = spk_codes(:,1) == 1;
-%subSetSpkTimes = spk_times(thisNeu);
-subSetSpkTimes = spk_times;
-
-
-sacTimes = locs./1000; % in sec
-
-% combine all directions
-%subSac = sacTimes;
-
-% or take the subsets of directions
- dirNum = 1;
- thisDir = dirVec == dirNum;
- subSac = sacTimes(thisDir);
-
-
-totRelSpks = [];
-
-pretime = -0.3; % look 200ms prior to the saccade
-posttime = 0.3; % time after saccade
-
-figure(5); %clf % this will be for the raster
-subplot(2,2,dirNum), 
-hold all
-plot([0 0],[-1 length(subSac)+10],'r')
-
-for s = 1:length(subSac) % for all saccades
+%% Make rasters for the different directions
+for clus = [1 2 3 4]
     
-    thisIdx = find(subSetSpkTimes > subSac(s)+pretime & subSetSpkTimes < subSac(s) + posttime);
-    thisSpkTimes = subSetSpkTimes(thisIdx);
-    relSpkTimes = thisSpkTimes -  subSac(s);
+    fprintf('Plotting Clus: %i \n', clus)
     
-    % force col vector
     
-    if ~isempty(relSpkTimes) && length(relSpkTimes) == 2
-        plot([relSpkTimes'; relSpkTimes'], [s-0.9 s-0.1], 'k')
-    elseif ~isempty(relSpkTimes)
-        plot([relSpkTimes relSpkTimes], [s-1 s], 'k', 'LineWidth', 3)
+    spktimes = Allspktimes(spkcodes(:,1) == clus);
+    sactimes = eyeTS(locs);
+    
+    
+    for si = 1:length(dirVec) % for all saccades
+        
+        aligntime = sactimes(si);
+        thisspkidx = spktimes > aligntime - pretime & spktimes < aligntime + posttime;
+        thisspktimes = spktimes(thisspkidx);
+        thisspkreltimes = thisspktimes - aligntime;
+        
+        subplot(3,3,subpsac(si)), hold on
+        for spi = 1:length(thisspkreltimes)
+            plot([thisspkreltimes(spi) thisspkreltimes(spi)], [0.1+trly(subpsac(si)) 1+trly(subpsac(si))], 'k', 'LineWidth', 1.5)
+            xlim([-pretime posttime])
+        end
+        drawnow, pause(0.000001)
+        
+        totRelSpks{subpsac(si)} = [totRelSpks{subpsac(si)} thisspkreltimes'];
+        trly(subpsac(si)) = trly(subpsac(si)) + 1;
+        
     end
-    
-    totRelSpks = cat(1,totRelSpks, relSpkTimes);
+   
     
 end
-
 
 %% construct psth
 
-% bin data into 5ms bins & determine firing rate
-binwidth = 0.01;
-bins = pretime:binwidth:posttime;
-binned = nan(1,length(bins)-1);
-
-for bi = 1:length(bins)-1
-    thisDataIdx = totRelSpks > bins(bi) & totRelSpks < bins(bi+1);
-    binned(bi) = sum(thisDataIdx)./binwidth;
-end
-
-gausKer = normpdf(-0.01:0.001:0.01, 0, 0.01);
-psth = conv(binned, gausKer, 'same');
-
-plot(bins(1:end-1)+(binwidth/2), psth./sum(gausKer)./10,'r')
-
-ylim([-1 length(subSac)+10])
-%ylim([-1 100])
-
-xlabel('Time Rel To Saccade Onset (sec)', 'FontSize',20)
-ylabel('Trial # (or) Neuron Firing','FontSize',20)
-
-t=title('S10L3P0_510','FontSize',20);
-set(t, 'Interpreter', 'none'); % silly underscore controler
+for subpnum = [1:4 6:9]
+    subplot(3,3,subpnum)
+    ax = axis;
+    
+    plot([0 0], [0 ax(4)], 'b', 'LineWidth', 2)
+    
+    [bins, binwidth, psth] = buildpsth(pretime, posttime, totRelSpks{subpnum});
+    plot(bins(1:end-1)+(binwidth/2), psth./40, 'r', 'LineWidth', 2)
+    
+    
+    title('Aligned to Saccade')
+    drawnow
+end %subplot titles

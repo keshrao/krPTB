@@ -2,7 +2,7 @@
 % this program will help analyze the dir
 clear, clc
 
-clustouse = [3];
+clustouse = 1;
 
 figure(1), clf
 figure(2), clf
@@ -175,7 +175,7 @@ for clus = clustouse
                 elseif locs < 100
                     gotill = locs - 1;
                 else
-                    gotill = 100;
+                    gotill = 99;
                 end
                 
                 dirsac(ti) = atan2d(thiseyev(locs+gotill)-thiseyev(locs-gotill), thiseyeh(locs+gotill)-thiseyeh(locs-gotill));
@@ -255,6 +255,7 @@ for TorS = 1:2
     else
         totRelSpks = totRelSpksS;
     end
+    
     
     for subpnum = 1:9
         subplot(3,3,subpnum)
