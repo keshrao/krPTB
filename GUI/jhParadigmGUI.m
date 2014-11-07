@@ -114,8 +114,7 @@ switch popup_sel_index
     case 7 
         krFwdCorr_FreeMap(get(handles.SetTrialNumber,'Value'),handles);
     case 8
-        krPlotEyePosition(handles);
-        
+        krFwdCorr_FreeMap_Reward(get(handles.SetTrialNumber,'Value'),handles);
 end
 
 
@@ -186,7 +185,7 @@ end
 
 set(hObject, 'String', {'krDirReqSingleSac','krFwdCorr_OnlinePlot','krFwdCorr_MScale', ... 
                     'krFwdCorr_SingleSaccade','krFwdCorr_SingleSaccade_MScaling','krCal','FreeMap',...
-                     'PlotEyePos'});
+                     'krFreemap_Reward'});
 
 
 % --- Executes on button press in krCalibrateEyePos.
