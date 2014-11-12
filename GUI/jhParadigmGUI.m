@@ -115,6 +115,8 @@ switch popup_sel_index
         krFwdCorr_FreeMap(get(handles.SetTrialNumber,'Value'),handles);
     case 8
         krFwdCorr_FreeMap_Reward(get(handles.SetTrialNumber,'Value'),handles);
+    case 9
+        krFwdCorr_OnlinePlot_photoUpdate(get(handles.SetTrialNumber,'Value'),handles);
 end
 
 
@@ -185,7 +187,7 @@ end
 
 set(hObject, 'String', {'krDirReqSingleSac','krFwdCorr_OnlinePlot','krFwdCorr_MScale', ... 
                     'krFwdCorr_SingleSaccade','krFwdCorr_SingleSaccade_MScaling','krCal','FreeMap',...
-                     'krFreemap_Reward'});
+                     'krFreemap_Reward','krFwdCorr_OnlinePlot_photoUpdate'});
 
 
 % --- Executes on button press in krCalibrateEyePos.

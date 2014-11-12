@@ -1,4 +1,4 @@
-function [eyePosX eyePosY] = krPeekEyePos(ai)
+function [eyePosX eyePosY photo] = krPeekEyePos(ai)
 
 % this file is in krPlotEPos
 
@@ -10,6 +10,7 @@ while isempty(data)
     if(timelapse > 0.002)
         data(end,1) = 0;
         data(end,2) = 0;
+        data(end,4) = 0;
         break;
     end
 end
@@ -17,3 +18,4 @@ flushdata(ai);
 
 eyePosX = data(end,1)*100;
 eyePosY = data(end,2)*100;
+photo = data(end,4)*100;

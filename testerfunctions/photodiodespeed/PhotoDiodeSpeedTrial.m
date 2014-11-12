@@ -17,7 +17,7 @@ pause(1);
 stims = [photoSq];
 stimcolors = [colorWhite];
 
-numflash = 50;
+numflash = 1;
 
 photos = zeros(numflash,1000);
 photosOff = zeros(numflash,1000);
@@ -30,20 +30,33 @@ fliptimesOffB = zeros(1,numflash);
 
 scfliptime = zeros(2,numflash);
 
+photodata = zeros(numflash,500);
 flipstart = tic;
 for j=1:numflash;
     
     fliptimesOnA(j)=toc(flipstart);
         Screen(window, 'FillRect', stimcolors , stims);
         %scfliptime(1,j) = Screen(window, 'Flip');
-        [a scfliptime(1,j) c d e] = Screen(window, 'Flip');
+%         Screen(window, 'Flip');
     fliptimesOnB(j)=toc(flipstart);
     
-    %pause(0.01)
-    for i=1:1000
-        [eyex photos(j,i)]=krPeekEyePos(ai);
-    end
+    pause(0.01)
+    itimes = zeros(1,500);
+    istart = tic;
     
+    for i=1:500
+        if i==100
+            Screen(window, 'Flip');
+        end
+        if i== 300
+            Screen(window,'FillRect',black);
+            Screen(window,'Flip');
+        end
+        [eyex eyey photo]=krPeekEyePos(ai);
+        photodata(j,i) = photo;
+        itimes(i) = toc(istart);
+        pause(0.00005);
+    end
     
     
     fliptimesOffA(j) = toc(flipstart);
@@ -52,21 +65,24 @@ for j=1:numflash;
     fliptimesOffB(j) = toc(flipstart);
     
     %pause(0.1);
-    for i=1:1000
-        [eyex photosOff(j,i)]=krPeekEyePos(ai);
-    end
+%     for i=1:1000
+%         [eyex eyey photo]=krPeekEyePos(ai);
+%     end
     
 end;
 totaltime = toc(flipstart);
 
 Screen('CloseAll');
 
-figure(1);clf
-tt = fliptimesOffA-fliptimesOnB;
-subplot(2,1,1)
-for i = 1:numflash; plot(linspace(0,tt(i),1000),photos(i,:)); hold all; end
-subplot(2,1,2)
-for i = 1:numflash; plot(linspace(0,tt(i),1000),photosOff(i,:)); hold all; end
+figure(1);clf;
+plot(itimes,photodata,itimes(100),min(photodata),'r*',itimes(300),min(photodata),'r*')
+
+% figure(1);clf
+% tt = fliptimesOffA-fliptimesOnB;
+% subplot(2,1,1)
+% for i = 1:numflash; plot(linspace(0,tt(i),1000),photos(i,:)); hold all; end
+% subplot(2,1,2)
+% for i = 1:numflash; plot(linspace(0,tt(i),1000),photosOff(i,:)); hold all; end
 
 
 %save('thisrun.mat', 'fliptimesOnA','fliptimesOffA','fliptimesOnB','fliptimesOffB', 'scfliptime')
