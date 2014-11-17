@@ -87,8 +87,8 @@ try
     
     phototic=tic;
     while(~photoOff && toc(phototic)<1)
-        photoOff = checkPhotoOff(ai);
-        pause(0.0001);
+        photoOff = checkPhotoOff;
+        delay(0.0001);
     end
     photoOff = 0;
     
@@ -132,8 +132,8 @@ try
         
         phototic=tic;
         while(~photoOn && toc(phototic)<1)
-            photoOn = checkPhotoOn(ai);
-            pause(0.0001);
+            photoOn = checkPhotoOn;
+            delay(0.0001);
         end
         photoOn = 0;
         
@@ -173,8 +173,8 @@ try
             
             phototic=tic;
             while(~photoOff && toc(phototic)<1)
-                photoOff = checkPhotoOff(ai);
-                pause(0.0001);
+                photoOff = checkPhotoOff;
+                delay(0.0001);
             end
             photoOff = 0;
             
@@ -255,8 +255,8 @@ try
                     Screen(window, 'Flip');
                     
                     while(~photoOn && toc(phototic)<1)
-                        photoOn = checkPhotoOn(ai);
-                        pause(0.0001);
+                        photoOn = checkPhotoOn;
+                        delay(0.0001);
                     end
                     photoOn = 0;
                     
@@ -281,8 +281,8 @@ try
                     
                     phototic=tic;
                     while(~photoOn && toc(phototic)<1)
-                        photoOn = checkPhotoOn(ai);
-                        pause(0.0001);
+                        photoOn = checkPhotoOn;
+                        delay(0.0001);
                     end
                     photoOn = 0;
                     
@@ -322,8 +322,8 @@ try
                     
                     phototic=tic;
                     while(~photoOff && toc(phototic)<1)
-                        photoOff = checkPhotoOff(ai);
-                        pause(0.0001);
+                        photoOff = checkPhotoOff;
+                        delay(0.0001);
                     end
                     photoOff = 0;
                     
@@ -342,8 +342,8 @@ try
                     
                     phototic=tic;
                     while(~photoOff && toc(phototic)<1)
-                        photoOff = checkPhotoOff(ai);
-                        pause(0.0001);
+                        photoOff = checkPhotoOff;
+                        delay(0.0001);
                     end
                     photoOff = 0;
                     
@@ -384,7 +384,7 @@ catch lasterr
     if isDaq, krEndTrial(dio); end
     try save(fName, 'storeXlocs', 'storeYlocs','storeSuccess', 'storeEveryTic', 'storeEveryYloc', 'storeEveryXloc')
     disp(fName)
-    catch disp('Saving error');
+    catch
     end
     keyboard
 end

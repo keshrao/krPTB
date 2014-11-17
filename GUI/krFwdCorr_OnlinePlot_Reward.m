@@ -1,8 +1,8 @@
-function krFwdCorr_OnlinePlot_photoUpdate(ntrls, handles)
+function krFwdCorr_OnlinePlot_Reward(ntrls, handles)
 
 % testing psychtoolbox screen command
 
-clc;
+clc; 
 warning off
 
 if isempty(ntrls)
@@ -13,9 +13,7 @@ ai = handles.ai;
 dio = handles.dio;
 isDaq = true;
 
-% Photo diode variables
-photoOn = 0;
-photoOff = 0;
+
 
 % remember to clear this out for real experiments
 Screen('Preference', 'SkipSyncTests', 0);
@@ -39,7 +37,7 @@ if viewingFigure
     for numtargsi = 1:numstimthistrl
         hTargs(numtargsi) = rectangle('Position', [0, 0 10 10],'FaceColor','white'); %#ok
     end
-    % this is for the easy ending of programs
+     % this is for the easy ending of programs
     uic = uicontrol('Style','pushbutton','String','End Task','Callback',@cb_EndTask,'Position',[350 350 60 20]);
     drawnow
     
@@ -50,8 +48,8 @@ end
     function updateViewingFigure()
         try
             set(hEye, 'Position', [eyePosX eyePosY 25 25]); %note this different convention
-            for drawi = 1:numstimthistrl
-                set(hTargs(drawi), 'Position', [randXpos(drawi)-centX -(randYpos(drawi)-centY) 10 10])
+            for drawi = 1:numstimthistrl 
+               set(hTargs(drawi), 'Position', [randXpos(drawi)-centX -(randYpos(drawi)-centY) 10 10]) 
             end
             drawnow
             % don't want the program to crash if something happens to a figure
@@ -84,14 +82,7 @@ try
     % wipe screen & fill bac
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip');
-    
-    phototic=tic;
-    while(~photoOff && toc(phototic)<1)
-        photoOff = checkPhotoOff(ai);
-        pause(0.0001);
-    end
-    photoOff = 0;
-    
+
     % --- variables and declarations common to all trials
     
     winTol = 30;
@@ -125,17 +116,10 @@ try
     while trl <= ntrls && isRun
         
         set(handles.TrialNumber,'String',num2str(trl));
-        
+
         % present fixation square
         Screen(window, 'FillRect', colorBlue, fixSq);
         Screen(window, 'Flip');
-        
-        phototic=tic;
-        while(~photoOn && toc(phototic)<1)
-            photoOn = checkPhotoOn(ai);
-            pause(0.0001);
-        end
-        photoOn = 0;
         
         % wait of eye to enter fixation square to begin trial
         isInWindow = false;
@@ -170,14 +154,6 @@ try
         if ~isInWindow
             Screen(window, 'FillRect', black);
             Screen(window, 'Flip');
-            
-            phototic=tic;
-            while(~photoOff && toc(phototic)<1)
-                photoOff = checkPhotoOff(ai);
-                pause(0.0001);
-            end
-            photoOff = 0;
-            
             if isDaq, krEndTrial(dio); end
             storeSuccess(trl) = 0;
             WaitSecs(2);
@@ -254,12 +230,6 @@ try
                     Screen(window, 'FillRect', stimcolors , stims);
                     Screen(window, 'Flip');
                     
-                    while(~photoOn && toc(phototic)<1)
-                        photoOn = checkPhotoOn(ai);
-                        pause(0.0001);
-                    end
-                    photoOn = 0;
-                    
                     numtrigs = 0;
                     
                     % leave stimulus on for short priod of time
@@ -279,22 +249,15 @@ try
                     Screen(window, 'FillRect', colorBlue, fixSq);
                     Screen(window, 'Flip');
                     
-                    phototic=tic;
-                    while(~photoOn && toc(phototic)<1)
-                        photoOn = checkPhotoOn(ai);
-                        pause(0.0001);
-                    end
-                    photoOn = 0;
-                    
                     thisBlank = tic;
                     while toc(thisBlank) < blankDur
-                        % find out how many spikes occured
-                        try
+                       % find out how many spikes occured
+                       try
                             numtrigs = numtrigs + krTriggers(ai, stimwaitdur);
                         catch
                             disp('missed trigger')
                         end
-                        
+                      
                     end
                     
                     
@@ -319,14 +282,6 @@ try
                     storeSuccess(trl) = 0;
                     Screen(window, 'FillRect', black);
                     Screen(window, 'Flip');
-                    
-                    phototic=tic;
-                    while(~photoOff && toc(phototic)<1)
-                        photoOff = checkPhotoOff(ai);
-                        pause(0.0001);
-                    end
-                    photoOff = 0;
-                    
                     if isDaq, krEndTrial(dio); end
                     WaitSecs(2);
                     break
@@ -339,13 +294,6 @@ try
                     % wipe screen & fill bac
                     Screen(window, 'FillRect', black);
                     Screen(window, 'Flip');
-                    
-                    phototic=tic;
-                    while(~photoOff && toc(phototic)<1)
-                        photoOff = checkPhotoOff(ai);
-                        pause(0.0001);
-                    end
-                    photoOff = 0;
                     
                     WaitSecs(1);
                     if isDaq, krDeliverReward(dio, 4); end;
@@ -382,10 +330,8 @@ catch lasterr
     ShowCursor
     Screen('CloseAll');
     if isDaq, krEndTrial(dio); end
-    try save(fName, 'storeXlocs', 'storeYlocs','storeSuccess', 'storeEveryTic', 'storeEveryYloc', 'storeEveryXloc')
+    save(fName, 'storeXlocs', 'storeYlocs','storeSuccess', 'storeEveryTic', 'storeEveryYloc', 'storeEveryXloc')
     disp(fName)
-    catch disp('Saving error');
-    end
     keyboard
 end
 
