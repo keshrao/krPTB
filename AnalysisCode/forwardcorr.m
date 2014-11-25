@@ -1,12 +1,12 @@
 clear, clc
 
-xdiv = 100;
-ydiv = 100; % number of x/y divisions
+xdiv = 40;
+ydiv = 40; % number of x/y divisions
 
 clustertouse = [1 2];
 
 targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S37*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+[filename pathname] = uigetfile([targetdir 'S32*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -89,8 +89,8 @@ for prei = 1:length(predurs)
             %% Get data (bookkeeping)
             
             % smooth out the photocell
-            idxPhoto = photo > 0.02;
-            photo(idxPhoto) = 0.2;
+            idxPhoto = photo > 0.05;
+            photo(idxPhoto) = 0.3;
             photo(~idxPhoto) = 0;
             
             dphoto = diff(photo);
