@@ -9,7 +9,7 @@ warning off
 
 
 ai = handles.ai;
-dio = handles.ai;
+dio = handles.dio;
 isDaq = true;
 
 % remember to clear this out for real experiments
@@ -130,7 +130,7 @@ try
             
             if isDaq
                 try
-                    [eyePosX eyePosY] = krGetEyePos(ai);
+                    [eyePosX eyePosY] = krPeekEyePos(ai);
                 catch
                     disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                 end

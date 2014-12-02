@@ -43,18 +43,22 @@ for j=1:numflash;
     pause(0.01)
     itimes = zeros(1,500);
     istart = tic;
+    onTime = 0;
+    offTime = 0;
     
     for i=1:500
         if i==100
             Screen(window, 'Flip');
+            onTime = toc(istart);
         end
         if i== 300
             Screen(window,'FillRect',black);
             Screen(window,'Flip');
+            offTime = toc(istart);
         end
+        itimes(i) = toc(istart);
         [eyex eyey photo]=krPeekEyePos(ai);
         photodata(j,i) = photo;
-        itimes(i) = toc(istart);
         pause(0.00005);
     end
     
@@ -75,7 +79,7 @@ totaltime = toc(flipstart);
 Screen('CloseAll');
 
 figure(1);clf;
-plot(itimes,photodata,itimes(100),min(photodata),'r*',itimes(300),min(photodata),'r*')
+plot(itimes,photodata,onTime,min(photodata),'r*',offTime,min(photodata),'r*')
 
 % figure(1);clf
 % tt = fliptimesOffA-fliptimesOnB;

@@ -2,16 +2,20 @@ close all; clc
 [ai, dio] = krConnectDAQInf();
 warning off
 
-numsamps = ai.SampleRate * 0.1; % 100ms of data with each "peek"
+numiter = 100;
+datanum = zeros(numiter,100);
+tocpeekdata = zeros(numiter,100);
+
+for j = 1:100
+numsamps = ai.SampleRate * 0.0001 * j; % 100ms of data with each "peek"
 timestamps = linspace(0,-numsamps/ai.SampleRate, numsamps);
 
-numiter = 1000;
-tocpeekdata = zeros(numiter,1);
 
-figure(1),clf
-hp = plot(1:numsamps,zeros(1,numsamps), '.r'); axis([-500 500 -500 500])
 
-datanum = zeros(numiter,1);
+% figure(1),clf
+% hp = plot(1:numsamps,zeros(1,numsamps), '.r'); axis([-500 500 -500 500])
+
+
 
 % Eye Position plot
 whichScreen = 2;
@@ -32,17 +36,20 @@ for i = 1:numiter;
     while isempty(data)
         data = peekdata(ai,numsamps);
     end
-   tocpeekdata(i) = toc; % this is the key part we're trying to test
-   datanum(i) = numel(data(:,3));
+   tocpeekdata(j,i) = toc; % this is the key part we're trying to test
+   datanum(j,i) = numel(data(:,3));
    
-   eyePosX = data(:,1)*100; % scaling from volts to deg
-   eyePosY = data(:,2)*100; % scaling from volts to deg
-   %set(hEye, 'Position', [eyePosX(end) eyePosY(end) 25 25]);
-   set(hp, 'xdata', eyePosX)
-   set(hp, 'ydata', eyePosY)
-   drawnow
+%    eyePosX = data(:,1)*100; % scaling from volts to deg
+%    eyePosY = data(:,2)*100; % scaling from volts to deg
+%    %set(hEye, 'Position', [eyePosX(end) eyePosY(end) 25 25]);
+%    set(hp, 'xdata', eyePosX)
+%    set(hp, 'ydata', eyePosY)
+%    drawnow
    
     flushdata(ai)
+    pause(0.0001)
+end
+
 end
 
 stop(ai)
