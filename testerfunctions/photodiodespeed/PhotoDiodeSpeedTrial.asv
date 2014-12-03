@@ -17,7 +17,7 @@ pause(1);
 stims = [photoSq];
 stimcolors = [colorWhite];
 
-numflash = 200;
+numflash = 100;
 
 photos = zeros(numflash,1000);
 photosOff = zeros(numflash,1000);
@@ -35,8 +35,8 @@ flipstart = tic;
 
 onTime = zeros(1,numflash);
 offTime = zeros(1,numflash);
-itimes = zeros(200,numflash);
-photodata = zeros(200,numflash);
+itimes = zeros(300,numflash);
+photodata = zeros(300,numflash);
 for j=1:numflash
     
 %     fliptimesOnA(j)=toc(flipstart);
@@ -50,12 +50,12 @@ for j=1:numflash
     istart = tic;
     
     
-    for i=1:200
-        if i==70
+    for i=1:300
+        if i==100
             Screen(window, 'Flip');
             onTime(j) = toc(istart);
         end
-        if i== 140
+        if i== 200
             Screen(window,'FillRect',black);
             Screen(window,'Flip');
             offTime(j) = toc(istart);
