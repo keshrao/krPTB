@@ -32,7 +32,7 @@ drawnow,
 
 
 ai = handles.ai;
-dio = handles.ai;
+dio = handles.dio;
 isDaq = true;
 
 
@@ -82,14 +82,12 @@ hEye = rectangle('Position', [0, 0 25 25],'FaceColor','red');
 axis off
 
 
-
 try
     
     window = Screen(whichScreen, 'OpenWindow');
     
     black = BlackIndex(window); % pixel value for black
-    
-    
+        
     ntrls = 10;
     
     storeGlobalTics = nan(ntrls, 1);

@@ -250,7 +250,7 @@ try
             storeSuccesses(trl) = 1;
         end
         
-        if mod(trl,20) == 0
+        if mod(trl,10) == 0
             save(fName, 'storeGlobalTics', 'storeLocIDs','storeSuccesses')
         end
         
