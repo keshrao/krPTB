@@ -1,5 +1,5 @@
 function photoOn = checkPhotoOn(ai)
-onThresh = 150;
+onThresh = .150;
 data = [];
 photoOn = 0;
 tic

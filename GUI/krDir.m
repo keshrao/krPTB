@@ -166,7 +166,7 @@ try
             
             if isDaq
                 try
-                    [eyePosX eyePosY] = krGetEyePos(ai);
+                    [eyePosX eyePosY] = krPeekEyePos(ai);
                 catch
                     disp(['Missed Eye Pos Acquisition: ' num2str(trls)])
                 end
@@ -219,7 +219,7 @@ try
                 
                 if isDaq
                     try
-                        [eyePosX eyePosY] = krGetEyePos(ai);
+                        [eyePosX eyePosY] = krPeekEyePos(ai);
                     catch
                         disp(['Missed Eye Pos Acquisition: ' num2str(trls)])
                     end

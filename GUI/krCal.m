@@ -35,7 +35,7 @@ drawnow,
 
 
 ai = handles.ai;
-dio = handles.ai;
+dio = handles.dio;
 isDaq = true;
 
 
@@ -50,7 +50,7 @@ res = Screen('Resolution',whichScreen);
 centX = res.width/2;
 centY = res.height/2;
 
-ssq = 10; % size of square
+ssq = 20; % size of square
 sq = nan(4,9);
 generateTableSquares()
 
@@ -94,8 +94,9 @@ photocell = [0; 0; 50; 50;];
 
 % data to be stored into this filename
 c = clock;
-fName = [date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
+fName = ['cal_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
+% how close she has to be to the center
 winTol = 30;
 
 
@@ -178,6 +179,13 @@ try
         Screen(window, 'FillRect', [colorblue colorwhite], [sq(:,indLoc) photocell]);
         Screen(window, 'Flip');
         
+        photoOn = 0;
+        phototic=tic;
+        while(~photoOn && toc(phototic)<1)
+            photoOn = checkPhotoOn(ai);
+            pause(0.0001);
+        end
+        fprintf('Photo Delay %5.4f\n', toc(phototic))
         % now that stimulus is on, wait to let monkey enter window
         
         isInWindow = false;
@@ -186,16 +194,11 @@ try
         while toc(temptic) < 3 % wait 3 secs to enter window
             
             if isDaq
-                
                 try
-                    [eyePosX eyePosY] = krGetEyePos(ai);
+                    [eyePosX eyePosY] = krPeekEyePos(ai);
                 catch
                     disp('Missed Eye Data')
                 end
-            else
-                [eyePosX,eyePosY] = GetMouse(window);
-                eyePosX = eyePosX - centX;
-                eyePosY = eyePosY - centY;
             end
             
             %
@@ -217,14 +220,10 @@ try
             % successful fixation
             temptic = tic;
             
-            while toc(temptic) < 1 && isInWindow % maintin fix for 1 sec
+            while toc(temptic) < 0.5 && isInWindow % maintin fix for 1 sec
                 
                 if isDaq
-                    [eyePosX eyePosY] = krGetEyePos(ai);
-                else
-                    [eyePosX,eyePosY] = GetMouse(window);
-                    eyePosX = eyePosX - centX;
-                    eyePosY = eyePosY - centY;
+                    [eyePosX eyePosY] = krPeekEyePos(ai);
                 end
                 
                 if viewingFigure, updateViewingFigure(); end
@@ -248,6 +247,9 @@ try
         if isInWindow
             if isDaq, krDeliverReward(dio,2);end
             storeSuccesses(trl) = 1;
+            WaitSecs(0.1);
+        else
+            WaitSecs(0.25);
         end
         
         if mod(trl,10) == 0
@@ -265,6 +267,7 @@ catch MException;
     close all
     
     disp(MException.message)
+    disp(MException.stack)
     delete(uic)
     axes(handles.EyePosition);cla
     
