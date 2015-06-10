@@ -296,7 +296,7 @@ try
                 getspikesonce = false;
 
                 sactic = tic;
-                while toc(sactic) < 0.35
+                while toc(sactic) < 0.5 % either 0.35 or something longer
                     if ~getspikesonce 
                         try
                             trigtic = tic;

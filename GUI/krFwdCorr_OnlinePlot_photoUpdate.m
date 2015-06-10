@@ -26,7 +26,7 @@ centX = res.width/2;
 centY = res.height/2;
 
 
-numstimthistrl = 5;
+numstimthistrl = 3;
 
 viewingFigure = true;
 if viewingFigure
@@ -143,16 +143,10 @@ try
         
         while toc(temptic) < 3 % wait three seconds to enter fixation
             
-            if isDaq
-                try
-                    [eyePosX eyePosY] = krPeekEyePos(ai);
-                catch
-                    disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
-                end
-            else
-                [eyePosX,eyePosY] = GetMouse(window);
-                eyePosX = eyePosX - centX;
-                eyePosY = eyePosY - centY;
+            try
+                [eyePosX eyePosY] = krPeekEyePos(ai);
+            catch
+                disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
             end
             
             if viewingFigure, updateViewingFigure(); end
@@ -187,7 +181,8 @@ try
             if isDaq, krStartTrial(dio); end
             
             % begin series of stimuli flashes
-            numflashes = 10;
+            % numflashes = 10;
+            numflashes = 2; % snb
             
             while isInWindow
                 
@@ -204,16 +199,10 @@ try
                     
                     
                     % make sure still in window
-                    if isDaq
-                        try
-                            [eyePosX eyePosY] = krPeekEyePos(ai);
-                        catch
-                            disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
-                        end
-                    else
-                        [eyePosX,eyePosY] = GetMouse(window);
-                        eyePosX = eyePosX - centX;
-                        eyePosY = eyePosY - centY;
+                    try
+                        [eyePosX eyePosY] = krPeekEyePos(ai);
+                    catch
+                        disp(['Missed Eye Pos Acquisition: ' num2str(trl)])
                     end
                     
                     % maybe this won't be good if we're worried about timing

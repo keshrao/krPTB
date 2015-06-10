@@ -15,7 +15,7 @@ ai.TriggerType = 'manual';
 set(ai,'TriggerRepeat',inf); % as soon as buffer filled, trigger again
 
 
-try 
+try
     start(ai);
 catch
     stop(ai);
