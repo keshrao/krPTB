@@ -38,6 +38,8 @@ ai = handles.ai;
 dio = handles.dio;
 isDaq = true;
 
+% photo diode boolean
+isPhoto = 0;
 
 Priority(2); % realtime priority
 
@@ -97,7 +99,7 @@ c = clock;
 fName = ['cal_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
 % how close she has to be to the center
-winTol = 30;
+winTol = 300;
 
 
 viewingFigure = true;
@@ -155,6 +157,12 @@ try
         % wipe screen & fill back
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
         
+        phototic = tic;
+        isPhoto = krCheckPhoto(ai);
+        while (isPhoto && toc(phototic) < 0.25)
+            isPhoto = krCheckPhoto(ai);
+        end
+        
         % select random location
         while indLoc == prevLoc
             indLoc = randi(9);
@@ -179,12 +187,11 @@ try
         Screen(window, 'FillRect', [colorblue colorwhite], [sq(:,indLoc) photocell]);
         Screen(window, 'Flip');
         
-        photoOn = 0;
-        phototic=tic;
-        while(~photoOn && toc(phototic)<1)
-            photoOn = checkPhotoOn(ai);
-            pause(0.0001);
+        phototic = tic;
+        while (~isPhoto && toc(phototic) < 0.25)
+            isPhoto = krCheckPhoto(ai);
         end
+        
         %fprintf('Photo Delay %5.4f\n', toc(phototic))
         % now that stimulus is on, wait to let monkey enter window
         
@@ -212,15 +219,12 @@ try
         end
         
         % check if fixation failed
-        if ~isInWindow
-            Screen(window, 'FillRect', black); Screen(window, 'Flip');
-            if isDaq, krEndTrial(dio);end
-        else
+        if isInWindow
             
             % successful fixation
             temptic = tic;
             
-            while toc(temptic) < 0.5 && isInWindow % maintin fix for 1 sec
+            while toc(temptic) < 0.25 && isInWindow % maintin fix for 1 sec
                 
                 if isDaq
                     [eyePosX eyePosY] = krPeekEyePos(ai);
@@ -241,6 +245,10 @@ try
         
         % ----------------- end
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
+        phototic = tic;
+        while (isPhoto && toc(phototic) < 5)
+            isPhoto = krCheckPhoto(ai);
+        end
         if isDaq, krEndTrial(dio);end
         
         % broke fixation during trial
@@ -249,7 +257,7 @@ try
             storeSuccesses(trl) = 1;
             WaitSecs(0.1);
         else
-            WaitSecs(0.25);
+            WaitSecs(0.1);
         end
         
         if mod(trl,10) == 0

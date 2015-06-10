@@ -1,7 +1,7 @@
-function photoOn = checkPhotoOn(ai)
-onThresh = .150;
+function photo = checkPhotoOff(ai)
+offThresh = .150;
 data = [];
-photoOn = 0;
+
 tic
 while isempty(data)
     data = peekdata(ai,1);
@@ -13,6 +13,7 @@ while isempty(data)
 end
 flushdata(ai);
 
-if data(end,4)> onThresh
-    photoOn = 1;
+photo = 1;
+if data(end,4)< offThresh
+    photo = 0;
 end

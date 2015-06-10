@@ -100,23 +100,20 @@ guidata(hObject, handles);
 popup_sel_index = get(handles.ChooseParadigm, 'Value');
 switch popup_sel_index
     case 1
-        krDirReqSingleSac(get(handles.SetTrialNumber,'Value'),handles);
-    case 2
-        krFwdCorr_OnlinePlot(get(handles.SetTrialNumber,'Value'),handles);
-    case 3
-        krFwdCorr_MScale(get(handles.SetTrialNumber,'Value'),handles);
-    case 4
-        krFwdCorr_SingleSaccade(get(handles.SetTrialNumber,'Value'),handles);
-    case 5
-        krFwdCorr_SingleSaccade_MScaling(get(handles.SetTrialNumber,'Value'),handles);
-    case 6
         krCal(get(handles.SetTrialNumber,'Value'),handles);
-    case 7 
-        krFwdCorr_FreeMap(get(handles.SetTrialNumber,'Value'),handles);
-    case 8
-        krFwdCorr_FreeMap_photoupdate(get(handles.SetTrialNumber,'Value'),handles);
-    case 9
+    case 2
+        krDirReqSingleSac(get(handles.SetTrialNumber,'Value'),handles);
+    case 3
         krFwdCorr_OnlinePlot_photoUpdate(get(handles.SetTrialNumber,'Value'),handles);
+    case 4
+        krFwdCorr_MScale(get(handles.SetTrialNumber,'Value'),handles);
+    case 5
+        krFwdCorr_SingleSaccade(get(handles.SetTrialNumber,'Value'),handles);
+    case 6
+        krFwdCorr_SingleSaccade_MScaling(get(handles.SetTrialNumber,'Value'),handles);
+    case 7
+        krFwdCorr_FreeMap_photoupdate(get(handles.SetTrialNumber,'Value'),handles);
+        
 end
 
 
@@ -185,9 +182,8 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
      set(hObject,'BackgroundColor','white');
 end
 
-set(hObject, 'String', {'krDirReqSingleSac','krFwdCorr_OnlinePlot','krFwdCorr_MScale', ... 
-                    'krFwdCorr_SingleSaccade','krFwdCorr_SingleSaccade_MScaling','krCal','FreeMap',...
-                     'krFwdCorr_FreeMap_photoupdate','krFwdCorr_OnlinePlot_photoUpdate'});
+set(hObject, 'String', {'Cal','DirReq','Fwd_Photo','Fwd_MScale',...
+                         'Fwd_Sac','Fwd_Sac_MScale','FreeMap'});
 
 
 % --- Executes on button press in krCalibrateEyePos.

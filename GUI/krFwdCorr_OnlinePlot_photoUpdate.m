@@ -131,7 +131,7 @@ try
         Screen(window, 'Flip');
         
         phototic=tic;
-        while(~photoOn && toc(phototic)<1)
+        while(~photoOn && toc(phototic)<.1)
             photoOn = checkPhotoOn(ai);
             pause(0.0001);
         end
@@ -181,8 +181,7 @@ try
             if isDaq, krStartTrial(dio); end
             
             % begin series of stimuli flashes
-            % numflashes = 10;
-            numflashes = 2; % snb
+            numflashes = 5;
             
             while isInWindow
                 
@@ -196,7 +195,6 @@ try
                     
                     % how many stimuli do I want to create - for now , always 2
                     % numstimthistrl = randi([1 5], 1);
-                    
                     
                     % make sure still in window
                     try
@@ -217,7 +215,6 @@ try
                     end
                     % --------------------------
                     
-                    
                     stims = [fixSq photoSq];
                     stimcolors = [colorBlue colorWhite];
                     
@@ -236,18 +233,18 @@ try
                         stimcolors = [stimcolors colorWhite];
                     end
                     
-                    
-                    tocFlashIter(nf) = toc(globeTic);
-                    
                     % draw stimuli
                     Screen(window, 'FillRect', stimcolors , stims);
                     Screen(window, 'Flip');
                     
-                    while(~photoOn && toc(phototic)<1)
+                    phototic=tic;
+                    while(~photoOn && toc(phototic)<.1)
                         photoOn = checkPhotoOn(ai);
                         pause(0.0001);
                     end
-                    photoOn = 0;
+                    
+                    % wait for photo diode to turn on and then store time
+                    tocFlashIter(nf) = toc(globeTic);
                     
                     numtrigs = 0;
                     
@@ -366,14 +363,18 @@ try
     
     Screen('CloseAll');
     
-catch lasterr
+catch
     
     ShowCursor
     Screen('CloseAll');
     if isDaq, krEndTrial(dio); end
-    try save(fName, 'storeXlocs', 'storeYlocs','storeSuccess', 'storeEveryTic', 'storeEveryYloc', 'storeEveryXloc')
-    disp(fName)
-    catch disp('Saving error');
+    
+    try 
+        disp(lasterr)
+        save(fName, 'storeXlocs', 'storeYlocs','storeSuccess', 'storeEveryTic', 'storeEveryYloc', 'storeEveryXloc')
+        disp(fName)
+    catch
+        disp('Saving error');
     end
     keyboard
 end
