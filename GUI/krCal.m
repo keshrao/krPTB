@@ -185,7 +185,7 @@ try
             photoOn = checkPhotoOn(ai);
             pause(0.0001);
         end
-        fprintf('Photo Delay %5.4f\n', toc(phototic))
+        %fprintf('Photo Delay %5.4f\n', toc(phototic))
         % now that stimulus is on, wait to let monkey enter window
         
         isInWindow = false;
