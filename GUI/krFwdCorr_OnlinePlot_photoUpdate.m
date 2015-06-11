@@ -13,10 +13,6 @@ ai = handles.ai;
 dio = handles.dio;
 isDaq = true;
 
-% Photo diode variables
-photoOn = 0;
-photoOff = 0;
-
 % remember to clear this out for real experiments
 Screen('Preference', 'SkipSyncTests', 0);
 
@@ -77,20 +73,14 @@ fName = ['fixOnline_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and
 Priority(2);
 
 try
-    window = Screen(whichScreen, 'OpenWindow');
+    window = Screen('OpenWindow', whichScreen);
     
     black = BlackIndex(window); % pixel value for black
     
-    % wipe screen & fill bac
+    % wipe screen & call black background, and wait for black
     Screen(window, 'FillRect', black);
     Screen(window, 'Flip');
-    
-    phototic=tic;
-    while(~photoOff && toc(phototic)<1)
-        photoOff = checkPhotoOff(ai);
-        pause(0.0001);
-    end
-    photoOff = 0;
+    sbPhotoOffWait(ai,0.1);
     
     % --- variables and declarations common to all trials
     
@@ -130,13 +120,6 @@ try
         Screen(window, 'FillRect', colorBlue, fixSq);
         Screen(window, 'Flip');
         
-        phototic=tic;
-        while(~photoOn && toc(phototic)<.1)
-            photoOn = checkPhotoOn(ai);
-            pause(0.0001);
-        end
-        photoOn = 0;
-        
         % wait of eye to enter fixation square to begin trial
         isInWindow = false;
         temptic = tic;
@@ -165,12 +148,8 @@ try
             Screen(window, 'FillRect', black);
             Screen(window, 'Flip');
             
-            phototic=tic;
-            while(~photoOff && toc(phototic)<1)
-                photoOff = checkPhotoOff(ai);
-                pause(0.0001);
-            end
-            photoOff = 0;
+            % wait for black
+            sbPhotoOffWait(ai,0.1);
             
             if isDaq, krEndTrial(dio); end
             storeSuccess(trl) = 0;
@@ -237,11 +216,8 @@ try
                     Screen(window, 'FillRect', stimcolors , stims);
                     Screen(window, 'Flip');
                     
-                    phototic=tic;
-                    while(~photoOn && toc(phototic)<.1)
-                        photoOn = checkPhotoOn(ai);
-                        pause(0.0001);
-                    end
+                    % wait for stimuli to come on
+                    sbPhotoOnWait(ai,0.1);
                     
                     % wait for photo diode to turn on and then store time
                     tocFlashIter(nf) = toc(globeTic);
@@ -254,7 +230,7 @@ try
                     while toc(thisstimdur) < stimwaitdur
                         % find out how many spikes occured
                         try
-                            numtrigs = numtrigs + krTriggers(ai, stimwaitdur);
+                            numtrigs = numtrigs + krPeekTriggers(ai, stimwaitdur);
                         catch
                             disp('missed trigger')
                         end
@@ -264,19 +240,13 @@ try
                     % after stim duration, then blank screen (leave fixation) for 100ms
                     Screen(window, 'FillRect', colorBlue, fixSq);
                     Screen(window, 'Flip');
-                    
-                    phototic=tic;
-                    while(~photoOn && toc(phototic)<1)
-                        photoOn = checkPhotoOn(ai);
-                        pause(0.0001);
-                    end
-                    photoOn = 0;
+                    sbPhotoOffWait(ai,0.1);
                     
                     thisBlank = tic;
                     while toc(thisBlank) < blankDur
                         % find out how many spikes occured
                         try
-                            numtrigs = numtrigs + krTriggers(ai, stimwaitdur);
+                            numtrigs = numtrigs + krPeekTriggers(ai, stimwaitdur);
                         catch
                             disp('missed trigger')
                         end
@@ -305,13 +275,7 @@ try
                     storeSuccess(trl) = 0;
                     Screen(window, 'FillRect', black);
                     Screen(window, 'Flip');
-                    
-                    phototic=tic;
-                    while(~photoOff && toc(phototic)<1)
-                        photoOff = checkPhotoOff(ai);
-                        pause(0.0001);
-                    end
-                    photoOff = 0;
+                    sbPhotoOffWait(ai,0.1);
                     
                     if isDaq, krEndTrial(dio); end
                     WaitSecs(2);
@@ -325,13 +289,7 @@ try
                     % wipe screen & fill bac
                     Screen(window, 'FillRect', black);
                     Screen(window, 'Flip');
-                    
-                    phototic=tic;
-                    while(~photoOff && toc(phototic)<1)
-                        photoOff = checkPhotoOff(ai);
-                        pause(0.0001);
-                    end
-                    photoOff = 0;
+                    sbPhotoOffWait(ai,0.1);
                     
                     WaitSecs(1);
                     if isDaq, krDeliverReward(dio, 4); end;
@@ -363,14 +321,16 @@ try
     
     Screen('CloseAll');
     
-catch
+catch MException;
     
     ShowCursor
     Screen('CloseAll');
     if isDaq, krEndTrial(dio); end
     
+    disp(MException.message)
+    disp(MException.stack)
+    
     try 
-        disp(lasterr)
         save(fName, 'storeXlocs', 'storeYlocs','storeSuccess', 'storeEveryTic', 'storeEveryYloc', 'storeEveryXloc')
         disp(fName)
     catch

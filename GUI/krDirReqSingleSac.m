@@ -161,7 +161,7 @@ isRequested = false;
 % ---- PTB segment
 try
     
-    window = Screen(whichScreen, 'OpenWindow');
+    window = Screen('OpenWindow', whichScreen);
     
     black = BlackIndex(window); % pixel value for black
     
@@ -196,7 +196,7 @@ try
         
         % wipe screen & fill back
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
-        
+        sbPhotoOffWait(ai,0.1);
         % select random location
         if ~isRequested 
             while indLoc == prevLoc % because that's the center square
@@ -220,6 +220,8 @@ try
         % present fixation square
         Screen(window, 'FillRect', colorBlue, sq(:,5));
         Screen(window, 'Flip');
+        % I think photodiode should be off, even though fix is on
+        sbPhotoOffWait(ai,0.1);
         
         % wait of eye to enter fixation square to begin trial
         isInWindow = false;
@@ -251,6 +253,7 @@ try
         if ~isInWindow
             Screen(window, 'FillRect', black);
             Screen(window, 'Flip');
+            sbPhotoOffWait(ai,0.1);
             storeSuccess(trl) = 0;
             if isDaq, krEndTrial(dio); end
             WaitSecs(2);
@@ -276,6 +279,7 @@ try
                     isInWindow = true; % cue to begin wait period
                 else
                     isInWindow = false;
+                    break; % snb: she broke fixation; end waiting period and don't enter stim display phase
                 end
             end
             
@@ -284,6 +288,7 @@ try
                 
                 Screen(window, 'FillRect', [colorwhite colorwhite], [sq(:,indLoc) photocell]);
                 Screen(window, 'Flip');
+                sbPhotoOnWait(ai,0.1);
                 %fprintf('End Fix: %0.3f \n', toc(prefixtic)),
                 
                 set(hTarg, 'visible', 'on')
@@ -296,7 +301,7 @@ try
                 getspikesonce = false;
 
                 sactic = tic;
-                while toc(sactic) < 0.5 % either 0.35 or something longer
+                while toc(sactic) < 0.35
                     if ~getspikesonce 
                         try
                             trigtic = tic;
@@ -319,7 +324,7 @@ try
             
             % successful fixation
             postfixtic = tic;
-            while toc(postfixtic) < 0.15 && isInWindow % maintin fix for 0.5 sec
+            while toc(postfixtic) < 0.2 && isInWindow % maintin fix for 0.5 sec
                 
 
                 try
@@ -335,6 +340,7 @@ try
                     isInWindow = true; % cue to begin wait period
                 else
                     isInWindow = false;
+                    break; % snb: she left fixation during post-saccade fix interval
                 end
                 %fprintf('End Post Fix: %0.3f \n', toc(postfixtic))
             end %while fixating on target
@@ -345,6 +351,7 @@ try
         end % presentation of trial 
         
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
+        sbPhotoOffWait(ai,0.1);
         set(hFix, 'visible', 'off')
         set(hTarg, 'visible', 'off')
         drawnow 
@@ -354,9 +361,7 @@ try
             if isDaq, krEndTrial(dio);end
             WaitSecs(2);
         else
-            WaitSecs(0.5);
             if isDaq, krEndTrial(dio);end
-            WaitSecs(0.5);
             if isDaq, krDeliverReward(dio,2);end
             if distvar <= 8
                 if isDaq, krDeliverReward(dio,1);end

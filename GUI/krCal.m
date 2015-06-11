@@ -38,9 +38,6 @@ ai = handles.ai;
 dio = handles.dio;
 isDaq = true;
 
-% photo diode boolean
-isPhoto = 0;
-
 Priority(2); % realtime priority
 
 % remember to clear this out for real experiments
@@ -99,7 +96,7 @@ c = clock;
 fName = ['cal_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
 % how close she has to be to the center
-winTol = 300;
+winTol = 30;
 
 
 viewingFigure = true;
@@ -135,13 +132,14 @@ isRun = true;
 % ---- PTB segment
 try
     
+    % switched argument order to Screen
     window = Screen(whichScreen, 'OpenWindow');
     
     black = BlackIndex(window); % pixel value for black
     
     prevLoc = 0;
     indLoc = 0;
-    
+    disp('TestHere')
     storeGlobalTics = nan(ntrls, 1);
     storeLocIDs = nan(ntrls,1); % save the location of stimuli
     storeSuccesses = zeros(ntrls, 1);
@@ -156,12 +154,7 @@ try
     while trl <= ntrls && isRun
         % wipe screen & fill back
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
-        
-        phototic = tic;
-        isPhoto = krCheckPhoto(ai);
-        while (isPhoto && toc(phototic) < 0.25)
-            isPhoto = krCheckPhoto(ai);
-        end
+        sbPhotoOffWait(ai,0.1);
         
         % select random location
         while indLoc == prevLoc
@@ -186,11 +179,7 @@ try
         % draw fixation dot
         Screen(window, 'FillRect', [colorblue colorwhite], [sq(:,indLoc) photocell]);
         Screen(window, 'Flip');
-        
-        phototic = tic;
-        while (~isPhoto && toc(phototic) < 0.25)
-            isPhoto = krCheckPhoto(ai);
-        end
+        sbPhotoOnWait(ai,0.1);
         
         %fprintf('Photo Delay %5.4f\n', toc(phototic))
         % now that stimulus is on, wait to let monkey enter window
@@ -245,10 +234,8 @@ try
         
         % ----------------- end
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
-        phototic = tic;
-        while (isPhoto && toc(phototic) < 5)
-            isPhoto = krCheckPhoto(ai);
-        end
+        sbPhotoOffWait(ai,0.1);
+        
         if isDaq, krEndTrial(dio);end
         
         % broke fixation during trial
@@ -271,11 +258,13 @@ catch MException;
     
     ShowCursor;
     Screen('CloseAll');
-    save(fName, 'storeGlobalTics', 'storeLocIDs','storeSuccesses')
-    close all
+    
     
     disp(MException.message)
     disp(MException.stack)
+    
+    save(fName, 'storeGlobalTics', 'storeLocIDs','storeSuccesses')
+    
     delete(uic)
     axes(handles.EyePosition);cla
     
