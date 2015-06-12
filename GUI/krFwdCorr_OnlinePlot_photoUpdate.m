@@ -21,8 +21,11 @@ res = Screen('Resolution',whichScreen);
 centX = res.width/2;
 centY = res.height/2;
 
+% number of stims per flash
+numstimthistrl = 5;
 
-numstimthistrl = 3;
+% number of flashes per trial
+numflashes = 10;
 
 viewingFigure = true;
 if viewingFigure
@@ -159,9 +162,6 @@ try
             % successful fixation trial logic goes here
             if isDaq, krStartTrial(dio); end
             
-            % begin series of stimuli flashes
-            numflashes = 5;
-            
             while isInWindow
                 
                 xFlashesIter = nan(numflashes,numstimthistrl);
@@ -258,6 +258,10 @@ try
                     
                     tottrltrigs = tottrltrigs + numtrigs;
                     
+					if nf > 3 && rand < 0.99
+						krDeliverReward(dio, 1);
+					end
+					
                 end %nflahses
                 
                 % at this point, you know the number of spikes occured
