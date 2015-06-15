@@ -188,10 +188,15 @@ try
         distvar = randi([6 15],1,1);
         generateTableSquares(distvar)
         
-        if distvar <= 8
-            winTol = 50;
+        % how close she has to be to the center
+        if get(handles.checkCheckWindows,'Value')
+            if distvar <= 8
+                winTol = 50;
+            else
+                winTol = 30;
+            end
         else
-            winTol = 30;
+            winTol = 1000;
         end
         
         % wipe screen & fill back
@@ -427,7 +432,9 @@ catch MException;
     
     ShowCursor;
     Screen('CloseAll');
-    save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
+    if exist('storeLocs', 'var')
+        save(fName, 'storeLocs','storeSuccesses', 'storeDistVar')
+    end
     close all
     
     disp(MException.message)

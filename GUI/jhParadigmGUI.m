@@ -22,7 +22,7 @@ function varargout = jhParadigmGUI(varargin)
 
 % Edit the above text to modify the response to help jhParadigmGUI
 
-% Last Modified by GUIDE v2.5 14-Oct-2014 15:32:40
+% Last Modified by GUIDE v2.5 12-Jun-2015 11:39:02
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -304,3 +304,12 @@ function MonitorSaccades_PB_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 krMonitorSaccades(handles)
 
+
+
+% --- Executes on button press in checkCheckWindows.
+function checkCheckWindows_Callback(hObject, eventdata, handles)
+% hObject    handle to checkCheckWindows (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkCheckWindows

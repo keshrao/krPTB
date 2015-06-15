@@ -95,10 +95,6 @@ photocell = [0; 0; 50; 50;];
 c = clock;
 fName = ['cal_' date '-' num2str(c(4)) num2str(c(5))]; % date and hour and min
 
-% how close she has to be to the center
-winTol = 30;
-
-
 viewingFigure = true;
 if viewingFigure
     % now open up a second matlab figure to be used to view eye position
@@ -152,6 +148,14 @@ try
     trl = 1;
     
     while trl <= ntrls && isRun
+        
+        % how close she has to be to the center
+        if get(handles.checkCheckWindows,'Value')
+            winTol = 30;
+        else
+            winTol = 1000;
+        end
+        
         % wipe screen & fill back
         Screen(window, 'FillRect', black); Screen(window, 'Flip');
         sbPhotoOffWait(ai,0.1);
