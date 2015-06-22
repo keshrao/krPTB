@@ -14,8 +14,9 @@ trlyS = zeros(9,1);
 
 
 
-targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S32*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+%targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
+targetdir = '\\ccn-sommerserv.win.duke.edu\Data\Sam\';
+[filename pathname] = uigetfile([targetdir '*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots

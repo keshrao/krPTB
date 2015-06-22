@@ -2,7 +2,7 @@
 % this program will help analyze the dir
 clear, clc
 
-clustouse = 1;
+clustouse = 1:2;
 
 figure(1), clf
 figure(2), clf
@@ -13,9 +13,9 @@ trlyT = zeros(9,1);
 trlyS = zeros(9,1);
 
 
-
-targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
-[filename pathname] = uigetfile([targetdir 'S43*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
+%targetdir = 'C:\Users\Hrishikesh\Data\krPTBData\';
+targetdir = 'C:\Users\Hrishikesh\Desktop\';
+[filename pathname] = uigetfile([targetdir '*.mat'], 'Load Exp Session File (not sp2)', 'MultiSelect', 'on');
 fullpathname = strcat(pathname, filename); % all the files in pathname
 
 %% Because I want to combine files and build up the firing rate plots
@@ -144,6 +144,7 @@ for clus = clustouse
         
         dirsac = nan(length(nonzerotrls),1); % direction the saccade was made to
         sactimes = nan(length(nonzerotrls),1);
+        dirtarg = nan(length(nonzerotrls),1);
         
         for ti = 1:length(trltouse)
             
@@ -178,13 +179,14 @@ for clus = clustouse
                     gotill = 99;
                 end
                 
-                dirsac(ti) = atan2d(thiseyev(locs+gotill)-thiseyev(locs-gotill), thiseyeh(locs+gotill)-thiseyeh(locs-gotill));
+                dirsac(ti) = atan2dKesh(thiseyev(locs+gotill)-thiseyev(locs-gotill), thiseyeh(locs+gotill)-thiseyeh(locs-gotill));
                 sactimes(ti) = thisEyeTS(locs);
-                
+                dirtarg(ti) = atan2dKesh(storeLocs(trl,2), storeLocs(trl,1));
             else
                 % no saccade made
                 dirsac(ti) = nan;
                 sactimes(ti) = nan;
+                dirtarg(ti) = nan;
             end
             
             
@@ -215,6 +217,7 @@ for clus = clustouse
                 thisspkreltimes = thisspktimes - aligntimes(ti);
                 
 
+                % can also use dirsac to get the actual saccade direction
                 subpnum = computesubpnum(dirsac(ti));
                 
                 if TorS == 1
