@@ -25,7 +25,7 @@ centY = res.height/2;
 numstimthistrl = 5;
 
 % number of flashes per trial
-numflashes = 10;
+numflashes = 5;
 
 viewingFigure = true;
 if viewingFigure
@@ -258,10 +258,21 @@ try
                     
                     tottrltrigs = tottrltrigs + numtrigs;
                     
-					if nf > 3 && rand < 0.99
-						krDeliverReward(dio, 1);
-					end
-					
+                    if nf == 2 && rand < 0.2
+                        krDeliverReward(dio,1);
+                    elseif nf == 3 && rand < 0.3
+                        krDeliverReward(dio,1);
+                    elseif nf == 4 && rand < 0.35
+                        krDeliverReward(dio,1);
+                    end
+% 					if nf > 3 && rand < 0.99
+% 						krDeliverReward(dio, 1);
+% 					end
+%                     if nf > 2
+%                         krDeliverReward(dio,1);% reward at every stim presentation after 1 full fixation
+%                     elseif rand < 0.2
+%                         krDeliverReward(dio,1);% reward 20 prcnt for initiating trial
+%                     end 
                 end %nflahses
                 
                 % at this point, you know the number of spikes occured

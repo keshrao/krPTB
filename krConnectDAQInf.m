@@ -9,7 +9,7 @@ ai.SamplesPerTrigger = ai.SampleRate; % one second of data per trigger
 addchannel(ai,0); % eyeh
 addchannel(ai,1); % eyev
 addchannel(ai,2); % spike triggers
-addchannel(ai,3); % dummy channel
+addchannel(ai,3); % photo
 
 ai.TriggerType = 'manual';
 set(ai,'TriggerRepeat',inf); % as soon as buffer filled, trigger again
