@@ -22,7 +22,7 @@ function varargout = jhParadigmGUI(varargin)
 
 % Edit the above text to modify the response to help jhParadigmGUI
 
-% Last Modified by GUIDE v2.5 12-Jun-2015 11:39:02
+% Last Modified by GUIDE v2.5 07-Jul-2015 15:43:58
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -113,6 +113,8 @@ switch popup_sel_index
         krFwdCorr_SingleSaccade_MScaling(get(handles.SetTrialNumber,'Value'),handles);
     case 7
         krFwdCorr_FreeMap_photoupdate(get(handles.SetTrialNumber,'Value'),handles);
+    case 8
+        sbFixTrain(get(handles.SetTrialNumber, 'Value'), handles);
         
 end
 
@@ -183,7 +185,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 set(hObject, 'String', {'Cal','DirReq','Fwd_Photo','Fwd_MScale',...
-                         'Fwd_Sac','Fwd_Sac_MScale','FreeMap'});
+                         'Fwd_Sac','Fwd_Sac_MScale','FreeMap', 'FixTrain'});
 
 
 % --- Executes on button press in krCalibrateEyePos.
@@ -313,3 +315,49 @@ function checkCheckWindows_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkCheckWindows
+
+
+
+function enterFixDur(hObject, eventdata, handles)
+% hObject    handle to guiFixDuration (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of guiFixDuration as text
+%        str2double(get(hObject,'String')) returns contents of guiFixDuration as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function fixDurLabel(hObject, eventdata, handles)
+% hObject    handle to guiFixDuration (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function guiFixDuration_Callback(hObject, eventdata, handles)
+% hObject    handle to guiFixDuration (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of guiFixDuration as text
+%        str2double(get(hObject,'String')) returns contents of guiFixDuration as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function guiFixDuration_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to guiFixDuration (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
